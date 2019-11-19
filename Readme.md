@@ -1,7 +1,7 @@
 # Личный проект «Киноман» [![Build status][travis-image]][travis-url]
 
 * Студент: [Евгения Сипидина](https://up.htmlacademy.ru/ecmascript/10/user/245441).
-* Наставник: `Неизвестно`.
+* Наставник: `Игорь Тараканов`.
 
 ---
 
