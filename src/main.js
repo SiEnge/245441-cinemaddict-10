@@ -243,7 +243,6 @@ for (let i = 0; i < FILM_COUNT; i++) {
   render(filmContainerElement, createFilmCardTemplate(), `beforeend`);
 }
 
-
 const filmExtraElements = mainElement.querySelectorAll(`.films-list--extra`);
 for (let i = 0; i < filmExtraElements.length; i++) {
   const filmExtraElement = filmExtraElements[i].querySelector(`.films-list__container`);
@@ -262,4 +261,4 @@ const filmElement = mainElement.querySelector(`.films-list`);
 render(filmElement, createShowMoreButtonTemplate(), `beforeend`);
 
 // 7. вставка в тело "Попап"
-// render(footerElement, createPopupTemplate(), `afterend`);
+render(footerElement, createPopupTemplate(), `afterend`);
