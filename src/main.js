@@ -236,29 +236,30 @@ render(mainElement, createSortTemplate(), `beforeend`);
 // 4. вставка в тело "Контейнер для карточек фильма"
 render(mainElement, createFilmListTemplate(), `beforeend`);
 
-const filmContainerElement = mainElement.querySelector(`.films-list__container`);
 
 // 5. вставка "Карточки фильма"
-new Array(FILM_COUNT)
-  .fill(``)
-  .forEach(
-      () => render(filmContainerElement, createFilmCardTemplate(), `beforeend`)
-  );
-
-const filmExtraElements = mainElement.querySelectorAll(`.films-list--extra`);
-
-for (let i = 0; i < filmExtraElements.length; i++) {
-  const container = filmExtraElements[i].querySelector(`.films-list__container`);
-  new Array(FILM_EXTRA_COUNT)
-  .fill(``)
-  .forEach(
-      () => render(container, createFilmCardTemplate(), `beforeend`)
-  );
+const filmContainerElement = mainElement.querySelector(`.films-list__container`);
+for (let i = 0; i < FILM_COUNT; i++) {
+  render(filmContainerElement, createFilmCardTemplate(), `beforeend`);
 }
 
-const filmElement = mainElement.querySelector(`.films-list`);
+
+const filmExtraElements = mainElement.querySelectorAll(`.films-list--extra`);
+for (let i = 0; i < filmExtraElements.length; i++) {
+  const filmExtraElement = filmExtraElements[i].querySelector(`.films-list__container`);
+
+  for (let j = 0; j < FILM_EXTRA_COUNT; j++) {
+    render(filmExtraElement, createFilmCardTemplate(), `beforeend`);
+  }
+}
+
+// использование forEach для filmExtraElements, а внутри цикл - так тоже неверно будет?
+// или по-хорошему процесс добавления Карточки фильма на страницу нужно вынести в отдельную функцию?
+
+
 // 6. вставка "Кнопки Показать еще"
+const filmElement = mainElement.querySelector(`.films-list`);
 render(filmElement, createShowMoreButtonTemplate(), `beforeend`);
 
 // 7. вставка в тело "Попап"
-render(footerElement, createPopupTemplate(), `afterend`);
+// render(footerElement, createPopupTemplate(), `afterend`);
