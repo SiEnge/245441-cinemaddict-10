@@ -6,6 +6,10 @@ import {createFilmCardTemplate} from './components/film-card.js';
 import {createShowMoreButtonTemplate} from './components/show-more-button.js';
 import {createPopupTemplate} from './components/popup.js';
 
+import {generateFilm} from './mock/film-card.js';
+import {generateFilms} from './mock/film-card.js';
+
+
 const FILM_COUNT = 5;
 const FILM_EXTRA_COUNT = 2;
 const headerElement = document.querySelector(`.header`);
@@ -32,14 +36,18 @@ render(mainElement, createFilmContainerTemplate(), `beforeend`);
 
 // 5. вставка "Карточки фильма"
 const filmContainerElement = mainElement.querySelector(`.films-list__container`);
-for (let i = 0; i < FILM_COUNT; i++) {
-  render(filmContainerElement, createFilmCardTemplate(), `beforeend`);
+const films = generateFilms(FILM_COUNT);
+
+for (let i = 0; i < films.length; i++) {
+  render(filmContainerElement, createFilmCardTemplate(films[i]), `beforeend`);
 }
 
 const filmExtraElements = mainElement.querySelectorAll(`.films-list--extra`);
 for (const filmExtra of filmExtraElements) {
-  for (let j = 0; j < FILM_EXTRA_COUNT; j++) {
-    render(filmExtra.querySelector(`.films-list__container`), createFilmCardTemplate(), `beforeend`);
+  let extraFilms = generateFilms(FILM_EXTRA_COUNT);
+
+  for (let i = 0; i < extraFilms.length; i++) {
+    render(filmExtra.querySelector(`.films-list__container`), createFilmCardTemplate(extraFilms[i]), `beforeend`);
   }
 }
 

@@ -69,7 +69,8 @@ const getRandomArrayItem = (array) => {
 
 // получение рандомного числа от min до max
 const getRandomIntegerNumber = (min, max) => {
-  return Math.floor(min + Math.random() * (max + 1 - min));
+  // return Math.floor(min + Math.random() * (max + 1 - min));
+  return min + Math.floor(max * Math.random());
 };
 
 // генерация данных для одного фильма
@@ -88,13 +89,13 @@ const generateFilm = () => {
     year: getRandomIntegerNumber(YEAR_MIN, YEAR_MAX),
 
     // длительность (вид 1h 59m)
-    duration: '',
+    duration: '1h 59m',
 
     // жанр
     genre: getRandomArrayItem(FilmGenres),
 
     // оценка (вид 9.3)
-    rating: '',
+    rating: '9.3',
 
     // комментарии (вид 18 comments)
     comments: getRandomIntegerNumber(COUNT_COMMENTS_MIN, COUNT_COMMENTS_MAX),
@@ -109,3 +110,13 @@ const generateFilm = () => {
     isFavorite: Math.random() > 0.5,
   };
 };
+
+const generateFilms = (count) => {
+  const films = [];
+  for (var i = 0; i < count; i++) {
+    films.push(generateFilm());
+  }
+  return films;
+};
+
+export {generateFilm, generateFilms};
