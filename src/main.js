@@ -48,4 +48,4 @@ const filmElement = mainElement.querySelector(`.films-list`);
 render(filmElement, createShowMoreButtonTemplate(), `beforeend`);
 
 // 7. вставка в тело "Попап"
-render(footerElement, createPopupTemplate(), `afterend`);
+// render(footerElement, createPopupTemplate(), `afterend`);
