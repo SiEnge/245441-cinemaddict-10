@@ -1,51 +1,68 @@
+import {getRandomIntegerNumber, getRandomArrayItem} from '../util.js';
+
 const YEAR_MIN = 1950;
 const YEAR_MAX = 2019;
 const COUNT_COMMENTS_MIN = 0;
 const COUNT_COMMENTS_MAX = 666;
+const RATING_MIN = 0;
+const RATING_MAX = 9;
+const ONE_HOUR_IN_MINUTE = 60;
+const TEN_MINUTES = 10;
+const DURATION_MIN = 20;
+const DURATION_MAX = 150;
 
 // названия фильмов
 const FilmTitles = [
-  'Пятый элемент',
-  'РЭД',
-  'РЭД 2',
-  'Сокровища нации',
-  'Сокровища нации. Книга тайн',
-  'Ангелы и демоны',
-  'Код да Винчи',
-  'Инферно',
-  'Форрест Гамп',
-  'Изгой',
-  'Тринадцатый этаж',
-  'Пиджак',
-  'Великий Гэтсби',
-  'Загадочная история Бенджамина Баттона',
-  'Бойцовский клуб'
+  `The Fifth Element`,
+  `Red`,
+  `Red 2`,
+  `National Treasure`,
+  `National Treasure: Book of Secrets`,
+  `Angels & Demons`,
+  `The Da Vinci Code`,
+  `Inferno`,
+  `Forrest Gump`,
+  `Cast Away`,
+  `The Thirteenth Floor`,
+  `The Jacket`,
+  `The Great Gatsby`,
+  `The Curious Case of Benjamin Button`,
+  `Fight Club`
 ];
 
 // постеры
-
 const FilmPosters = [
-  'made-for-each-other.png',
-  'popeye-meets-sinbad.png',
-  'sagebrush-trail.jpg',
-  'santa-claus-conquers-the-martians.jpg',
-  'the-dance-of-life.jpg',
-  'the-great-flamarion.jpg',
-  'the-man-with-the-golden-arm.jpg'
+  `made-for-each-other.png`,
+  `popeye-meets-sinbad.png`,
+  `sagebrush-trail.jpg`,
+  `santa-claus-conquers-the-martians.jpg`,
+  `the-dance-of-life.jpg`,
+  `the-great-flamarion.jpg`,
+  `the-man-with-the-golden-arm.jpg`
 ];
 
+// жанры
 const FilmGenres = [
-  'Musical',
-  'Western',
-  'Drama',
-  'Comedy',
-  'Cartoon',
-  'Mystery'
+  `Musical`,
+  `Western`,
+  `Drama`,
+  `Comedy`,
+  `Cartoon`,
+  `Mystery`,
+  `Film-Noir`
+];
+
+// возрастная категория
+const FilmAges = [
+  `0+`,
+  `6+`,
+  `12+`,
+  `16+`,
+  `18+`
 ];
 
 // описание к фильму
-
-const Description = `
+const FilmDescription = `
   Lorem ipsum dolor sit amet, consectetur adipiscing elit.
   Cras aliquet varius magna, non porta ligula feugiat eget.
   Fusce tristique felis at fermentum pharetra.
@@ -59,61 +76,68 @@ const Description = `
   In rutrum ac purus sit amet tempus.
 `;
 
-const FilmDescriptions = Description.split(`. `);
+const generateRandomDescription = (description) => {
+  let descriptions = description.split(`.`);
 
-// получение рандомного индекса массива
-const getRandomArrayItem = (array) => {
-  const randomIndex = getRandomIntegerNumber(0, array.length);
-  return array[randomIndex];
+  let text = new Set();
+  for (let i = 0; i < 3; i++) {
+    text.add(descriptions[getRandomIntegerNumber(0, descriptions.length)]);
+  }
+  return Array.from(text).join(`.`);
 };
 
-// получение рандомного числа от min до max
-const getRandomIntegerNumber = (min, max) => {
-  // return Math.floor(min + Math.random() * (max + 1 - min));
-  return min + Math.floor(max * Math.random());
+const getRandomDuration = () => {
+  const duration = getRandomIntegerNumber(DURATION_MIN, DURATION_MAX);
+  if (duration > ONE_HOUR_IN_MINUTE) {
+    const hour = Math.round(duration / ONE_HOUR_IN_MINUTE);
+    const minute = (duration % ONE_HOUR_IN_MINUTE < TEN_MINUTES) ? `0${duration % ONE_HOUR_IN_MINUTE}` : duration % ONE_HOUR_IN_MINUTE;
+    return `${hour}h ${minute}m`;
+  } else {
+    return `${duration}m`;
+  }
+};
+
+const getRandomRating = () => {
+  return (getRandomIntegerNumber(RATING_MIN * 10, RATING_MAX * 10) / 10).toFixed(1);
+};
+
+const generateRandomGenre = (genres) => {
+  const countGenres = getRandomIntegerNumber(1, 3);
+  return genres
+    .filter(() => Math.random() > 0.5)
+    .slice(0, countGenres);
 };
 
 // генерация данных для одного фильма
 const generateFilm = () => {
   return {
-    // название фильма
     title: getRandomArrayItem(FilmTitles),
-
-    // постер для фильма
+    originalTitle: `The Great Flamarion`,
     poster: getRandomArrayItem(FilmPosters),
+    description: generateRandomDescription(FilmDescription),
+    director: `Anthony Mann`,
+    writers: `Anne Wigton, Heinz Herald, Richard Weil`,
+    actors: `Erich von Stroheim, Mary Beth Hughes, Dan Duryea`,
+    releaseDate: getRandomIntegerNumber(YEAR_MIN, YEAR_MAX),
+    duration: getRandomDuration(),
+    country: `USA`,
+    genres: new Set(generateRandomGenre(FilmGenres)),
+    // rating: 0,
+    rating: getRandomRating(),
+    age: getRandomArrayItem(FilmAges),
 
-    // описание фильма
-    description: '',
-
-    // год
-    year: getRandomIntegerNumber(YEAR_MIN, YEAR_MAX),
-
-    // длительность (вид 1h 59m)
-    duration: '1h 59m',
-
-    // жанр
-    genre: getRandomArrayItem(FilmGenres),
-
-    // оценка (вид 9.3)
-    rating: '9.3',
-
-    // комментарии (вид 18 comments)
+    // comments: 0,
     comments: getRandomIntegerNumber(COUNT_COMMENTS_MIN, COUNT_COMMENTS_MAX),
 
-    // флаг в списке просмотра
-    isAddToWatchlist: Math.random() > 0.5,
-
-    // флаг просмотрен
+    isWatchlist: Math.random() > 0.5,
     isWatched: Math.random() > 0.5,
-
-    // флаг избранное
     isFavorite: Math.random() > 0.5,
   };
 };
 
 const generateFilms = (count) => {
   const films = [];
-  for (var i = 0; i < count; i++) {
+  for (let i = 0; i < count; i++) {
     films.push(generateFilm());
   }
   return films;
