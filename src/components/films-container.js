@@ -1,19 +1,19 @@
-// компонент "Кнопка «Show more»"
+// компонент "Контейнер для карточек фильма"
 import {createElement} from '../util.js';
 
-const createShowMoreButtonTemplate = () => {
+const createFilmsContainerTemplate = () => {
   return (
-    `<button class="films-list__show-more">Show more</button>`
+    `<section class="films"></section>`
   );
 };
 
-export default class ShowMoreButton {
+export default class Films {
   constructor() {
     this._element = null;
   }
 
   getTemplate() {
-    return createShowMoreButtonTemplate();
+    return createFilmsContainerTemplate();
   }
 
   getElement() {
@@ -28,3 +28,4 @@ export default class ShowMoreButton {
     this._element = null;
   }
 }
+

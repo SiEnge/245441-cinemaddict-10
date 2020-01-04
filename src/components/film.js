@@ -1,4 +1,6 @@
 // компонент "Карточка фильма"
+import {createElement} from '../util.js';
+
 const createBooleanItemMarkup = (isBoolean) => {
   if (isBoolean) {
     return `film-card__controls-item--active`;
@@ -6,7 +8,7 @@ const createBooleanItemMarkup = (isBoolean) => {
   return ``;
 };
 
-export const createFilmCardTemplate = (film) => {
+const createFilmCardTemplate = (film) => {
   const {title, poster, description, releaseDate, duration, genres, rating, comments, isWatchlist, isWatched, isFavorite} = film;
 
   const watchlist = createBooleanItemMarkup(isWatchlist);
@@ -36,3 +38,26 @@ export const createFilmCardTemplate = (film) => {
     </article>`
   );
 };
+
+export default class Film {
+  constructor(film) {
+    this._film = film;
+    this._element = null;
+  }
+
+  getTemplate() {
+    return createFilmCardTemplate(this._film);
+  }
+
+  getElement() {
+    if (!this._element) {
+      this._element = createElement(this.getTemplate());
+    }
+
+    return this._element;
+  }
+
+  removeElement() {
+    this._element = null;
+  }
+}
