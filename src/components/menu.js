@@ -1,6 +1,7 @@
 // компонент "Меню"
+import {createElement} from '../util.js';
 
-export const createMenuTemplate = (filter) => {
+const createMenuTemplate = (filter) => {
   const {countWatchlist, countHistory, countFavorites} = filter;
 
   return (
@@ -13,3 +14,26 @@ export const createMenuTemplate = (filter) => {
     </nav>`
   );
 };
+
+export default class Menu {
+  constructor(filter) {
+    this._filter = filter;
+    this._element = null;
+  }
+
+  getTemplate() {
+    return createMenuTemplate(this._filter);
+  }
+
+  getElement() {
+    if (!this._element) {
+      this._element = createElement(this.getTemplate());
+    }
+
+    return this._element;
+  }
+
+  removeElement() {
+    this._element = null;
+  }
+}

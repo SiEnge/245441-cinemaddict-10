@@ -1,3 +1,5 @@
+import {createElement} from '../util.js';
+
 const createGenresMarkup = (genres) => {
   return genres
   .map((genre) => {
@@ -9,7 +11,7 @@ const createGenresMarkup = (genres) => {
 };
 
 // компонент "Попап"
-export const createPopupTemplate = (film) => {
+const createPopupTemplate = (film) => {
   const {title, originalTitle, poster, description, director, writers, actors, releaseDate, duration, country, genres, rating, age, isWatchlist, isWatched, isFavorite} = film;
 
   const genresMarkup = createGenresMarkup(Array.from(genres));
@@ -98,3 +100,27 @@ export const createPopupTemplate = (film) => {
     </section>`
   );
 };
+
+
+export default class Popup {
+  constructor(film) {
+    this._film = film;
+    this._element = null;
+  }
+
+  getTemplate() {
+    return createPopupTemplate(this._film);
+  }
+
+  getElement() {
+    if (!this._element) {
+      this._element = createElement(this.getTemplate());
+    }
+
+    return this._element;
+  }
+
+  removeElement() {
+    this._element = null;
+  }
+}

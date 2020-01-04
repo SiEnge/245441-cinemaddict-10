@@ -1,4 +1,5 @@
 // компонент "Звание пользователя"
+import {createElement} from '../util.js';
 
 const getTitleProfile = (countFilm) => {
   let titleProfile;
@@ -15,12 +16,11 @@ const getTitleProfile = (countFilm) => {
     titleProfile = `Movie Buff`;
   }
   return titleProfile;
-
 };
 
 
-export const createProfileTemplate = (profile) => {
-  const titleProfile = getTitleProfile(profile);
+const createProfileTemplate = (watchedMovies) => {
+  const titleProfile = getTitleProfile(watchedMovies);
 
   if (!titleProfile) {
     return ``;
@@ -33,3 +33,26 @@ export const createProfileTemplate = (profile) => {
     </section>`
   );
 };
+
+export default class Profile {
+  constructor(watchedMovies) {
+    this._watchedMovies = watchedMovies;
+    this._element = null;
+  }
+
+  getTemplate() {
+    return createProfileTemplate(this._watchedMovies);
+  }
+
+  getElement() {
+    if (!this._element) {
+      this._element = createElement(this.getTemplate());
+    }
+
+    return this._element;
+  }
+
+  removeElement() {
+    this._element = null;
+  }
+}
