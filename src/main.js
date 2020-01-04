@@ -26,12 +26,41 @@ const SHOWING_FILMS_COUNT_BY_BUTTON = 5;
 
 // const COMMENT_COUNT = getRandomIntegerNumber(0, 10);
 
-const openPopup = (filmPopupComponent) => {
-  render(bodyElement, filmPopupComponent.getElement(), RenderPosition.BEFOREEND);
-};
+// const openPopup = (filmPopupComponent) => {
+//   render(bodyElement, filmPopupComponent.getElement(), RenderPosition.BEFOREEND);
+// };
 
 // функция переключение с карточки и обратно
-const renderFilm = (film) => {
+const renderFilm = (film, place) => {
+
+
+  const onEscKeyDown = (evt) => {
+    const isEscKey = evt.key === `Escape` || evt.key === `Esc`;
+
+    if (isEscKey) {
+      closePopup();
+      document.removeEventListener(`keydown`, onEscKeyDown);
+    }
+  };
+
+  const openPopup = () => {
+    render(bodyElement, filmPopupComponent.getElement(), RenderPosition.BEFOREEND);
+  };
+
+  const closePopup = () => {
+    // debugger;
+    filmPopupComponent.getElement().remove();
+    // render(bodyElement, filmPopupComponent.getElement(), RenderPosition.BEFOREEND);
+  };
+
+  // const replaceEditToTask = () => {
+  //   taskListElement.replaceChild(taskComponent.getElement(), taskEditComponent.getElement());
+  // };
+
+  // const replaceTaskToEdit = () => {
+  //   taskListElement.replaceChild(taskEditComponent.getElement(), taskComponent.getElement());
+  // };
+
   // создание новых компонент карточки и формы редактирования
   const filmComponent = new FilmComponent(film);
   const filmPopupComponent = new PopupComponent(film);
@@ -43,25 +72,29 @@ const renderFilm = (film) => {
   // и навешивание на нее обработчика
   titleFilm.addEventListener(`click`, () => {
     openPopup(filmPopupComponent);
+    document.addEventListener(`keydown`, onEscKeyDown);
   });
 
   posterFilm.addEventListener(`click`, () => {
     openPopup(filmPopupComponent);
+    document.addEventListener(`keydown`, onEscKeyDown);
   });
 
   commentFilm.addEventListener(`click`, () => {
     openPopup(filmPopupComponent);
+    document.addEventListener(`keydown`, onEscKeyDown);
   });
 
   // сохранение в переменную кнопку сохранить на форме
   const closeButton = filmPopupComponent.getElement().querySelector(`.film-details__close-btn`);
   // и навешивание на нее обработчика
   closeButton.addEventListener(`click`, () => {
-    filmPopupComponent.getElement().remove();
+    closePopup();
+    // filmPopupComponent.getElement().remove();
   });
 
   // отрисовать карточку задачи
-  render(filmContainerElement, filmComponent.getElement(), RenderPosition.BEFOREEND);
+  render(place, filmComponent.getElement(), RenderPosition.BEFOREEND);
 };
 
 const bodyElement = document.querySelector(`body`);
@@ -99,7 +132,7 @@ const filmContainerElement = filmList.getElement().querySelector(`.films-list__c
 // films.slice(0, showingFilmsCount).forEach((film) => render2(filmContainerElement, createFilmCardTemplate(film), `beforeend`));
 films.slice(0, showingFilmsCount)
 .forEach((film) => {
-  renderFilm(film);
+  renderFilm(film, filmContainerElement);
 });
 
 // переписать на функции
@@ -118,11 +151,17 @@ const extraMostCommentedFilms = films.slice()
 
 const filmListExtraTopRated = new FilmListExtraComponent(`Top rated`);
 render(filmsContainer.getElement(), filmListExtraTopRated.getElement(), RenderPosition.BEFOREEND);
-extraTopRatedFilms.forEach((film) => render(filmListExtraTopRated.getElement().querySelector(`.films-list__container`), new FilmComponent(film).getElement(), RenderPosition.BEFOREEND));
+extraTopRatedFilms.forEach((film) => {
+  renderFilm(film, filmListExtraTopRated.getElement().querySelector(`.films-list__container`));
+});
+// extraTopRatedFilms.forEach((film) => render(filmListExtraTopRated.getElement().querySelector(`.films-list__container`), new FilmComponent(film).getElement(), RenderPosition.BEFOREEND));
 
 const filmListExtraMostCommented = new FilmListExtraComponent(`Most commented`);
 render(filmsContainer.getElement(), filmListExtraMostCommented.getElement(), RenderPosition.BEFOREEND);
-extraMostCommentedFilms.forEach((film) => render(filmListExtraMostCommented.getElement().querySelector(`.films-list__container`), new FilmComponent(film).getElement(), RenderPosition.BEFOREEND));
+extraMostCommentedFilms.forEach((film) => {
+  renderFilm(film, filmListExtraMostCommented.getElement().querySelector(`.films-list__container`));
+});
+// extraMostCommentedFilms.forEach((film) => render(filmListExtraMostCommented.getElement().querySelector(`.films-list__container`), new FilmComponent(film).getElement(), RenderPosition.BEFOREEND));
 
 
 // 6. вставка "Кнопки Показать еще"
@@ -139,7 +178,9 @@ showMoreButton.getElement().addEventListener(`click`, () => {
 
   // исходный массив с задачами скопировать (=slice) в количестве с 8 по 16
   films.slice(prevFilmsCount, showingFilmsCount)
-  .forEach((film) => renderFilm(film));
+  .forEach((film) => {
+    renderFilm(film, filmContainerElement);
+  });
 
   // если показыны все задачи - то удалить кнопку
   if (showingFilmsCount >= films.length) {
