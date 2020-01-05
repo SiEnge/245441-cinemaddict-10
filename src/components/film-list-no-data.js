@@ -1,5 +1,5 @@
 // компонент "Нет данных для отображения"
-import {createElement} from '../util.js';
+import AbstractComponent from './abstract-component.js';
 
 const createFilmListNoFilmsTemplate = () => {
   return (
@@ -9,27 +9,8 @@ const createFilmListNoFilmsTemplate = () => {
   );
 };
 
-
-export default class NoFilms {
-  constructor() {
-    this._element = null;
-  }
-
+export default class NoFilms extends AbstractComponent {
   getTemplate() {
     return createFilmListNoFilmsTemplate();
   }
-
-  getElement() {
-    if (!this._element) {
-      this._element = createElement(this.getTemplate());
-    }
-
-    return this._element;
-  }
-
-  removeElement() {
-    this._element = null;
-  }
 }
-
-// export {createFilmListNoDataTemplate};

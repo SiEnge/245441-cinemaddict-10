@@ -1,4 +1,5 @@
-import {createElement} from '../util.js';
+// компонент "Попап"
+import AbstractComponent from './abstract-component.js';
 
 const createGenresMarkup = (genres) => {
   return genres
@@ -101,26 +102,19 @@ const createPopupTemplate = (film) => {
   );
 };
 
-
-export default class Popup {
+export default class Popup extends AbstractComponent {
   constructor(film) {
+    super();
     this._film = film;
-    this._element = null;
   }
 
   getTemplate() {
     return createPopupTemplate(this._film);
   }
 
-  getElement() {
-    if (!this._element) {
-      this._element = createElement(this.getTemplate());
-    }
-
-    return this._element;
-  }
-
-  removeElement() {
-    this._element = null;
+  setCloseButtonClickHandler(handler) {
+    this.getElement().querySelector(`.film-details__close-btn`).addEventListener(`click`, handler);
   }
 }
+
+// нужно ли польностью удалять ссылку на объект?

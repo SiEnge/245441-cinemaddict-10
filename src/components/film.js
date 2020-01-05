@@ -1,5 +1,5 @@
 // компонент "Карточка фильма"
-import {createElement} from '../util.js';
+import AbstractComponent from './abstract-component.js';
 
 const createBooleanItemMarkup = (isBoolean) => {
   if (isBoolean) {
@@ -39,25 +39,28 @@ const createFilmCardTemplate = (film) => {
   );
 };
 
-export default class Film {
+export default class Film extends AbstractComponent {
   constructor(film) {
+    super();
     this._film = film;
-    this._element = null;
   }
 
   getTemplate() {
     return createFilmCardTemplate(this._film);
   }
 
-  getElement() {
-    if (!this._element) {
-      this._element = createElement(this.getTemplate());
-    }
+  setClickHandler(handler) {
+    this.getElement().addEventListener(`click`, (evt) => {
+      const target = evt.target;
 
-    return this._element;
-  }
+      if (!target.classList.contains(`film-card__title`) && !target.classList.contains(`film-card__poster`) && !target.classList.contains(`film-card__comments`)) {
+        return;
+      }
 
-  removeElement() {
-    this._element = null;
+      handler();
+    });
   }
 }
+
+
+// создать список, на чем будет срабатывать клик
