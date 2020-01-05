@@ -18,72 +18,35 @@ import FilmComponent from './components/film.js';
 import PopupComponent from './components/popup.js';
 import ShowMoreButtonComponent from './components/show-more-button.js';
 
-
 import {render, RenderPosition} from './util.js';
 
 const FILM_COUNT = 17;
 const SHOWING_FILMS_COUNT_ON_START = 5;
 const SHOWING_FILMS_COUNT_BY_BUTTON = 5;
 
-// const COMMENT_COUNT = getRandomIntegerNumber(0, 10);
-
-// const openPopup = (filmPopupComponent) => {
-//   render(bodyElement, filmPopupComponent.getElement(), RenderPosition.BEFOREEND);
-// };
-
 // функция переключение с карточки и обратно
 const renderFilm = (film, place) => {
-
 
   const onEscKeyDown = (evt) => {
     const isEscKey = evt.key === `Escape` || evt.key === `Esc`;
 
     if (isEscKey) {
-      closePopup();
+      filmPopupComponent.getElement().remove();
       document.removeEventListener(`keydown`, onEscKeyDown);
     }
-  };
-
-  const openPopup = () => {
-    render(bodyElement, filmPopupComponent.getElement(), RenderPosition.BEFOREEND);
-  };
-
-  const closePopup = () => {
-    // debugger;
-    filmPopupComponent.getElement().remove();
-    // render(bodyElement, filmPopupComponent.getElement(), RenderPosition.BEFOREEND);
   };
 
   // создание новых компонент карточки и формы редактирования
   const filmComponent = new FilmComponent(film);
   const filmPopupComponent = new PopupComponent(film);
 
-  // сохранение в переменную кнопку редактирование на карточке задачи
-  const titleFilm = filmComponent.getElement().querySelector(`.film-card__title`);
-  const posterFilm = filmComponent.getElement().querySelector(`.film-card__poster`);
-  const commentFilm = filmComponent.getElement().querySelector(`.film-card__comments`);
-  // и навешивание на нее обработчика
-  titleFilm.addEventListener(`click`, () => {
-    openPopup(filmPopupComponent);
+  filmComponent.setClickHandler(() => {
+    render(bodyElement, filmPopupComponent.getElement(), RenderPosition.BEFOREEND);
     document.addEventListener(`keydown`, onEscKeyDown);
   });
 
-  posterFilm.addEventListener(`click`, () => {
-    openPopup(filmPopupComponent);
-    document.addEventListener(`keydown`, onEscKeyDown);
-  });
-
-  commentFilm.addEventListener(`click`, () => {
-    openPopup(filmPopupComponent);
-    document.addEventListener(`keydown`, onEscKeyDown);
-  });
-
-  // сохранение в переменную кнопку сохранить на форме
-  const closeButton = filmPopupComponent.getElement().querySelector(`.film-details__close-btn`);
-  // и навешивание на нее обработчика
-  closeButton.addEventListener(`click`, () => {
-    closePopup();
-    // filmPopupComponent.getElement().remove();
+  filmPopupComponent.setCloseButtonClickHandler(() => {
+    filmPopupComponent.getElement().remove();
   });
 
   // отрисовать карточку задачи
@@ -125,7 +88,6 @@ if (films.length === 0) {
   let showingFilmsCount = SHOWING_FILMS_COUNT_ON_START;
   const filmContainerElement = filmList.getElement().querySelector(`.films-list__container`);
 
-  // films.slice(0, showingFilmsCount).forEach((film) => render2(filmContainerElement, createFilmCardTemplate(film), `beforeend`));
   films.slice(0, showingFilmsCount)
   .forEach((film) => {
     renderFilm(film, filmContainerElement);
@@ -150,14 +112,12 @@ if (films.length === 0) {
   extraTopRatedFilms.forEach((film) => {
     renderFilm(film, filmListExtraTopRated.getElement().querySelector(`.films-list__container`));
   });
-  // extraTopRatedFilms.forEach((film) => render(filmListExtraTopRated.getElement().querySelector(`.films-list__container`), new FilmComponent(film).getElement(), RenderPosition.BEFOREEND));
 
   const filmListExtraMostCommented = new FilmListExtraComponent(`Most commented`);
   render(filmsContainer.getElement(), filmListExtraMostCommented.getElement(), RenderPosition.BEFOREEND);
   extraMostCommentedFilms.forEach((film) => {
     renderFilm(film, filmListExtraMostCommented.getElement().querySelector(`.films-list__container`));
   });
-  // extraMostCommentedFilms.forEach((film) => render(filmListExtraMostCommented.getElement().querySelector(`.films-list__container`), new FilmComponent(film).getElement(), RenderPosition.BEFOREEND));
 
 
   // 6. вставка "Кнопки Показать еще"
@@ -166,7 +126,7 @@ if (films.length === 0) {
 
   // вешаем обработчики на кнопку
   // обработка клика на кнопке загрузить еще
-  showMoreButton.getElement().addEventListener(`click`, () => {
+  showMoreButton.setClickHandler(() => {
     // записать в константу сколько было показано задач (=8)
     const prevFilmsCount = showingFilmsCount;
     // вычислить последний индекс карточки для показа (=16), чтобы применить в slice
