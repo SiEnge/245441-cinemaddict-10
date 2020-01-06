@@ -1,3 +1,6 @@
+import MenuComponent from '../components/menu.js';
+import SortComponent, {SortType} from '../components/sort.js';
+import FilmsContainerComponent from '../components/films-container.js';
 import FilmListComponent from '../components/film-list.js';
 import NoFilmsListComponent from '../components/film-list-no-data.js';
 import FilmListExtraComponent from '../components/film-list-extra.js';
@@ -5,15 +8,15 @@ import FilmComponent from '../components/film.js';
 import PopupComponent from '../components/popup.js';
 import ShowMoreButtonComponent from '../components/show-more-button.js';
 import {render, RenderPosition} from '../util.js';
+// import {countFilmsFilter} from '../mock/menu.js';
 
 const bodyElement = document.querySelector(`body`);
-
 
 const SHOWING_FILMS_COUNT_ON_START = 5;
 const SHOWING_FILMS_COUNT_BY_BUTTON = 5;
 
+// отрисовка одного фильма и попапа, и навешивание обработчиков
 const renderFilm = (film, place) => {
-
   const onEscKeyDown = (evt) => {
     const isEscKey = evt.key === `Escape` || evt.key === `Esc`;
 
@@ -40,39 +43,57 @@ const renderFilm = (film, place) => {
   render(place, filmComponent.getElement(), RenderPosition.BEFOREEND);
 };
 
+// отрисовка нескольких фильмов. Передаются фильмы и блок в который нужно отрисовать
+// т.е. тут ищется films-list__container и туда отрисовываются фильмы
+const renderFilms = (filmListElement, films) => {
+  films.forEach((film) => {
+    renderFilm(film, filmListElement.querySelector(`.films-list__container`));
+  });
+};
+
 
 export default class PageController {
   constructor(container) {
     this._container = container;
+
+    this._menuComponent = new MenuComponent();
+    this._sortComponent = new SortComponent();
+    this._filmsContainerComponent = new FilmsContainerComponent();
 
     this._noFilmsComponent = new NoFilmsListComponent();
     this._filmList = new FilmListComponent();
     this._filmListExtraTopRated = new FilmListExtraComponent(`Top rated`);
     this._filmListExtraMostCommented = new FilmListExtraComponent(`Most commented`);
     this._showMoreButton = new ShowMoreButtonComponent();
+
   }
 
   render(films) {
-    const container = this._container.getElement();
-    // если есть фильм (а пока они всегда есть), то отрисовать контейнер для фильмов и сами фильмы в него
+    const container = this._container;
+
+    // 2. вставка в тело "Меню"
+    // const filter = countFilmsFilter(films);
+    // render(container, this._menuComponent.getElement(), RenderPosition.BEFOREEND);
+
+    // 3. вставка в тело "Сортировка"
+    render(container, this._sortComponent.getElement(), RenderPosition.BEFOREEND);
+
+    // const filmsContainer = new FilmsContainerComponent();
+    render(container, this._filmsContainerComponent.getElement(), RenderPosition.BEFOREEND);
+
     if (films.length === 0) {
-      render(container, this._noFilmsComponent.getElement(), RenderPosition.BEFOREEND);
+      render(this._filmsContainerComponent.getElement(), this._noFilmsComponent.getElement(), RenderPosition.BEFOREEND);
       return;
     }
 
-    // const filmList = new FilmListComponent();
-    render(container, this._filmList.getElement(), RenderPosition.BEFOREEND);
+    render(this._filmsContainerComponent.getElement(), this._filmList.getElement(), RenderPosition.BEFOREEND);
 
-    // 5. вставка "Карточки фильма"
     let showingFilmsCount = SHOWING_FILMS_COUNT_ON_START;
-    const filmContainerElement = this._filmList.getElement().querySelector(`.films-list__container`);
+    let sortedFilms = films;
 
-    films.slice(0, showingFilmsCount)
-    .forEach((film) => {
-      renderFilm(film, filmContainerElement);
-    });
+    // отрисовка нескольких фильмов
+    renderFilms(this._filmList.getElement(), sortedFilms.slice(0, showingFilmsCount));
 
-    // переписать на функции
     const extraTopRatedFilms = films.slice()
       .sort((a, b) => b.rating - a.rating)
       .filter((film) => film.rating !== 0)
@@ -84,41 +105,60 @@ export default class PageController {
       .slice(0, 2);
 
 
-    // тут нужно делать проверку на наличие фильмов в массиве, если есть то отрисовывать
-    render(container, this._filmListExtraTopRated.getElement(), RenderPosition.BEFOREEND);
-    extraTopRatedFilms.forEach((film) => {
-      renderFilm(film, this._filmListExtraTopRated.getElement().querySelector(`.films-list__container`));
+    render(this._filmsContainerComponent.getElement(), this._filmListExtraTopRated.getElement(), RenderPosition.BEFOREEND);
+    renderFilms(this._filmListExtraTopRated.getElement(), extraTopRatedFilms);
+
+    render(this._filmsContainerComponent.getElement(), this._filmListExtraMostCommented.getElement(), RenderPosition.BEFOREEND);
+    renderFilms(this._filmListExtraMostCommented.getElement(), extraMostCommentedFilms);
+
+    // что происходит если изменить сортировку
+    this._sortComponent.setSortTypeChangeHandler((sortType) => {
+      // (создается пустой) очищается массив для отсортированного
+      sortedFilms = [];
+
+      // в зависимости от выбранной сортировки записываем данные в массив
+      switch (sortType) {
+        case SortType.DEFAULT:
+          sortedFilms = films;
+          break;
+        case SortType.DATE:
+          sortedFilms = films.slice().sort((a, b) => b.releaseDate - a.releaseDate);
+          break;
+        case SortType.RATING:
+          sortedFilms = films.slice().sort((a, b) => b.rating - a.rating);
+          break;
+      }
+
+      // очистка контейнера для вывода новых фильмов
+      this._filmList.getElement().querySelector(`.films-list__container`).innerHTML = ``;
+
+      showingFilmsCount = SHOWING_FILMS_COUNT_ON_START;
+
+      // отрисовка отсортированных фильмов
+      renderFilms(this._filmList.getElement(), sortedFilms.slice(0, showingFilmsCount));
+
+      // отрисовать кнопку Показать еще, то отрисовать ее
+      render(this._filmList.getElement(), this._showMoreButton.getElement(), `beforeend`);
     });
 
-    render(container, this._filmListExtraMostCommented.getElement(), RenderPosition.BEFOREEND);
-    extraMostCommentedFilms.forEach((film) => {
-      renderFilm(film, this._filmListExtraMostCommented.getElement().querySelector(`.films-list__container`));
-    });
-
-
-    // 6. вставка "Кнопки Показать еще"
-    // const showMoreButton = new ShowMoreButtonComponent();
+    // отрисовка кнопки Показать еще
     render(this._filmList.getElement(), this._showMoreButton.getElement(), `beforeend`);
 
-    // вешаем обработчики на кнопку
-    // обработка клика на кнопке загрузить еще
+    // обработчик клика на кнопке Показать еще
     this._showMoreButton.setClickHandler(() => {
-      // записать в константу сколько было показано задач (=8)
       const prevFilmsCount = showingFilmsCount;
-      // вычислить последний индекс карточки для показа (=16), чтобы применить в slice
       showingFilmsCount = showingFilmsCount + SHOWING_FILMS_COUNT_BY_BUTTON;
 
-      // исходный массив с задачами скопировать (=slice) в количестве с 8 по 16
-      films.slice(prevFilmsCount, showingFilmsCount)
-      .forEach((film) => {
-        renderFilm(film, filmContainerElement);
-      });
+      // отрисовка нескольких фильмов
+      renderFilms(this._filmList.getElement(), sortedFilms.slice(prevFilmsCount, showingFilmsCount));
 
-      // если показыны все задачи - то удалить кнопку
-      if (showingFilmsCount >= films.length) {
+      if (showingFilmsCount >= sortedFilms.length) {
         this._showMoreButton.getElement().remove();
-        this._showMoreButton.removeElement();
+        // this._showMoreButton.removeElement();
       }
     });
+
   }
 }
+
+// перенести в утилиты countFilmsFilter
