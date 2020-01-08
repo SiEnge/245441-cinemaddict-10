@@ -4,50 +4,20 @@ import FilmsContainerComponent from '../components/films-container.js';
 import FilmListComponent from '../components/film-list.js';
 import NoFilmsListComponent from '../components/film-list-no-data.js';
 import FilmListExtraComponent from '../components/film-list-extra.js';
-import FilmComponent from '../components/film.js';
-import PopupComponent from '../components/popup.js';
 import ShowMoreButtonComponent from '../components/show-more-button.js';
 import {render, RenderPosition} from '../util.js';
-// import {countFilmsFilter} from '../mock/menu.js';
+import FilmController from './movie.js';
 
-const bodyElement = document.querySelector(`body`);
 
 const SHOWING_FILMS_COUNT_ON_START = 5;
 const SHOWING_FILMS_COUNT_BY_BUTTON = 5;
 
-// отрисовка одного фильма и попапа, и навешивание обработчиков
-const renderFilm = (film, place) => {
-  const onEscKeyDown = (evt) => {
-    const isEscKey = evt.key === `Escape` || evt.key === `Esc`;
-
-    if (isEscKey) {
-      filmPopupComponent.getElement().remove();
-      document.removeEventListener(`keydown`, onEscKeyDown);
-    }
-  };
-
-  // создание новых компонент карточки и формы редактирования
-  const filmComponent = new FilmComponent(film);
-  const filmPopupComponent = new PopupComponent(film);
-
-  filmComponent.setClickHandler(() => {
-    render(bodyElement, filmPopupComponent.getElement(), RenderPosition.BEFOREEND);
-    document.addEventListener(`keydown`, onEscKeyDown);
-  });
-
-  filmPopupComponent.setCloseButtonClickHandler(() => {
-    filmPopupComponent.getElement().remove();
-  });
-
-  // отрисовать карточку задачи
-  render(place, filmComponent.getElement(), RenderPosition.BEFOREEND);
-};
-
 // отрисовка нескольких фильмов. Передаются фильмы и блок в который нужно отрисовать
 // т.е. тут ищется films-list__container и туда отрисовываются фильмы
 const renderFilms = (filmListElement, films) => {
-  films.forEach((film) => {
-    renderFilm(film, filmListElement.querySelector(`.films-list__container`));
+  films.map((film) => {
+    const filmController = new FilmController(filmListElement.querySelector(`.films-list__container`));
+    filmController.render(film);
   });
 };
 

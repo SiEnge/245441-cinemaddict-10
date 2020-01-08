@@ -6,7 +6,8 @@ export const RenderPosition = {
 
 // разобраться?? не работает
 export const getRandomIntegerNumber = (min, max) => {
-  return min + Math.floor(max * Math.random());
+  // return min + Math.floor(max * Math.random());
+  return min + Math.floor((max - min) * Math.random());
 };
 
 export const getRandomArrayItem = (array) => {
