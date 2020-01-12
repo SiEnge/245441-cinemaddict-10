@@ -1,6 +1,7 @@
 // компонент "Попап"
 // import AbstractComponent from './abstract-component.js';
 import AbstractSmartComponent from './abstract-smart-component.js';
+import {formatDate} from '../util.js';
 
 const createGenresMarkup = (genres) => {
   return genres
@@ -119,7 +120,7 @@ const createPopupTemplate = (film, options = {}) => {
                 </tr>
                 <tr class="film-details__row">
                   <td class="film-details__term">Release Date</td>
-                  <td class="film-details__cell">${releaseDate}</td>
+                  <td class="film-details__cell">${formatDate(releaseDate)}</td>
                 </tr>
                 <tr class="film-details__row">
                   <td class="film-details__term">Runtime</td>
