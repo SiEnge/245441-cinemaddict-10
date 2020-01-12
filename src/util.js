@@ -6,7 +6,8 @@ export const RenderPosition = {
 
 // разобраться?? не работает
 export const getRandomIntegerNumber = (min, max) => {
-  return min + Math.floor(max * Math.random());
+  // return min + Math.floor(max * Math.random());
+  return min + Math.floor((max - min) * Math.random());
 };
 
 export const getRandomArrayItem = (array) => {
@@ -31,5 +32,18 @@ export const render = (container, element, place) => {
     case RenderPosition.BEFOREEND:
       container.append(element);
       break;
+  }
+};
+
+// функция замены компонентов
+export const replace = (newComponent, oldComponent) => {
+  const parentElement = oldComponent.getElement().parentElement;
+  const newElement = newComponent.getElement();
+  const oldElement = oldComponent.getElement();
+
+  const isExistElements = !!(parentElement && newElement && oldElement);
+
+  if (isExistElements && parentElement.contains(oldElement)) {
+    parentElement.replaceChild(newElement, oldElement);
   }
 };

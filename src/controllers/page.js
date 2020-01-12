@@ -4,50 +4,42 @@ import FilmsContainerComponent from '../components/films-container.js';
 import FilmListComponent from '../components/film-list.js';
 import NoFilmsListComponent from '../components/film-list-no-data.js';
 import FilmListExtraComponent from '../components/film-list-extra.js';
-import FilmComponent from '../components/film.js';
-import PopupComponent from '../components/popup.js';
 import ShowMoreButtonComponent from '../components/show-more-button.js';
 import {render, RenderPosition} from '../util.js';
-// import {countFilmsFilter} from '../mock/menu.js';
+import FilmController from './movie.js';
 
-const bodyElement = document.querySelector(`body`);
 
 const SHOWING_FILMS_COUNT_ON_START = 5;
 const SHOWING_FILMS_COUNT_BY_BUTTON = 5;
 
-// отрисовка одного фильма и попапа, и навешивание обработчиков
-const renderFilm = (film, place) => {
-  const onEscKeyDown = (evt) => {
-    const isEscKey = evt.key === `Escape` || evt.key === `Esc`;
-
-    if (isEscKey) {
-      filmPopupComponent.getElement().remove();
-      document.removeEventListener(`keydown`, onEscKeyDown);
-    }
-  };
-
-  // создание новых компонент карточки и формы редактирования
-  const filmComponent = new FilmComponent(film);
-  const filmPopupComponent = new PopupComponent(film);
-
-  filmComponent.setClickHandler(() => {
-    render(bodyElement, filmPopupComponent.getElement(), RenderPosition.BEFOREEND);
-    document.addEventListener(`keydown`, onEscKeyDown);
-  });
-
-  filmPopupComponent.setCloseButtonClickHandler(() => {
-    filmPopupComponent.getElement().remove();
-  });
-
-  // отрисовать карточку задачи
-  render(place, filmComponent.getElement(), RenderPosition.BEFOREEND);
-};
-
 // отрисовка нескольких фильмов. Передаются фильмы и блок в который нужно отрисовать
 // т.е. тут ищется films-list__container и туда отрисовываются фильмы
-const renderFilms = (filmListElement, films) => {
-  films.forEach((film) => {
-    renderFilm(film, filmListElement.querySelector(`.films-list__container`));
+
+// для отрисовки фильмов проходит методом map по всему массиву фильмов,
+// которые планируется отрисовать
+// для каждого фильма создаем инстанс класса FilmController
+// и потом его отрисовываем своим методом render
+// в который входит помимо отрисовки, навешивание обработчиков и логики переключения карточки/попапа
+
+// при создании инстанса передается контейнер куда отрисовать и
+// метода onDataChange, который будет срабатывать когда данные изменятся
+// а сам этот флаг относится к PageController и его основная функции
+// - сохранить новые данные в общем массиве данных Films
+// - дать команду на перерисовку карточки
+// т.е. карточка меняет свой вид не когда на нее кликнули, а когда сработала вся цепочка внесения изменений
+// в общий массив, и если все он, то обновить ее
+
+const renderFilms = (filmListElement, films, onDataChange, onViewChange) => {
+  // return films.map((film) => {
+  //   const filmController = new FilmController(filmListElement, onDataChange, onViewChange);
+  //   filmController.render(film);
+  //   return filmController;
+  // });
+
+  return films.map((film) => {
+    const filmController = new FilmController(filmListElement, onDataChange, onViewChange);
+    filmController.render(film);
+    return filmController;
   });
 };
 
@@ -55,6 +47,8 @@ const renderFilms = (filmListElement, films) => {
 export default class PageController {
   constructor(container) {
     this._container = container;
+    this._films = [];
+    this._showedFilmControllers = [];
 
     this._menuComponent = new MenuComponent();
     this._sortComponent = new SortComponent();
@@ -66,10 +60,14 @@ export default class PageController {
     this._filmListExtraMostCommented = new FilmListExtraComponent(`Most commented`);
     this._showMoreButton = new ShowMoreButtonComponent();
 
+    this._onDataChange = this._onDataChange.bind(this);
+    this._onViewChange = this._onViewChange.bind(this);
+
   }
 
   render(films) {
     const container = this._container;
+    this._films = films;
 
     // 2. вставка в тело "Меню"
     // const filter = countFilmsFilter(films);
@@ -92,7 +90,8 @@ export default class PageController {
     let sortedFilms = films;
 
     // отрисовка нескольких фильмов
-    renderFilms(this._filmList.getElement(), sortedFilms.slice(0, showingFilmsCount));
+    const newFilms = renderFilms(this._filmList.getElement(), sortedFilms.slice(0, showingFilmsCount), this._onDataChange, this._onViewChange);
+    this._showedFilmControllers = this._showedFilmControllers.concat(newFilms);
 
     const extraTopRatedFilms = films.slice()
       .sort((a, b) => b.rating - a.rating)
@@ -104,12 +103,19 @@ export default class PageController {
       .filter((film) => film.comments !== 0)
       .slice(0, 2);
 
+    if (extraTopRatedFilms.length > 0) {
+      render(this._filmsContainerComponent.getElement(), this._filmListExtraTopRated.getElement(), RenderPosition.BEFOREEND);
+      const newExtraFilms = renderFilms(this._filmListExtraTopRated.getElement(), extraTopRatedFilms, this._onDataChange, this._onViewChange);
+      this._showedFilmControllers = this._showedFilmControllers.concat(newExtraFilms);
 
-    render(this._filmsContainerComponent.getElement(), this._filmListExtraTopRated.getElement(), RenderPosition.BEFOREEND);
-    renderFilms(this._filmListExtraTopRated.getElement(), extraTopRatedFilms);
+    }
 
-    render(this._filmsContainerComponent.getElement(), this._filmListExtraMostCommented.getElement(), RenderPosition.BEFOREEND);
-    renderFilms(this._filmListExtraMostCommented.getElement(), extraMostCommentedFilms);
+    if (extraMostCommentedFilms.length > 0) {
+      render(this._filmsContainerComponent.getElement(), this._filmListExtraMostCommented.getElement(), RenderPosition.BEFOREEND);
+      const newExtraFilms = renderFilms(this._filmListExtraMostCommented.getElement(), extraMostCommentedFilms, this._onDataChange, this._onViewChange);
+      this._showedFilmControllers = this._showedFilmControllers.concat(newExtraFilms);
+    }
+
 
     // что происходит если изменить сортировку
     this._sortComponent.setSortTypeChangeHandler((sortType) => {
@@ -135,7 +141,8 @@ export default class PageController {
       showingFilmsCount = SHOWING_FILMS_COUNT_ON_START;
 
       // отрисовка отсортированных фильмов
-      renderFilms(this._filmList.getElement(), sortedFilms.slice(0, showingFilmsCount));
+      newFilms = renderFilms(this._filmList.getElement(), sortedFilms.slice(0, showingFilmsCount), this._onDataChange, this._onViewChange);
+      this._showedFilmControllers = newFilms;
 
       // отрисовать кнопку Показать еще, то отрисовать ее
       render(this._filmList.getElement(), this._showMoreButton.getElement(), `beforeend`);
@@ -150,7 +157,8 @@ export default class PageController {
       showingFilmsCount = showingFilmsCount + SHOWING_FILMS_COUNT_BY_BUTTON;
 
       // отрисовка нескольких фильмов
-      renderFilms(this._filmList.getElement(), sortedFilms.slice(prevFilmsCount, showingFilmsCount));
+      newFilms = renderFilms(this._filmList.getElement(), sortedFilms.slice(prevFilmsCount, showingFilmsCount), this._onDataChange, this._onViewChange);
+      this._showedFilmControllers = this._showedFilmControllers.concat(newFilms);
 
       if (showingFilmsCount >= sortedFilms.length) {
         this._showMoreButton.getElement().remove();
@@ -159,6 +167,40 @@ export default class PageController {
     });
 
   }
+
+  // паттерн Наблюдатель, если изменяются данные, то должна происходит перерисовка карточки
+  // - пользователь кликает на кнопки Добавить в избранное
+  // - событие этого клика вызывает метод _onDataChange, в который передаем
+  //  - инстанс filmController (если он есть, то значит в нем сохранен фильм и это нужно для определения что делать при перерисовке)
+  //  - старые данные по кликнутому
+  //  - новые данные по кликнутому
+  // - в этом метода ищется индекс фильма с которым произошли изменения
+  // - исправляем общий массив с фильмами
+  // - изменяем общую карточку
+  // _onDataChange(filmController, oldData, newData) {
+  _onDataChange(filmController, oldData, newData) {
+    // debugger;
+    const index = this._films.findIndex((it) => it === oldData);
+
+    if (index === -1) {
+      return;
+    }
+
+    // тут меняем данные в модели
+    this._films = [].concat(this._films.slice(0, index), newData, this._films.slice(index + 1));
+
+    // а тут перерисовываем карточку фильма и попап(?)
+    // нужно перерисовать только карточку фильма
+    filmController.render(this._films[index]);
+    // filmComponent.
+  }
+
+  _onViewChange() {
+    this._showedFilmControllers.forEach((it) => it.setDefaultView());
+    // setDefaultView
+  }
 }
 
 // перенести в утилиты countFilmsFilter
+
+// не забыть про экстрафильмы - чтобы и их попапы закрывались

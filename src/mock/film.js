@@ -4,7 +4,7 @@ const YEAR_MIN = 1950;
 const YEAR_MAX = 2019;
 const COUNT_COMMENTS_MIN = 0;
 const COUNT_COMMENTS_MAX = 666;
-const RATING_MIN = 0;
+const RATING_MIN = 1;
 const RATING_MAX = 9;
 const ONE_HOUR_IN_MINUTE = 60;
 const TEN_MINUTES = 10;
@@ -101,6 +101,11 @@ const getRandomRating = () => {
   return (getRandomIntegerNumber(RATING_MIN * 10, RATING_MAX * 10) / 10).toFixed(1);
 };
 
+const getRandomUserRating = () => {
+  return Math.random() > 0.5 ? null : getRandomIntegerNumber(RATING_MIN, RATING_MAX);
+  // return getRandomIntegerNumber(RATING_MIN, RATING_MAX);
+};
+
 const generateRandomGenre = (genres) => {
   const countGenres = getRandomIntegerNumber(1, 3);
   return genres
@@ -122,8 +127,8 @@ const generateFilm = () => {
     duration: getRandomDuration(),
     country: `USA`,
     genres: new Set(generateRandomGenre(FilmGenres)),
-    // rating: 0,
     rating: getRandomRating(),
+    userRating: getRandomUserRating(),
     age: getRandomArrayItem(FilmAges),
 
     // comments: 0,
