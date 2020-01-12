@@ -113,6 +113,17 @@ const generateRandomGenre = (genres) => {
     .slice(0, countGenres);
 };
 
+const getRandomReleaseDate = () => {
+  const targetDate = new Date();
+  const year = getRandomIntegerNumber(YEAR_MIN, YEAR_MAX);
+  const month = getRandomIntegerNumber(1, 12);
+  const date = getRandomIntegerNumber(1, 31);
+
+  targetDate.setFullYear(year, month, date);
+  return targetDate;
+};
+
+
 // генерация данных для одного фильма
 const generateFilm = () => {
   return {
@@ -123,7 +134,7 @@ const generateFilm = () => {
     director: `Anthony Mann`,
     writers: `Anne Wigton, Heinz Herald, Richard Weil`,
     actors: `Erich von Stroheim, Mary Beth Hughes, Dan Duryea`,
-    releaseDate: getRandomIntegerNumber(YEAR_MIN, YEAR_MAX),
+    releaseDate: getRandomReleaseDate(),
     duration: getRandomDuration(),
     country: `USA`,
     genres: new Set(generateRandomGenre(FilmGenres)),

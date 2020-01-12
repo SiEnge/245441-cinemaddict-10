@@ -1,5 +1,6 @@
 // компонент "Карточка фильма"
 import AbstractComponent from './abstract-component.js';
+import {formatDateYear} from '../util.js';
 
 const createBooleanItemMarkup = (isBoolean) => {
   if (isBoolean) {
@@ -23,7 +24,7 @@ const createFilmCardTemplate = (film) => {
       <h3 class="film-card__title">${title}</h3>
       <p class="film-card__rating">${rating}</p>
       <p class="film-card__info">
-        <span class="film-card__year">${releaseDate}</span>
+        <span class="film-card__year">${formatDateYear(releaseDate)}</span>
         <span class="film-card__duration">${duration}</span>
         <span class="film-card__genre">${genre[0]}</span>
       </p>

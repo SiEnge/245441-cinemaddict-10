@@ -1,3 +1,15 @@
+import moment from 'moment';
+
+
+export const formatDate = (date) => {
+  return moment(date).format(`DD MMMM YYYY`);
+};
+
+export const formatDateYear = (date) => {
+  return moment(date).format(`YYYY`);
+};
+// 30 March 1945
+
 // экспорт констант места вставки
 export const RenderPosition = {
   AFTERBEGIN: `afterbegin`,
