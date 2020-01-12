@@ -2,16 +2,25 @@ import FilmComponent from '../components/film.js';
 import PopupComponent from '../components/popup.js';
 import {render, replace, RenderPosition} from '../util.js';
 
+const Mode = {
+  DEFAULT: `default`,
+  POPUP: `popup`,
+};
+
 export default class MovieController {
-  constructor(container, onDataChange) {
+  constructor(container, onDataChange, onViewChange) {
     this._container = container.querySelector(`.films-list__container`);
 
     //
     this._onDataChange = onDataChange;
+    this._onViewChange = onViewChange;
 
     // инстансы класс фильма и попапа
     this._filmComponent = null;
     this._popupComponent = null;
+
+    this._mode = Mode.DEFAULT;
+
 
     // активация обработчика Escape
     this._onEscKeyDown = this._onEscKeyDown.bind(this);
@@ -20,19 +29,34 @@ export default class MovieController {
   render(film) {
     // для перерисовки конкретной карточки нужно завести новые переменные
     const oldFilmComponent = this._filmComponent;
-    const oldPopupComponent = this._popupComponent;
+    // const oldPopupComponent = this._popupComponent;
 
     this._filmComponent = new FilmComponent(film);
-    this._popupComponent = new PopupComponent(film);
+    // this._popupComponent = new PopupComponent(film);
 
-    const bodyElement = document.querySelector(`body`);
 
-    this._filmComponent.setClickHandler(() => {
-      render(bodyElement, this._popupComponent.getElement(), RenderPosition.BEFOREEND);
-      document.addEventListener(`keydown`, this._onEscKeyDown);
+    // обработчики на карточке фильма
+    // клик по карточке в определенной области (переделать на клики по каждой области)
+    // => открывает попап
+
+
+    this._filmComponent.setTitleClickHandler(() => {
+      this._showPopup(film);
     });
 
+    this._filmComponent.setPosterClickHandler(() => {
+      this._showPopup(film);
+      // document.addEventListener(`keydown`, this._onEscKeyDown);
+    });
 
+    this._filmComponent.setCommentsClickHandler(() => {
+      this._showPopup(film);
+      // document.addEventListener(`keydown`, this._onEscKeyDown);
+    });
+
+    // клик по кнопке добавить в вишлист
+    // => вызывает метод, который описан в контроллере уровнем выше, ктр
+    // при этом обновляет данные в модели
     this._filmComponent.setAddToWatchlistButtonClickHandler(() => {
       this._onDataChange(this, film, Object.assign({}, film, {
         isWatchlist: !film.isWatchlist,
@@ -51,6 +75,38 @@ export default class MovieController {
       }));
     });
 
+    // здесь логика отрисовки фильма если он новый или нужно только изменить данные
+    if (oldFilmComponent) { // если в этом инстансе уже есть фильм, то заменить новым
+      // debugger;
+      replace(this._filmComponent, oldFilmComponent);
+      // replace(this._popupComponent, oldPopupComponent);
+    } else { // если нет, то просто отрисовать
+      render(this._container, this._filmComponent.getElement(), RenderPosition.BEFOREEND);
+    }
+
+  }
+
+  setDefaultView() {
+    // debugger;
+    if (this._mode !== Mode.DEFAULT) {
+      this._closePopup();
+    }
+  }
+
+  // какждый раз при открытии попапа мы его отрисовываем
+  _showPopup(film) {
+    this._onViewChange();
+
+    this._popupComponent = new PopupComponent(film);
+    render(document.querySelector(`body`), this._popupComponent.getElement(), RenderPosition.BEFOREEND);
+
+    document.addEventListener(`keydown`, this._onEscKeyDown);
+
+    // обработчики на попапе фильма
+    this._popupComponent.setCloseButtonClickHandler(() => {
+      // debugger;
+      this._closePopup();
+    });
 
     this._popupComponent.setAddToWatchlistButtonClickHandler(() => {
       this._onDataChange(this, film, Object.assign({}, film, {
@@ -59,7 +115,6 @@ export default class MovieController {
     });
 
     this._popupComponent.setMarkAsWatchedButtonClickHandler(() => {
-      // debugger;
       this._onDataChange(this, film, Object.assign({}, film, {
         isWatched: !film.isWatched,
       }));
@@ -71,18 +126,15 @@ export default class MovieController {
       }));
     });
 
+    this._mode = Mode.POPUP;
+  }
 
-    this._popupComponent.setCloseButtonClickHandler(() => {
-      this._popupComponent.getElement().remove();
-    });
-
-    // здесь логика отрисовки фильма если он новый или нужно только изменить данные
-    if (oldFilmComponent && oldPopupComponent) { // если в этом инстансе уже есть фильм, то заменить новым
-      replace(this._filmComponent, oldFilmComponent);
-      replace(this._popupComponent, oldPopupComponent);
-    } else { // если нет, то просто отрисовать
-      render(this._container, this._filmComponent.getElement(), RenderPosition.BEFOREEND);
-    }
+  // удаляем этот элемент полностью, т.к. все равно каждый раз его отрисовываем
+  _closePopup() {
+    this._popupComponent.getElement().remove();
+    this._popupComponent.removeElement();
+    document.removeEventListener(`keydown`, this._onEscKeyDown);
+    this._mode = Mode.DEFAULT;
 
   }
 
@@ -103,3 +155,18 @@ export default class MovieController {
 
 }
 
+// в учебном проекте есть методы replace и rerender
+// они похожи но выполняют разные задачи
+// replace
+// чтобы переключиться на форму редактирования удаляем из верстки карточку и на ее место
+// ставим форму редактирования. данные используются те же
+// при replace берутся их разметка и заменяется одно на другое
+
+// rerender
+// нужно для перерисовки элемента одного элемента
+// т.е. есть старая разметка со старыми данными и есть новая разметки с новыми данными
+// старую разметку удаляем из компонента с помощью removeElement (удаляет только разметку)
+// ! но это еще не удаление из верстки
+// сохраняем в переменную новую разметку с новыми данными (а новая разметка создается
+//   на момент получения ссылки на этот элемент getElement(если элемент пустой то сделать новую разметку))
+// и меняем разметку старую на новую

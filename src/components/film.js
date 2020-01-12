@@ -42,6 +42,7 @@ const createFilmCardTemplate = (film) => {
 export default class Film extends AbstractComponent {
   constructor(film) {
     super();
+
     this._film = film;
   }
 
@@ -49,16 +50,19 @@ export default class Film extends AbstractComponent {
     return createFilmCardTemplate(this._film);
   }
 
-  setClickHandler(handler) {
-    this.getElement().addEventListener(`click`, (evt) => {
-      const target = evt.target;
+  setTitleClickHandler(handler) {
+    this.getElement().querySelector(`.film-card__title`)
+    .addEventListener(`click`, handler);
+  }
 
-      if (!target.classList.contains(`film-card__title`) && !target.classList.contains(`film-card__poster`) && !target.classList.contains(`film-card__comments`)) {
-        return;
-      }
+  setPosterClickHandler(handler) {
+    this.getElement().querySelector(`.film-card__poster`)
+    .addEventListener(`click`, handler);
+  }
 
-      handler();
-    });
+  setCommentsClickHandler(handler) {
+    this.getElement().querySelector(`.film-card__comments`)
+    .addEventListener(`click`, handler);
   }
 
   setAddToWatchlistButtonClickHandler(handler) {
@@ -76,7 +80,3 @@ export default class Film extends AbstractComponent {
       .addEventListener(`click`, handler);
   }
 }
-
-
-// создать список, на чем будет срабатывать клик
-// Add to watchlist», «Already watched», «Add to favorites»
