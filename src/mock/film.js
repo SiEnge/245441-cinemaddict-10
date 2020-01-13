@@ -127,6 +127,7 @@ const getRandomReleaseDate = () => {
 // генерация данных для одного фильма
 const generateFilm = () => {
   return {
+    id: String(new Date() + Math.random()),
     title: getRandomArrayItem(FilmTitles),
     originalTitle: `The Great Flamarion`,
     poster: getRandomArrayItem(FilmPosters),

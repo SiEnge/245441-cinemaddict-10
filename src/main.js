@@ -10,6 +10,8 @@ import {generateProfile} from './mock/profile.js';
 import ProfileComponent from './components/profile.js';
 import PageController from './controllers/page.js';
 
+import FilmsModel from './models/movies.js';
+
 import {render, RenderPosition} from './util.js';
 
 const FILM_COUNT = 17;
@@ -24,8 +26,12 @@ render(headerElement, new ProfileComponent(watchedMovies).getElement(), RenderPo
 
 const films = generateFilms(FILM_COUNT);
 
-const pageController = new PageController(mainElement);
-pageController.render(films);
+const filmsModel = new FilmsModel();
+// debugger;
+filmsModel.setFilms(films);
+
+const pageController = new PageController(mainElement, filmsModel);
+pageController.render();
 
 // 8. вставка Комментарий
 // const comments = generateComments(COMMENT_COUNT);

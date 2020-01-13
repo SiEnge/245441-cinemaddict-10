@@ -45,9 +45,12 @@ const renderFilms = (filmListElement, films, onDataChange, onViewChange) => {
 
 
 export default class PageController {
-  constructor(container) {
+  constructor(container, filmsModel) {
     this._container = container;
+    this._filmsModel = filmsModel;
+
     this._films = [];
+    this._sortedFilms = [];
     this._showedFilmControllers = [];
 
     this._menuComponent = new MenuComponent();
@@ -65,9 +68,11 @@ export default class PageController {
 
   }
 
-  render(films) {
+  render() {
+    // this._films = films;
     const container = this._container;
-    this._films = films;
+
+    const films = this._filmsModel.getFilms();
 
     // 2. вставка в тело "Меню"
     // const filter = countFilmsFilter(films);
@@ -87,10 +92,10 @@ export default class PageController {
     render(this._filmsContainerComponent.getElement(), this._filmList.getElement(), RenderPosition.BEFOREEND);
 
     let showingFilmsCount = SHOWING_FILMS_COUNT_ON_START;
-    let sortedFilms = films;
+    this._sortedFilms = films;
 
     // отрисовка нескольких фильмов
-    const newFilms = renderFilms(this._filmList.getElement(), sortedFilms.slice(0, showingFilmsCount), this._onDataChange, this._onViewChange);
+    let newFilms = renderFilms(this._filmList.getElement(), this._sortedFilms.slice(0, showingFilmsCount), this._onDataChange, this._onViewChange);
     this._showedFilmControllers = this._showedFilmControllers.concat(newFilms);
 
     const extraTopRatedFilms = films.slice()
@@ -120,18 +125,18 @@ export default class PageController {
     // что происходит если изменить сортировку
     this._sortComponent.setSortTypeChangeHandler((sortType) => {
       // (создается пустой) очищается массив для отсортированного
-      sortedFilms = [];
+      this._sortedFilms = [];
 
       // в зависимости от выбранной сортировки записываем данные в массив
       switch (sortType) {
         case SortType.DEFAULT:
-          sortedFilms = films;
+          this._sortedFilms = films;
           break;
         case SortType.DATE:
-          sortedFilms = films.slice().sort((a, b) => b.releaseDate - a.releaseDate);
+          this._sortedFilms = films.slice().sort((a, b) => b.releaseDate - a.releaseDate);
           break;
         case SortType.RATING:
-          sortedFilms = films.slice().sort((a, b) => b.rating - a.rating);
+          this._sortedFilms = films.slice().sort((a, b) => b.rating - a.rating);
           break;
       }
 
@@ -141,7 +146,7 @@ export default class PageController {
       showingFilmsCount = SHOWING_FILMS_COUNT_ON_START;
 
       // отрисовка отсортированных фильмов
-      newFilms = renderFilms(this._filmList.getElement(), sortedFilms.slice(0, showingFilmsCount), this._onDataChange, this._onViewChange);
+      newFilms = renderFilms(this._filmList.getElement(), this._sortedFilms.slice(0, showingFilmsCount), this._onDataChange, this._onViewChange);
       this._showedFilmControllers = newFilms;
 
       // отрисовать кнопку Показать еще, то отрисовать ее
@@ -157,10 +162,10 @@ export default class PageController {
       showingFilmsCount = showingFilmsCount + SHOWING_FILMS_COUNT_BY_BUTTON;
 
       // отрисовка нескольких фильмов
-      newFilms = renderFilms(this._filmList.getElement(), sortedFilms.slice(prevFilmsCount, showingFilmsCount), this._onDataChange, this._onViewChange);
+      newFilms = renderFilms(this._filmList.getElement(), this._sortedFilms.slice(prevFilmsCount, showingFilmsCount), this._onDataChange, this._onViewChange);
       this._showedFilmControllers = this._showedFilmControllers.concat(newFilms);
 
-      if (showingFilmsCount >= sortedFilms.length) {
+      if (showingFilmsCount >= this._sortedFilms.length) {
         this._showMoreButton.getElement().remove();
         // this._showMoreButton.removeElement();
       }
@@ -179,25 +184,17 @@ export default class PageController {
   // - изменяем общую карточку
   // _onDataChange(filmController, oldData, newData) {
   _onDataChange(filmController, oldData, newData) {
-    // debugger;
-    const index = this._films.findIndex((it) => it === oldData);
+    // const films = this._filmsModel.getFilms();
+    const isSuccess = this._filmsModel.updateFilm(oldData.id, newData);
 
-    if (index === -1) {
-      return;
+    if (isSuccess) {
+      filmController.render(newData);
     }
 
-    // тут меняем данные в модели
-    this._films = [].concat(this._films.slice(0, index), newData, this._films.slice(index + 1));
-
-    // а тут перерисовываем карточку фильма и попап(?)
-    // нужно перерисовать только карточку фильма
-    filmController.render(this._films[index]);
-    // filmComponent.
   }
 
   _onViewChange() {
     this._showedFilmControllers.forEach((it) => it.setDefaultView());
-    // setDefaultView
   }
 }
 
