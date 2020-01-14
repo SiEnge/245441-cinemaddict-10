@@ -1,27 +1,51 @@
 // компонент "Меню"
 import AbstractComponent from './abstract-component.js';
+import {FilterType} from '../const.js';
 
-const createFilterTemplate = (filter) => {
-  const {countWatchlist, countHistory, countFavorites} = filter;
+const NameToTitleFilter = {
+  'all': `All movies`,
+  'watchlist': `Watchlist`,
+  'history': `History`,
+  'favorites': `Favorites`
+};
+
+const createFilterMarkup = (filter, isChecked) => {
+  const {name, count} = filter;
+  const countMarkup = (name === FilterType.ALL) ? NameToTitleFilter[name] : `${NameToTitleFilter[name]} <span class="main-navigation__item-count">${count}</span>`;
+
+  return (
+    `<a href="#${name}" data-filter-type="${name}" class="main-navigation__item ${isChecked ? `main-navigation__item--active` : ``}">${countMarkup}</a>`
+  );
+};
+
+const createFilterTemplate = (filters) => {
+  const filtersMarkup = filters.map((it) => createFilterMarkup(it, it.checked)).join(`\n`);
 
   return (
     `<nav class="main-navigation">
-      <a href="#all" class="main-navigation__item main-navigation__item--active">All movies</a>
-      <a href="#watchlist" class="main-navigation__item">Watchlist <span class="main-navigation__item-count">${countWatchlist}</span></a>
-      <a href="#history" class="main-navigation__item">History <span class="main-navigation__item-count">${countHistory}</span></a>
-      <a href="#favorites" class="main-navigation__item">Favorites <span class="main-navigation__item-count">${countFavorites}</span></a>
+      ${filtersMarkup}
       <a href="#stats" class="main-navigation__item main-navigation__item--additional">Stats</a>
     </nav>`
   );
 };
 
+
 export default class Filter extends AbstractComponent {
-  constructor(filter) {
+  constructor(filters) {
     super();
-    this._filter = filter;
+    this._filters = filters;
   }
 
   getTemplate() {
-    return createFilterTemplate(this._filter);
+    return createFilterTemplate(this._filters);
+  }
+
+  setFilterChangeHandler(handler) {
+    // debugger;
+    this.getElement().addEventListener(`click`, (evt) => {
+      evt.preventDefault();
+      const filterName = evt.target.dataset.filterType;
+      handler(filterName);
+    });
   }
 }

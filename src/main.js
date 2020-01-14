@@ -10,6 +10,8 @@ import {generateProfile} from './mock/profile.js';
 import ProfileComponent from './components/profile.js';
 import PageController from './controllers/page.js';
 
+import FilterController from './controllers/filter.js';
+
 import FilmsModel from './models/movies.js';
 
 import {render, RenderPosition} from './util.js';
@@ -27,8 +29,10 @@ render(headerElement, new ProfileComponent(watchedMovies).getElement(), RenderPo
 const films = generateFilms(FILM_COUNT);
 
 const filmsModel = new FilmsModel();
-// debugger;
 filmsModel.setFilms(films);
+
+const filterController = new FilterController(mainElement, filmsModel);
+filterController.render();
 
 const pageController = new PageController(mainElement, filmsModel);
 pageController.render();
