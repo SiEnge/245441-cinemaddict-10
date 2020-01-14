@@ -1,4 +1,4 @@
-import MenuComponent from '../components/menu.js';
+import FilterComponent from '../components/filter.js';
 import SortComponent, {SortType} from '../components/sort.js';
 import FilmsContainerComponent from '../components/films-container.js';
 import FilmListComponent from '../components/film-list.js';
@@ -7,6 +7,7 @@ import FilmListExtraComponent from '../components/film-list-extra.js';
 import ShowMoreButtonComponent from '../components/show-more-button.js';
 import {render, RenderPosition} from '../util.js';
 import FilmController from './movie.js';
+import {countFilmsFilter} from '../mock/menu.js';
 
 
 const SHOWING_FILMS_COUNT_ON_START = 5;
@@ -53,7 +54,7 @@ export default class PageController {
     this._sortedFilms = [];
     this._showedFilmControllers = [];
 
-    this._menuComponent = new MenuComponent();
+    this._filterComponent = null;
     this._sortComponent = new SortComponent();
     this._filmsContainerComponent = new FilmsContainerComponent();
 
@@ -74,9 +75,11 @@ export default class PageController {
 
     const films = this._filmsModel.getFilms();
 
-    // 2. вставка в тело "Меню"
-    // const filter = countFilmsFilter(films);
-    // render(container, this._menuComponent.getElement(), RenderPosition.BEFOREEND);
+    // 2. вставка в тело "Фильтр"
+    const filter = countFilmsFilter(films);
+    this._filterComponent = new FilterComponent(filter);
+
+    render(container, this._filterComponent.getElement(), RenderPosition.BEFOREEND);
 
     // 3. вставка в тело "Сортировка"
     render(container, this._sortComponent.getElement(), RenderPosition.BEFOREEND);

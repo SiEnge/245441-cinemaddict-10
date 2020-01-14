@@ -1,7 +1,7 @@
 // компонент "Меню"
 import AbstractComponent from './abstract-component.js';
 
-const createMenuTemplate = (filter) => {
+const createFilterTemplate = (filter) => {
   const {countWatchlist, countHistory, countFavorites} = filter;
 
   return (
@@ -15,13 +15,13 @@ const createMenuTemplate = (filter) => {
   );
 };
 
-export default class Menu extends AbstractComponent {
+export default class Filter extends AbstractComponent {
   constructor(filter) {
     super();
     this._filter = filter;
   }
 
   getTemplate() {
-    return createMenuTemplate(this._filter);
+    return createFilterTemplate(this._filter);
   }
 }
