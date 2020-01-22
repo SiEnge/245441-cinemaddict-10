@@ -1,4 +1,5 @@
 import moment from 'moment';
+import {FilterType} from './const.js';
 
 
 export const formatDate = (date) => {
@@ -9,6 +10,11 @@ export const formatDateYear = (date) => {
   return moment(date).format(`YYYY`);
 };
 // 30 March 1945
+
+export const formatDateComment = (date) => {
+  return moment(date).format(`YYYY/MM/DD HH:MM`);
+};
+// YYYY/MM/DD HH:MM. Например: 2019/12/31 23:59.
 
 // экспорт констант места вставки
 export const RenderPosition = {
@@ -58,4 +64,47 @@ export const replace = (newComponent, oldComponent) => {
   if (isExistElements && parentElement.contains(oldElement)) {
     parentElement.replaceChild(newElement, oldElement);
   }
+};
+
+// функция для удаления элемента
+export const remove = (component) => {
+  component.getElement().remove();
+  component.removeElement();
+};
+
+// фильтры (перенести в отдельный утиль)
+
+
+const getWatchlistFilms = (films) => {
+  return films.filter((film) => film.isWatchlist);
+};
+
+const getHistoryFilms = (films) => {
+  return films.filter((film) => film.isWatched);
+};
+
+const getFavoritesFilms = (films) => {
+  return films.filter((film) => film.isFavorite);
+};
+
+
+// получить список отфильтрованных фильмов
+export const getFilmsByFilter = (films, filterType) => {
+  let filteredFilms;
+  // debugger;
+  switch (filterType) {
+    case FilterType.ALL:
+      filteredFilms = films;
+      break;
+    case FilterType.WATCHLIST:
+      filteredFilms = getWatchlistFilms(films);
+      break;
+    case FilterType.HISTORY:
+      filteredFilms = getHistoryFilms(films);
+      break;
+    case FilterType.FAVORITES:
+      filteredFilms = getFavoritesFilms(films);
+      break;
+  }
+  return filteredFilms;
 };

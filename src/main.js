@@ -8,7 +8,12 @@ import {generateProfile} from './mock/profile.js';
 // import {countFilmsFilter} from './mock/menu.js';
 
 import ProfileComponent from './components/profile.js';
+// import PopupContainerComponent from './components/popup-container.js';
 import PageController from './controllers/page.js';
+
+import FilterController from './controllers/filter.js';
+
+import FilmsModel from './models/movies.js';
 
 import {render, RenderPosition} from './util.js';
 
@@ -22,10 +27,18 @@ const footerElement = document.querySelector(`.footer`);
 const watchedMovies = generateProfile();
 render(headerElement, new ProfileComponent(watchedMovies).getElement(), RenderPosition.BEFOREEND);
 
+// render(headerElement, new PopupContainerComponent().getElement(), RenderPosition.BEFOREEND);
+
 const films = generateFilms(FILM_COUNT);
 
-const pageController = new PageController(mainElement);
-pageController.render(films);
+const filmsModel = new FilmsModel();
+filmsModel.setFilms(films);
+
+const filterController = new FilterController(mainElement, filmsModel);
+filterController.render();
+
+const pageController = new PageController(mainElement, filmsModel);
+pageController.render();
 
 // 8. вставка Комментарий
 // const comments = generateComments(COMMENT_COUNT);

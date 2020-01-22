@@ -1,12 +1,13 @@
-import MenuComponent from '../components/menu.js';
+// import FilterComponent from '../components/filter.js';
 import SortComponent, {SortType} from '../components/sort.js';
 import FilmsContainerComponent from '../components/films-container.js';
 import FilmListComponent from '../components/film-list.js';
 import NoFilmsListComponent from '../components/film-list-no-data.js';
 import FilmListExtraComponent from '../components/film-list-extra.js';
 import ShowMoreButtonComponent from '../components/show-more-button.js';
-import {render, RenderPosition} from '../util.js';
+import {render, remove, RenderPosition} from '../util.js';
 import FilmController from './movie.js';
+// import {countFilmsFilter} from '../mock/menu.js';
 
 
 const SHOWING_FILMS_COUNT_ON_START = 5;
@@ -29,15 +30,9 @@ const SHOWING_FILMS_COUNT_BY_BUTTON = 5;
 // т.е. карточка меняет свой вид не когда на нее кликнули, а когда сработала вся цепочка внесения изменений
 // в общий массив, и если все он, то обновить ее
 
-const renderFilms = (filmListElement, films, onDataChange, onViewChange) => {
-  // return films.map((film) => {
-  //   const filmController = new FilmController(filmListElement, onDataChange, onViewChange);
-  //   filmController.render(film);
-  //   return filmController;
-  // });
-
+const renderFilms = (filmListElement, films, onDataChange, onViewChange, onCommentsChange) => {
   return films.map((film) => {
-    const filmController = new FilmController(filmListElement, onDataChange, onViewChange);
+    const filmController = new FilmController(filmListElement, onDataChange, onViewChange, onCommentsChange);
     filmController.render(film);
     return filmController;
   });
@@ -45,12 +40,15 @@ const renderFilms = (filmListElement, films, onDataChange, onViewChange) => {
 
 
 export default class PageController {
-  constructor(container) {
+  constructor(container, filmsModel) {
     this._container = container;
-    this._films = [];
-    this._showedFilmControllers = [];
+    this._filmsModel = filmsModel;
 
-    this._menuComponent = new MenuComponent();
+    this._films = [];
+    this._sortedFilms = [];
+    this._showedFilmControllers = [];
+    this._showingFilmsCount = SHOWING_FILMS_COUNT_ON_START;
+
     this._sortComponent = new SortComponent();
     this._filmsContainerComponent = new FilmsContainerComponent();
 
@@ -58,25 +56,25 @@ export default class PageController {
     this._filmList = new FilmListComponent();
     this._filmListExtraTopRated = new FilmListExtraComponent(`Top rated`);
     this._filmListExtraMostCommented = new FilmListExtraComponent(`Most commented`);
-    this._showMoreButton = new ShowMoreButtonComponent();
+    this._showMoreButtonComponent = new ShowMoreButtonComponent();
 
     this._onDataChange = this._onDataChange.bind(this);
+    this._onSortTypeChange = this._onSortTypeChange.bind(this);
     this._onViewChange = this._onViewChange.bind(this);
+    this._onCommentsChange = this._onCommentsChange.bind(this);
 
+    this._onShowMoreButtonClick = this._onShowMoreButtonClick.bind(this);
+    this._onFilterChange = this._onFilterChange.bind(this);
+
+    this._sortComponent.setSortTypeChangeHandler(this._onSortTypeChange);
+    this._filmsModel.setFilterChangeHandler(this._onFilterChange);
   }
 
-  render(films) {
+  render() {
     const container = this._container;
-    this._films = films;
+    const films = this._filmsModel.getFilms();
 
-    // 2. вставка в тело "Меню"
-    // const filter = countFilmsFilter(films);
-    // render(container, this._menuComponent.getElement(), RenderPosition.BEFOREEND);
-
-    // 3. вставка в тело "Сортировка"
     render(container, this._sortComponent.getElement(), RenderPosition.BEFOREEND);
-
-    // const filmsContainer = new FilmsContainerComponent();
     render(container, this._filmsContainerComponent.getElement(), RenderPosition.BEFOREEND);
 
     if (films.length === 0) {
@@ -86,12 +84,17 @@ export default class PageController {
 
     render(this._filmsContainerComponent.getElement(), this._filmList.getElement(), RenderPosition.BEFOREEND);
 
-    let showingFilmsCount = SHOWING_FILMS_COUNT_ON_START;
-    let sortedFilms = films;
+    this._sortedFilms = films;
+    this._renderFilms(this._sortedFilms.slice(0, this._showingFilmsCount));
 
-    // отрисовка нескольких фильмов
-    const newFilms = renderFilms(this._filmList.getElement(), sortedFilms.slice(0, showingFilmsCount), this._onDataChange, this._onViewChange);
-    this._showedFilmControllers = this._showedFilmControllers.concat(newFilms);
+    this._renderExtraFilms(films);
+    this._renderShowMoreButton();
+  }
+
+
+  // отрисовка блока с экстраФИльмами
+  _renderExtraFilms(films) {
+    const container = this._filmsContainerComponent.getElement();
 
     const extraTopRatedFilms = films.slice()
       .sort((a, b) => b.rating - a.rating)
@@ -99,108 +102,125 @@ export default class PageController {
       .slice(0, 2);
 
     const extraMostCommentedFilms = films.slice()
-      .sort((a, b) => b.comments - a.comments)
+      .sort((a, b) => b.comments.length - a.comments.length)
       .filter((film) => film.comments !== 0)
       .slice(0, 2);
 
     if (extraTopRatedFilms.length > 0) {
-      render(this._filmsContainerComponent.getElement(), this._filmListExtraTopRated.getElement(), RenderPosition.BEFOREEND);
-      const newExtraFilms = renderFilms(this._filmListExtraTopRated.getElement(), extraTopRatedFilms, this._onDataChange, this._onViewChange);
-      this._showedFilmControllers = this._showedFilmControllers.concat(newExtraFilms);
-
+      render(container, this._filmListExtraTopRated.getElement(), RenderPosition.BEFOREEND);
+      renderFilms(this._filmListExtraTopRated.getElement(), extraTopRatedFilms, this._onDataChange, this._onViewChange);
     }
 
     if (extraMostCommentedFilms.length > 0) {
-      render(this._filmsContainerComponent.getElement(), this._filmListExtraMostCommented.getElement(), RenderPosition.BEFOREEND);
-      const newExtraFilms = renderFilms(this._filmListExtraMostCommented.getElement(), extraMostCommentedFilms, this._onDataChange, this._onViewChange);
-      this._showedFilmControllers = this._showedFilmControllers.concat(newExtraFilms);
+      render(container, this._filmListExtraMostCommented.getElement(), RenderPosition.BEFOREEND);
+      renderFilms(this._filmListExtraMostCommented.getElement(), extraMostCommentedFilms, this._onDataChange, this._onViewChange);
     }
-
-
-    // что происходит если изменить сортировку
-    this._sortComponent.setSortTypeChangeHandler((sortType) => {
-      // (создается пустой) очищается массив для отсортированного
-      sortedFilms = [];
-
-      // в зависимости от выбранной сортировки записываем данные в массив
-      switch (sortType) {
-        case SortType.DEFAULT:
-          sortedFilms = films;
-          break;
-        case SortType.DATE:
-          sortedFilms = films.slice().sort((a, b) => b.releaseDate - a.releaseDate);
-          break;
-        case SortType.RATING:
-          sortedFilms = films.slice().sort((a, b) => b.rating - a.rating);
-          break;
-      }
-
-      // очистка контейнера для вывода новых фильмов
-      this._filmList.getElement().querySelector(`.films-list__container`).innerHTML = ``;
-
-      showingFilmsCount = SHOWING_FILMS_COUNT_ON_START;
-
-      // отрисовка отсортированных фильмов
-      newFilms = renderFilms(this._filmList.getElement(), sortedFilms.slice(0, showingFilmsCount), this._onDataChange, this._onViewChange);
-      this._showedFilmControllers = newFilms;
-
-      // отрисовать кнопку Показать еще, то отрисовать ее
-      render(this._filmList.getElement(), this._showMoreButton.getElement(), `beforeend`);
-    });
-
-    // отрисовка кнопки Показать еще
-    render(this._filmList.getElement(), this._showMoreButton.getElement(), `beforeend`);
-
-    // обработчик клика на кнопке Показать еще
-    this._showMoreButton.setClickHandler(() => {
-      const prevFilmsCount = showingFilmsCount;
-      showingFilmsCount = showingFilmsCount + SHOWING_FILMS_COUNT_BY_BUTTON;
-
-      // отрисовка нескольких фильмов
-      newFilms = renderFilms(this._filmList.getElement(), sortedFilms.slice(prevFilmsCount, showingFilmsCount), this._onDataChange, this._onViewChange);
-      this._showedFilmControllers = this._showedFilmControllers.concat(newFilms);
-
-      if (showingFilmsCount >= sortedFilms.length) {
-        this._showMoreButton.getElement().remove();
-        // this._showMoreButton.removeElement();
-      }
-    });
-
   }
 
-  // паттерн Наблюдатель, если изменяются данные, то должна происходит перерисовка карточки
-  // - пользователь кликает на кнопки Добавить в избранное
-  // - событие этого клика вызывает метод _onDataChange, в который передаем
-  //  - инстанс filmController (если он есть, то значит в нем сохранен фильм и это нужно для определения что делать при перерисовке)
-  //  - старые данные по кликнутому
-  //  - новые данные по кликнутому
-  // - в этом метода ищется индекс фильма с которым произошли изменения
-  // - исправляем общий массив с фильмами
-  // - изменяем общую карточку
-  // _onDataChange(filmController, oldData, newData) {
-  _onDataChange(filmController, oldData, newData) {
-    // debugger;
-    const index = this._films.findIndex((it) => it === oldData);
+  // здесь логика отрисовки кнпоки загрузить еще
+  _renderShowMoreButton() {
+    remove(this._showMoreButtonComponent);
 
-    if (index === -1) {
+    if (this._showingFilmsCount >= this._filmsModel.getFilms().length) {
       return;
     }
 
-    // тут меняем данные в модели
-    this._films = [].concat(this._films.slice(0, index), newData, this._films.slice(index + 1));
+    render(this._filmList.getElement(), this._showMoreButtonComponent.getElement(), RenderPosition.BEFOREEND);
+    this._showMoreButtonComponent.setClickHandler(this._onShowMoreButtonClick);
+  }
 
-    // а тут перерисовываем карточку фильма и попап(?)
-    // нужно перерисовать только карточку фильма
-    filmController.render(this._films[index]);
-    // filmComponent.
+  // удаление всех фильмов
+  _removeFilms() {
+    const filmListElement = this._filmList.getElement().querySelector(`.films-list__container`);
+    filmListElement.innerHTML = ``;
+    this._showedFilmControllers = [];
+    this._showingFilmsCount = SHOWING_FILMS_COUNT_ON_START;
+  }
+
+  // отрисовка фильмов
+  _renderFilms(films) {
+    const filmListElement = this._filmList.getElement();
+
+    const newFilms = renderFilms(filmListElement, films, this._onDataChange, this._onViewChange, this._onCommentsChange);
+    this._showedFilmControllers = this._showedFilmControllers.concat(newFilms);
+    this._showingFilmsCount = this._showedFilmControllers.length;
+  }
+
+  // а здесь логика клика на кнопку
+  _onShowMoreButtonClick() {
+    const prevFilmsCount = this._showingFilmsCount;
+    this._showingFilmsCount = this._showingFilmsCount + SHOWING_FILMS_COUNT_BY_BUTTON;
+
+    // отрисовка нескольких фильмов
+    this._renderFilms(this._sortedFilms.slice(prevFilmsCount, this._showingFilmsCount));
+
+    if (this._showingFilmsCount >= this._sortedFilms.length) {
+      this._showMoreButtonComponent.getElement().remove();
+    }
+  }
+
+  _onSortTypeChange(sortType) {
+    const films = this._filmsModel.getFilms();
+    this._sortedFilms = [];
+
+    // в зависимости от выбранной сортировки записываем данные в массив
+    switch (sortType) {
+      case SortType.DEFAULT:
+        this._sortedFilms = films;
+        break;
+      case SortType.DATE:
+        this._sortedFilms = films.slice().sort((a, b) => b.releaseDate - a.releaseDate);
+        break;
+      case SortType.RATING:
+        this._sortedFilms = films.slice().sort((a, b) => b.rating - a.rating);
+        break;
+    }
+
+    this._removeFilms(); // очистка страницы от всех карточек
+    this._renderFilms(this._sortedFilms.slice(0, this._showingFilmsCount)); // отрисовка
+
+    this._renderShowMoreButton();
+  }
+
+
+  _onDataChange(filmController, oldData, newData) {
+    const isSuccess = this._filmsModel.updateFilm(oldData.id, newData);
+
+    if (isSuccess) {
+      filmController.render(newData);
+    }
   }
 
   _onViewChange() {
     this._showedFilmControllers.forEach((it) => it.setDefaultView());
-    // setDefaultView
+  }
+
+  _onFilterChange() {
+    const films = this._filmsModel.getFilms();
+    this._sortedFilms = films;
+
+    this._removeFilms();
+    this._renderFilms(this._sortedFilms.slice(0, SHOWING_FILMS_COUNT_ON_START));
+    this._renderShowMoreButton();
+  }
+
+  _onCommentsChange(filmController, film, oldData, newData) {
+    let isSuccess = false;
+
+    if (oldData === null) {
+      isSuccess = this._filmsModel.addComment(film, newData);
+    }
+
+    if (newData === null) {
+      isSuccess = this._filmsModel.deleteComment(film, oldData);
+    }
+
+    if (isSuccess) {
+      filmController.render(film);
+    }
   }
 }
 
-// перенести в утилиты countFilmsFilter
 
-// не забыть про экстрафильмы - чтобы и их попапы закрывались
+// не забыть про экстрафильмы - чтобы и их попапы закрывались - нужно добавить в отдельный массив для проверки что их попапы тоже нужно закрыть
+

@@ -30,7 +30,7 @@ const createFilmCardTemplate = (film) => {
       </p>
       <img src="./images/posters/${poster}" alt="" class="film-card__poster">
       <p class="film-card__description">${descriptionText}</p>
-      <a class="film-card__comments">${comments} comments</a>
+      <a class="film-card__comments">${comments.length} comments</a>
       <form class="film-card__controls">
         <button class="film-card__controls-item button film-card__controls-item--add-to-watchlist ${watchlist}">Add to watchlist</button>
         <button class="film-card__controls-item button film-card__controls-item--mark-as-watched ${watched}">Mark as watched</button>
@@ -81,3 +81,10 @@ export default class Film extends AbstractComponent {
       .addEventListener(`click`, handler);
   }
 }
+
+
+// нужно
+// при клике на удалить фиксировать сам коммент на котором был клик
+// помечать что его нужно удалить
+// удалить в модели
+// и отрисовать все заново
