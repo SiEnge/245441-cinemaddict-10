@@ -37,7 +37,7 @@ export default class Sort extends AbstractComponent {
     return createSortTemplate();
   }
 
-  // обработчик сортировки, т.е. что происходит при измненении сортировки
+  // определение выбранной пользователем сортировки
   setSortTypeChangeHandler(handler) {
     // событие клик на блоке сортировке
     this.getElement().addEventListener(`click`, (evt) => {

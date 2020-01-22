@@ -1,9 +1,11 @@
 import {getRandomIntegerNumber, getRandomArrayItem} from '../util.js';
+import {generateComments} from './comment.js';
 
 const YEAR_MIN = 1950;
 const YEAR_MAX = 2019;
 const COUNT_COMMENTS_MIN = 0;
-const COUNT_COMMENTS_MAX = 666;
+const COUNT_COMMENTS_MAX = 100;
+// const COUNT_COMMENTS_MAX = 666;
 const RATING_MIN = 1;
 const RATING_MAX = 9;
 const ONE_HOUR_IN_MINUTE = 60;
@@ -143,8 +145,7 @@ const generateFilm = () => {
     userRating: getRandomUserRating(),
     age: getRandomArrayItem(FilmAges),
 
-    // comments: 0,
-    comments: getRandomIntegerNumber(COUNT_COMMENTS_MIN, COUNT_COMMENTS_MAX),
+    comments: (Math.random() > 0.5) ? generateComments(getRandomIntegerNumber(COUNT_COMMENTS_MIN, COUNT_COMMENTS_MAX)) : [],
 
     isWatchlist: Math.random() > 0.5,
     isWatched: Math.random() > 0.5,

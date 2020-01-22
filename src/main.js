@@ -8,6 +8,7 @@ import {generateProfile} from './mock/profile.js';
 // import {countFilmsFilter} from './mock/menu.js';
 
 import ProfileComponent from './components/profile.js';
+// import PopupContainerComponent from './components/popup-container.js';
 import PageController from './controllers/page.js';
 
 import FilterController from './controllers/filter.js';
@@ -25,6 +26,8 @@ const footerElement = document.querySelector(`.footer`);
 // 1. вставка в шапку "Звание пользователя"
 const watchedMovies = generateProfile();
 render(headerElement, new ProfileComponent(watchedMovies).getElement(), RenderPosition.BEFOREEND);
+
+// render(headerElement, new PopupContainerComponent().getElement(), RenderPosition.BEFOREEND);
 
 const films = generateFilms(FILM_COUNT);
 

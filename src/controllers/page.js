@@ -30,9 +30,9 @@ const SHOWING_FILMS_COUNT_BY_BUTTON = 5;
 // т.е. карточка меняет свой вид не когда на нее кликнули, а когда сработала вся цепочка внесения изменений
 // в общий массив, и если все он, то обновить ее
 
-const renderFilms = (filmListElement, films, onDataChange, onViewChange) => {
+const renderFilms = (filmListElement, films, onDataChange, onViewChange, onCommentsChange) => {
   return films.map((film) => {
-    const filmController = new FilmController(filmListElement, onDataChange, onViewChange);
+    const filmController = new FilmController(filmListElement, onDataChange, onViewChange, onCommentsChange);
     filmController.render(film);
     return filmController;
   });
@@ -61,6 +61,8 @@ export default class PageController {
     this._onDataChange = this._onDataChange.bind(this);
     this._onSortTypeChange = this._onSortTypeChange.bind(this);
     this._onViewChange = this._onViewChange.bind(this);
+    this._onCommentsChange = this._onCommentsChange.bind(this);
+
     this._onShowMoreButtonClick = this._onShowMoreButtonClick.bind(this);
     this._onFilterChange = this._onFilterChange.bind(this);
 
@@ -100,7 +102,7 @@ export default class PageController {
       .slice(0, 2);
 
     const extraMostCommentedFilms = films.slice()
-      .sort((a, b) => b.comments - a.comments)
+      .sort((a, b) => b.comments.length - a.comments.length)
       .filter((film) => film.comments !== 0)
       .slice(0, 2);
 
@@ -139,7 +141,7 @@ export default class PageController {
   _renderFilms(films) {
     const filmListElement = this._filmList.getElement();
 
-    const newFilms = renderFilms(filmListElement, films, this._onDataChange, this._onViewChange);
+    const newFilms = renderFilms(filmListElement, films, this._onDataChange, this._onViewChange, this._onCommentsChange);
     this._showedFilmControllers = this._showedFilmControllers.concat(newFilms);
     this._showingFilmsCount = this._showedFilmControllers.length;
   }
@@ -174,8 +176,8 @@ export default class PageController {
         break;
     }
 
-    this._removeFilms();
-    this._renderFilms(this._sortedFilms.slice(0, this._showingFilmsCount));
+    this._removeFilms(); // очистка страницы от всех карточек
+    this._renderFilms(this._sortedFilms.slice(0, this._showingFilmsCount)); // отрисовка
 
     this._renderShowMoreButton();
   }
@@ -201,7 +203,24 @@ export default class PageController {
     this._renderFilms(this._sortedFilms.slice(0, SHOWING_FILMS_COUNT_ON_START));
     this._renderShowMoreButton();
   }
+
+  _onCommentsChange(filmController, film, oldData, newData) {
+    let isSuccess = false;
+
+    if (oldData === null) {
+      isSuccess = this._filmsModel.addComment(film, newData);
+    }
+
+    if (newData === null) {
+      isSuccess = this._filmsModel.deleteComment(film, oldData);
+    }
+
+    if (isSuccess) {
+      filmController.render(film);
+    }
+  }
 }
 
 
-// не забыть про экстрафильмы - чтобы и их попапы закрывались
+// не забыть про экстрафильмы - чтобы и их попапы закрывались - нужно добавить в отдельный массив для проверки что их попапы тоже нужно закрыть
+

@@ -11,6 +11,11 @@ export const formatDateYear = (date) => {
 };
 // 30 March 1945
 
+export const formatDateComment = (date) => {
+  return moment(date).format(`YYYY/MM/DD HH:MM`);
+};
+// YYYY/MM/DD HH:MM. Например: 2019/12/31 23:59.
+
 // экспорт констант места вставки
 export const RenderPosition = {
   AFTERBEGIN: `afterbegin`,

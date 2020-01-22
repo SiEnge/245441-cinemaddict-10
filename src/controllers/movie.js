@@ -1,5 +1,6 @@
 import FilmComponent from '../components/film.js';
 import PopupComponent from '../components/popup.js';
+import PopupContainerComponent from '../components/popup-container.js';
 import {render, replace, RenderPosition} from '../util.js';
 
 const Mode = {
@@ -8,25 +9,33 @@ const Mode = {
 };
 
 export default class MovieController {
-  constructor(container, onDataChange, onViewChange) {
+  constructor(container, onDataChange, onViewChange, onCommentsChange) {
     this._container = container.querySelector(`.films-list__container`);
 
-    //
-    this._onDataChange = onDataChange;
-    this._onViewChange = onViewChange;
+    // присвоение обработчиков pageController контроллеру фильма
+    this._onDataChange = onDataChange; // при изменении  данных
+    this._onViewChange = onViewChange; // вернуть карточки фильмов в состояние по умолчанию
+    this._onCommentsChange = onCommentsChange; // вернуть карточки фильмов в состояние по умолчанию
 
     // инстансы класс фильма и попапа
+    // это вьюхи, т.е. отображение карточки фильма и попапа
     this._filmComponent = null;
     this._popupComponent = null;
+    this._popupContainerComponent = new PopupContainerComponent();
 
+    // режим контроллера, т.е. по умолчанию показывать карточку фильма
     this._mode = Mode.DEFAULT;
+    this._film = null;
 
 
     // активация обработчика Escape
     this._onEscKeyDown = this._onEscKeyDown.bind(this);
+    this._onCtrlEnterDown = this._onCtrlEnterDown.bind(this);
+
   }
 
   render(film) {
+    this._film = film;
     // для перерисовки конкретной карточки нужно завести новые переменные
     const oldFilmComponent = this._filmComponent;
     // const oldPopupComponent = this._popupComponent;
@@ -97,10 +106,15 @@ export default class MovieController {
   _showPopup(film) {
     this._onViewChange();
 
+    render(document.querySelector(`body`), this._popupContainerComponent.getElement(), RenderPosition.BEFOREEND);
+
+
     this._popupComponent = new PopupComponent(film);
-    render(document.querySelector(`body`), this._popupComponent.getElement(), RenderPosition.BEFOREEND);
+    render(this._popupContainerComponent.getElement(), this._popupComponent.getElement(), RenderPosition.BEFOREEND);
+    // render(document.querySelector(`body`), this._popupComponent.getElement(), RenderPosition.BEFOREEND);
 
     document.addEventListener(`keydown`, this._onEscKeyDown);
+    document.addEventListener(`keydown`, this._onCtrlEnterDown);
 
     // обработчики на попапе фильма
     this._popupComponent.setCloseButtonClickHandler(() => {
@@ -126,14 +140,29 @@ export default class MovieController {
       }));
     });
 
+    this._popupComponent.setDeleteCommentButtonClickHandler((commentId) => {
+      const index = film.comments.findIndex((it) => it.id === commentId);
+      this._onCommentsChange(this, film, film.comments[index], null);
+    });
+
+    // this._popupComponent.setAddCommentButtonClickHandler((comment) => {
+    //   // debugger;
+    //   // const index = film.comments.findIndex((it) => it.id === commentId);
+    //   this._onCommentsChange(this, film, null, comment);
+    // });
+
     this._mode = Mode.POPUP;
   }
 
   // удаляем этот элемент полностью, т.к. все равно каждый раз его отрисовываем
   _closePopup() {
-    this._popupComponent.getElement().remove();
-    this._popupComponent.removeElement();
+    this._popupContainerComponent.getElement().remove();
+    this._popupContainerComponent.removeElement();
+
+    // this._popupComponent.getElement().remove();
+    // this._popupComponent.removeElement();
     document.removeEventListener(`keydown`, this._onEscKeyDown);
+    document.removeEventListener(`keydown`, this._onCtrlEnterDown);
     this._mode = Mode.DEFAULT;
 
   }
@@ -148,8 +177,23 @@ export default class MovieController {
     const isEscKey = evt.key === `Escape` || evt.key === `Esc`;
 
     if (isEscKey) {
-      this._popupComponent.getElement().remove();
-      document.removeEventListener(`keydown`, this._onEscKeyDown);
+      this._closePopup();
+    }
+  }
+
+  _onCtrlEnterDown(evt) {
+    const isEnterKey = evt.key === `Enter`;
+
+    if ((evt.ctrlKey || evt.metaKey) && isEnterKey) {
+      const input = this._popupComponent.getElement().querySelector(`.film-details__comment-input`);
+
+      this._onCommentsChange(this, this._film, null, {
+        text: input.value,
+        date: new Date(),
+        emoji: `angry.png`
+      });
+
+      this._popupComponent.rerender();
     }
   }
 

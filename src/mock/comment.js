@@ -1,4 +1,4 @@
-import {getRandomArrayItem} from '../util.js';
+import {getRandomArrayItem, getRandomIntegerNumber} from '../util.js';
 
 const CommentText = [
   `Interesting setting and a good cast`,
@@ -12,13 +12,13 @@ const CommentAuthor = [
   `John Doe`
 ];
 
-const CommentDay = [
-  `2019/12/31 23:59`,
-  `today`,
-  `tomorrow`,
-  `2 days ago`,
-  `3 days ago`
-];
+// const CommentDay = [
+//   `2019/12/31 23:59`,
+//   `today`,
+//   `tomorrow`,
+//   `2 days ago`,
+//   `3 days ago`
+// ];
 
 const CommentEmoji = [
   `smile.png`,
@@ -27,23 +27,30 @@ const CommentEmoji = [
   `angry.png`
 ];
 
+const getRandomDate = () => {
+  const targetDate = new Date();
+  targetDate.setDate(targetDate.getDate() - getRandomIntegerNumber(0, 30));
 
-const generateComment = () => {
+  return targetDate;
+};
+
+
+const generateComment = (id) => {
   return {
+    id: String(id),
     text: getRandomArrayItem(CommentText),
     author: getRandomArrayItem(CommentAuthor),
-    day: getRandomArrayItem(CommentDay),
+    date: getRandomDate(),
     emoji: getRandomArrayItem(CommentEmoji)
   };
 };
 
-const generateComments = (count) => {
+export const generateComments = (count) => {
   const comments = [];
   for (let i = 0; i < count; i++) {
-    comments.push(generateComment());
+    comments.push(generateComment(i + 1));
   }
   return comments;
 };
 
 
-export {generateComment, generateComments};
