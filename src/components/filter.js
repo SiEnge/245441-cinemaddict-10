@@ -1,7 +1,6 @@
 // компонент "Меню"
 import AbstractComponent from './abstract-component.js';
 import {FilterType} from '../const.js';
-// import {createElementAll} from '../util.js';
 
 const NameToTitleFilter = {
   'all': `All movies`,
@@ -20,29 +19,11 @@ const createFilterMarkup = (filter, isChecked) => {
 };
 
 const createFilterTemplate = (filters) => {
-
-  // const filtersMarkup = filters
-  // .map((it) => createFilterMarkup(it, it.checked))
-  // .join(`\n`);
-
-  // debugger;
-  // return (
-  //   `<div>
-  //       ${filtersMarkup}
-  //   </div>`
-  //   );
-
-  // return filters
-  // .map((it) => createFilterMarkup(it, it.checked))
-  // .join(`\n`);
-
-
   const filtersMarkup = filters.map((it) => createFilterMarkup(it, it.checked)).join(`\n`);
 
   return (
     `<nav class="main-navigation">
       ${filtersMarkup}
-      <a href="#stats" class="main-navigation__item main-navigation__item--additional">Stats</a>
     </nav>`
   );
 };

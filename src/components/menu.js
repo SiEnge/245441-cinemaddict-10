@@ -1,27 +1,33 @@
-// // компонент "Меню"
-// import AbstractComponent from './abstract-component.js';
+// компонент "Меню"
+import AbstractComponent from './abstract-component.js';
+import {PageMode} from '../const.js';
 
-// const createMenuTemplate = () => {
-//   return (
-//     `<a href="#stats" class="main-navigation__item main-navigation__item--additional">Stats</a>`
-//   );
-// };
+const ACTIVE_CLASS = `main-navigation__item--active`;
 
-// export default class Menu extends AbstractComponent {
-//   getTemplate() {
-//     return createMenuTemplate();
-//   }
+const createMenuTemplate = () => {
+  return (
+    `<a href="#stats" class="main-navigation__item main-navigation__item--additional">Stats</a>`
+  );
+};
 
+export default class Menu extends AbstractComponent {
+  getTemplate() {
+    return createMenuTemplate();
+  }
 
-//   setStatisticsClickHandler(handler) {
-//     this.getElement().addEventListener(`click`, (evt) => {
-//       evt.preventDefault();
+  setStatisticsClickHandler(handler) {
+    this.getElement().addEventListener(`click`, (evt) => {
+      evt.preventDefault();
 
-//       if (evt.target.classList.contains('main-navigation__item--active')) {
-//         return;
-//       }
+      const btnStat = evt.target;
 
-//       handler();
-//     });
-//   }
-// }
+      if (btnStat.classList.contains(ACTIVE_CLASS)) {
+        handler(PageMode.MOVIE);
+        btnStat.classList.remove(ACTIVE_CLASS);
+      } else {
+        handler(PageMode.STAT);
+        btnStat.classList.add(ACTIVE_CLASS);
+      }
+    });
+  }
+}
