@@ -1,10 +1,10 @@
 import FilterComponent from '../components/filter.js';
-import {FilterType} from '../const.js';
+import {FilterType, PageMode} from '../const.js';
 import {render, replace, RenderPosition} from '../util.js';
 import {getFilmsByFilter} from '../util.js';
 
 export default class Filter {
-  constructor(container, filmsModel) {
+  constructor(container, filmsModel, pageController, statisticsComponent) {
     this._container = container;
     this._filmsModel = filmsModel;
 
@@ -14,7 +14,13 @@ export default class Filter {
     this._onDataChange = this._onDataChange.bind(this);
 
     this._onFilterChange = this._onFilterChange.bind(this);
+
     this._filmsModel.setDataChangeHandler(this._onDataChange);
+    this._onPageToggle = this._onPageToggle.bind(this);
+
+    this._pageMode = PageMode.MOVIE;
+    this._pageController = pageController;
+    this._statisticsComponent = statisticsComponent;
   }
 
   render() {
@@ -32,11 +38,12 @@ export default class Filter {
 
     this._filterComponent = new FilterComponent(filters);
     this._filterComponent.setFilterChangeHandler(this._onFilterChange);
+    this._filterComponent.setStatisticsClickHandler(this._onPageToggle);
 
     if (oldComponent) {
       replace(this._filterComponent, oldComponent);
     } else {
-      render(container, this._filterComponent.getElement(), RenderPosition.BEFOREEND);
+      render(container, this._filterComponent.getElement(), RenderPosition.AFTERBEGIN);
     }
   }
 
@@ -49,4 +56,18 @@ export default class Filter {
     this.render();
   }
 
+  _onPageToggle() {
+    switch (this._pageMode) {
+      case PageMode.MOVIE:
+        this._pageMode = PageMode.STAT;
+        this._pageController.hide();
+        this._statisticsComponent.show();
+        break;
+      case PageMode.STAT:
+        this._pageMode = PageMode.MOVIE;
+        this._pageController.show();
+        this._statisticsComponent.hide();
+        break;
+    }
+  }
 }

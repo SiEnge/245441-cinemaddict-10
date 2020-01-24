@@ -1,6 +1,7 @@
 // компонент "Меню"
 import AbstractComponent from './abstract-component.js';
 import {FilterType} from '../const.js';
+// import {createElementAll} from '../util.js';
 
 const NameToTitleFilter = {
   'all': `All movies`,
@@ -19,6 +20,23 @@ const createFilterMarkup = (filter, isChecked) => {
 };
 
 const createFilterTemplate = (filters) => {
+
+  // const filtersMarkup = filters
+  // .map((it) => createFilterMarkup(it, it.checked))
+  // .join(`\n`);
+
+  // debugger;
+  // return (
+  //   `<div>
+  //       ${filtersMarkup}
+  //   </div>`
+  //   );
+
+  // return filters
+  // .map((it) => createFilterMarkup(it, it.checked))
+  // .join(`\n`);
+
+
   const filtersMarkup = filters.map((it) => createFilterMarkup(it, it.checked)).join(`\n`);
 
   return (
@@ -41,11 +59,31 @@ export default class Filter extends AbstractComponent {
   }
 
   setFilterChangeHandler(handler) {
-    // debugger;
     this.getElement().addEventListener(`click`, (evt) => {
       evt.preventDefault();
+
+      if (evt.target.classList.contains(`main-navigation__item--additional`)) {
+        return;
+      }
+
       const filterName = evt.target.dataset.filterType;
       handler(filterName);
     });
   }
+
+  setStatisticsClickHandler(handler) {
+    this.getElement().querySelector(`.main-navigation__item--additional`)
+    .addEventListener(`click`, (evt) => {
+      evt.preventDefault();
+
+      if (evt.target.classList.contains(`main-navigation__item--active`)) {
+        return;
+      }
+
+      handler();
+    });
+  }
 }
+
+
+// выделить выбранный филтр/статистику, а с остальных сбросить выделение

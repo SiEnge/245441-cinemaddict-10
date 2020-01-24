@@ -219,8 +219,20 @@ export default class PageController {
       filmController.render(film);
     }
   }
+
+  hide() {
+    this._filmsContainerComponent.hide();
+    this._sortComponent.hide();
+  }
+
+  show() {
+    this._filmsContainerComponent.show();
+    this._sortComponent.show();
+  }
 }
 
 
 // не забыть про экстрафильмы - чтобы и их попапы закрывались - нужно добавить в отдельный массив для проверки что их попапы тоже нужно закрыть
 
+// Аналогично допишите в PageController методы, которые умееют скрывать и показывать его.
+// Для этого будет достаточно добавлять и удалять с корневого элемента класс visually-hidden соотвественно.
