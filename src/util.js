@@ -41,6 +41,7 @@ export const createElement = (template) => {
   return newElement.firstChild;
 };
 
+
 // вставка элемент в контейнер (отказ от insertAjast)
 export const render = (container, element, place) => {
   switch (place) {

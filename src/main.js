@@ -8,6 +8,8 @@ import {generateProfile} from './mock/profile.js';
 // import {countFilmsFilter} from './mock/menu.js';
 
 import ProfileComponent from './components/profile.js';
+import MenuComponent from './components/menu.js';
+import StatisticsComponent from './components/statistics.js';
 // import PopupContainerComponent from './components/popup-container.js';
 import PageController from './controllers/page.js';
 
@@ -16,6 +18,7 @@ import FilterController from './controllers/filter.js';
 import FilmsModel from './models/movies.js';
 
 import {render, RenderPosition} from './util.js';
+import {PageMode} from './const.js';
 
 const FILM_COUNT = 17;
 
@@ -27,26 +30,69 @@ const footerElement = document.querySelector(`.footer`);
 const watchedMovies = generateProfile();
 render(headerElement, new ProfileComponent(watchedMovies).getElement(), RenderPosition.BEFOREEND);
 
-// render(headerElement, new PopupContainerComponent().getElement(), RenderPosition.BEFOREEND);
+// 2. Меню, где кнопка Stat и фильтры для фильмов
+const menuComponent = new MenuComponent();
 
 const films = generateFilms(FILM_COUNT);
-
 const filmsModel = new FilmsModel();
 filmsModel.setFilms(films);
 
-const filterController = new FilterController(mainElement, filmsModel);
+const pageController = new PageController(mainElement, filmsModel);
+
+const StatiscticsPeriod = {
+  ALLTIME: `all-time`,
+  TODAY: `today`,
+  WEEK: `week`,
+  MONTH: `month`,
+  YEAR: `year`
+};
+
+const countingStatistic = (filmsAll) => {
+
+  const count = filmsAll.filter((film) => film.isWatched).length;
+  const duration = filmsAll
+    .reduce((accumulator, currentValue) => accumulator + currentValue.duration, 0);
+
+  const genre = `Musical`;
+
+
+  return {count, duration, genre};
+};
+
+
+const stat = countingStatistic(filmsModel.getFilms(films));
+const statisticsComponent = new StatisticsComponent(filmsModel, StatiscticsPeriod.ALLTIME, stat);
+
+const filterController = new FilterController(mainElement, filmsModel, menuComponent);
+
 filterController.render();
 
-const pageController = new PageController(mainElement, filmsModel);
 pageController.render();
+render(mainElement, statisticsComponent.getElement(), RenderPosition.BEFOREEND);
 
-// 8. вставка Комментарий
-// const comments = generateComments(COMMENT_COUNT);
-// const popupElement = document.querySelector(`.film-details`);
-// render2(popupElement.querySelector(`.form-details__top-container`), createCommentTemplate(comments), `afterend`);
+// statisticsComponent.hide();
+pageController.hide();
 
 // 9. вставка количества фильмов
 const footerStatistics = footerElement.querySelector(`.footer__statistics`);
 footerStatistics.querySelector(`p`).textContent = `${FILM_COUNT} movies inside`;
 
 // вставка количества фильма - переработать и убрать из main обращение к dom
+
+
+menuComponent.setStatisticsClickHandler((mode) => {
+  switch (mode) {
+    case PageMode.STAT:
+      pageController.hide();
+      statisticsComponent.show();
+      break;
+    case PageMode.MOVIE:
+      pageController.show();
+      statisticsComponent.hide();
+      break;
+  }
+});
+
+// statisticsComponent.setStatisticsFilterClickHandler((period) => {
+//   debugger;
+// });

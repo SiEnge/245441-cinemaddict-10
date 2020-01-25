@@ -44,7 +44,7 @@ const createPopupTemplate = (film, options = {}) => {
   const {title, originalTitle, poster, description, director, writers, actors, releaseDate,
     duration, country, genres, rating, userRating, age, comments} = film;
   const {isWatchlist, isWatched, isFavorite} = options;
-
+  // debugger;
   const genresMarkup = createGenresMarkup(Array.from(genres));
   const genreTitle = (genres.size === 1) ? `Genre` : `Genres`;
   const userRatingMarkup = (userRating) ? `<p class="film-details__user-rating">Your rate ${userRating}</p>` : ``;

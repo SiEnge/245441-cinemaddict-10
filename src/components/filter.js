@@ -24,7 +24,6 @@ const createFilterTemplate = (filters) => {
   return (
     `<nav class="main-navigation">
       ${filtersMarkup}
-      <a href="#stats" class="main-navigation__item main-navigation__item--additional">Stats</a>
     </nav>`
   );
 };
@@ -41,11 +40,31 @@ export default class Filter extends AbstractComponent {
   }
 
   setFilterChangeHandler(handler) {
-    // debugger;
     this.getElement().addEventListener(`click`, (evt) => {
       evt.preventDefault();
+
+      if (evt.target.classList.contains(`main-navigation__item--additional`)) {
+        return;
+      }
+
       const filterName = evt.target.dataset.filterType;
       handler(filterName);
     });
   }
+
+  setStatisticsClickHandler(handler) {
+    this.getElement().querySelector(`.main-navigation__item--additional`)
+    .addEventListener(`click`, (evt) => {
+      evt.preventDefault();
+
+      if (evt.target.classList.contains(`main-navigation__item--active`)) {
+        return;
+      }
+
+      handler();
+    });
+  }
 }
+
+
+// выделить выбранный филтр/статистику, а с остальных сбросить выделение

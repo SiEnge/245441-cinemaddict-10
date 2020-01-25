@@ -4,3 +4,8 @@ export const FilterType = {
   HISTORY: `history`,
   FAVORITES: `favorites`
 };
+
+export const PageMode = {
+  STAT: `stat`,
+  MOVIE: `movie`
+};

@@ -4,16 +4,18 @@ import {render, replace, RenderPosition} from '../util.js';
 import {getFilmsByFilter} from '../util.js';
 
 export default class Filter {
-  constructor(container, filmsModel) {
+  constructor(container, filmsModel, menuComponent) {
     this._container = container;
     this._filmsModel = filmsModel;
 
     this._activeFilterType = FilterType.ALL;
     this._filterComponent = null;
+    this._menuComponent = menuComponent;
 
     this._onDataChange = this._onDataChange.bind(this);
 
     this._onFilterChange = this._onFilterChange.bind(this);
+
     this._filmsModel.setDataChangeHandler(this._onDataChange);
   }
 
@@ -37,6 +39,7 @@ export default class Filter {
       replace(this._filterComponent, oldComponent);
     } else {
       render(container, this._filterComponent.getElement(), RenderPosition.BEFOREEND);
+      render(this._filterComponent.getElement(), this._menuComponent.getElement(), RenderPosition.BEFOREEND);
     }
   }
 
@@ -48,5 +51,4 @@ export default class Filter {
   _onDataChange() {
     this.render();
   }
-
 }
