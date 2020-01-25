@@ -8,8 +8,8 @@ const COUNT_COMMENTS_MAX = 100;
 // const COUNT_COMMENTS_MAX = 666;
 const RATING_MIN = 1;
 const RATING_MAX = 9;
-const ONE_HOUR_IN_MINUTE = 60;
-const TEN_MINUTES = 10;
+// const ONE_HOUR_IN_MINUTE = 60;
+// const TEN_MINUTES = 10;
 const DURATION_MIN = 20;
 const DURATION_MAX = 150;
 
@@ -89,14 +89,15 @@ const generateRandomDescription = (description) => {
 };
 
 const getRandomDuration = () => {
-  const duration = getRandomIntegerNumber(DURATION_MIN, DURATION_MAX);
-  if (duration > ONE_HOUR_IN_MINUTE) {
-    const hour = Math.round(duration / ONE_HOUR_IN_MINUTE);
-    const minute = (duration % ONE_HOUR_IN_MINUTE < TEN_MINUTES) ? `0${duration % ONE_HOUR_IN_MINUTE}` : duration % ONE_HOUR_IN_MINUTE;
-    return `${hour}h ${minute}m`;
-  } else {
-    return `${duration}m`;
-  }
+  return getRandomIntegerNumber(DURATION_MIN, DURATION_MAX);
+  // const duration = getRandomIntegerNumber(DURATION_MIN, DURATION_MAX);
+  // if (duration > ONE_HOUR_IN_MINUTE) {
+  //   const hour = Math.round(duration / ONE_HOUR_IN_MINUTE);
+  //   const minute = (duration % ONE_HOUR_IN_MINUTE < TEN_MINUTES) ? `0${duration % ONE_HOUR_IN_MINUTE}` : duration % ONE_HOUR_IN_MINUTE;
+  //   return `${hour}h ${minute}m`;
+  // } else {
+  //   return `${duration}m`;
+  // }
 };
 
 const getRandomRating = () => {
@@ -138,6 +139,7 @@ const generateFilm = () => {
     writers: `Anne Wigton, Heinz Herald, Richard Weil`,
     actors: `Erich von Stroheim, Mary Beth Hughes, Dan Duryea`,
     releaseDate: getRandomReleaseDate(),
+    // duration: getRandomIntegerNumber(DURATION_MIN, DURATION_MAX),
     duration: getRandomDuration(),
     country: `USA`,
     genres: new Set(generateRandomGenre(FilmGenres)),

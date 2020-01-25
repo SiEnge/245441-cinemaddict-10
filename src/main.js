@@ -38,7 +38,30 @@ const filmsModel = new FilmsModel();
 filmsModel.setFilms(films);
 
 const pageController = new PageController(mainElement, filmsModel);
-const statisticsComponent = new StatisticsComponent();
+
+const StatiscticsPeriod = {
+  ALLTIME: `all-time`,
+  TODAY: `today`,
+  WEEK: `week`,
+  MONTH: `month`,
+  YEAR: `year`
+};
+
+const countingStatistic = (filmsAll) => {
+
+  const count = filmsAll.filter((film) => film.isWatched).length;
+  const duration = filmsAll
+    .reduce((accumulator, currentValue) => accumulator + currentValue.duration, 0);
+
+  const genre = `Musical`;
+
+
+  return {count, duration, genre};
+};
+
+
+const stat = countingStatistic(filmsModel.getFilms(films));
+const statisticsComponent = new StatisticsComponent(filmsModel, StatiscticsPeriod.ALLTIME, stat);
 
 const filterController = new FilterController(mainElement, filmsModel, menuComponent);
 
@@ -47,7 +70,8 @@ filterController.render();
 pageController.render();
 render(mainElement, statisticsComponent.getElement(), RenderPosition.BEFOREEND);
 
-statisticsComponent.hide();
+// statisticsComponent.hide();
+pageController.hide();
 
 // 9. вставка количества фильмов
 const footerStatistics = footerElement.querySelector(`.footer__statistics`);
@@ -68,3 +92,7 @@ menuComponent.setStatisticsClickHandler((mode) => {
       break;
   }
 });
+
+// statisticsComponent.setStatisticsFilterClickHandler((period) => {
+//   debugger;
+// });
