@@ -1,7 +1,7 @@
 // компонент "Попап"
 // import AbstractComponent from './abstract-component.js';
 import AbstractSmartComponent from './abstract-smart-component.js';
-import {formatDate, formatDateComment} from '../util.js';
+import {formatDate, formatDateComment, parseDuration} from '../util.js';
 
 const createGenresMarkup = (genres) => {
   return genres
@@ -45,6 +45,9 @@ const createPopupTemplate = (film, options = {}) => {
     duration, country, genres, rating, userRating, age, comments} = film;
   const {isWatchlist, isWatched, isFavorite} = options;
   // debugger;
+
+  const durationText = parseDuration(duration);
+
   const genresMarkup = createGenresMarkup(Array.from(genres));
   const genreTitle = (genres.size === 1) ? `Genre` : `Genres`;
   const userRatingMarkup = (userRating) ? `<p class="film-details__user-rating">Your rate ${userRating}</p>` : ``;
@@ -60,9 +63,9 @@ const createPopupTemplate = (film, options = {}) => {
         </div>
         <div class="film-details__info-wrap">
           <div class="film-details__poster">
-            <img class="film-details__poster-img" src="./images/posters/${poster}" alt="">
+            <img class="film-details__poster-img" src="${poster}" alt="">
 
-            <p class="film-details__age">${age}</p>
+            <p class="film-details__age">${age}+</p>
           </div>
 
           <div class="film-details__info">
@@ -97,7 +100,7 @@ const createPopupTemplate = (film, options = {}) => {
               </tr>
               <tr class="film-details__row">
                 <td class="film-details__term">Runtime</td>
-                <td class="film-details__cell">${duration}</td>
+                <td class="film-details__cell">${durationText}</td>
               </tr>
               <tr class="film-details__row">
                 <td class="film-details__term">Country</td>

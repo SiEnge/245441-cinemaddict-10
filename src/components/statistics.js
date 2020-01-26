@@ -88,7 +88,10 @@ const renderStaticticsChart = (statisticsCtx, films) => {
 };
 
 const createStatisticsTemplate = (statistic) => {
-  const {count, duration, genre} = statistic;
+  // const {count, duration, genre} = statistic;
+  const count = 0;
+  const duration = 125;
+  const genre = "musical";
 
   const hour = Math.floor(duration / 60);
   const minute = duration % 60;

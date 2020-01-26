@@ -8,8 +8,7 @@ const COUNT_COMMENTS_MAX = 100;
 // const COUNT_COMMENTS_MAX = 666;
 const RATING_MIN = 1;
 const RATING_MAX = 9;
-// const ONE_HOUR_IN_MINUTE = 60;
-// const TEN_MINUTES = 10;
+
 const DURATION_MIN = 20;
 const DURATION_MAX = 150;
 
@@ -34,13 +33,13 @@ const FilmTitles = [
 
 // постеры
 const FilmPosters = [
-  `made-for-each-other.png`,
-  `popeye-meets-sinbad.png`,
-  `sagebrush-trail.jpg`,
-  `santa-claus-conquers-the-martians.jpg`,
-  `the-dance-of-life.jpg`,
-  `the-great-flamarion.jpg`,
-  `the-man-with-the-golden-arm.jpg`
+  `images/posters/made-for-each-other.png`,
+  `images/posters/popeye-meets-sinbad.png`,
+  `images/posters/sagebrush-trail.jpg`,
+  `images/posters/santa-claus-conquers-the-martians.jpg`,
+  `images/posters/the-dance-of-life.jpg`,
+  `images/posters/the-great-flamarion.jpg`,
+  `images/posters/the-man-with-the-golden-arm.jpg`
 ];
 
 // жанры
@@ -56,11 +55,11 @@ const FilmGenres = [
 
 // возрастная категория
 const FilmAges = [
-  `0+`,
-  `6+`,
-  `12+`,
-  `16+`,
-  `18+`
+  `0`,
+  `6`,
+  `12`,
+  `16`,
+  `18`
 ];
 
 // описание к фильму
@@ -90,14 +89,7 @@ const generateRandomDescription = (description) => {
 
 const getRandomDuration = () => {
   return getRandomIntegerNumber(DURATION_MIN, DURATION_MAX);
-  // const duration = getRandomIntegerNumber(DURATION_MIN, DURATION_MAX);
-  // if (duration > ONE_HOUR_IN_MINUTE) {
-  //   const hour = Math.round(duration / ONE_HOUR_IN_MINUTE);
-  //   const minute = (duration % ONE_HOUR_IN_MINUTE < TEN_MINUTES) ? `0${duration % ONE_HOUR_IN_MINUTE}` : duration % ONE_HOUR_IN_MINUTE;
-  //   return `${hour}h ${minute}m`;
-  // } else {
-  //   return `${duration}m`;
-  // }
+
 };
 
 const getRandomRating = () => {
