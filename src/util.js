@@ -1,6 +1,10 @@
 import moment from 'moment';
 import {FilterType} from './const.js';
 
+// перенести в константы
+const ONE_HOUR_IN_MINUTE = 60;
+const TEN_MINUTES = 10;
+
 
 export const formatDate = (date) => {
   return moment(date).format(`DD MMMM YYYY`);
@@ -15,6 +19,18 @@ export const formatDateComment = (date) => {
   return moment(date).format(`YYYY/MM/DD HH:MM`);
 };
 // YYYY/MM/DD HH:MM. Например: 2019/12/31 23:59.
+// перевод длительности
+export const parseDuration = (duration) => {
+  if (duration > ONE_HOUR_IN_MINUTE) {
+    const hour = Math.floor(duration / ONE_HOUR_IN_MINUTE);
+    const minute = (duration % ONE_HOUR_IN_MINUTE < TEN_MINUTES) ? `0${duration % ONE_HOUR_IN_MINUTE}` : duration % ONE_HOUR_IN_MINUTE;
+    return `${hour}h ${minute}m`;
+  } else {
+    return `${duration}m`;
+  }
+};
+  // const duration = getRandomIntegerNumber(DURATION_MIN, DURATION_MAX);
+
 
 // экспорт констант места вставки
 export const RenderPosition = {

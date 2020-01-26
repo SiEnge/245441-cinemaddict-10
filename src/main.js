@@ -1,8 +1,13 @@
+import API from './api.js';
+const AUTHORIZATION = `Basic kTy9gIdsiz2317=rD666`;
+const END_POINT = `https://htmlacademy-es-10.appspot.com/cinemaddict/`;
+
 // import {getRandomIntegerNumber} from './util.js';
 
 // import {createCommentTemplate} from './components/comment.js';
 
-import {generateFilms} from './mock/film.js';
+// import {generateFilms} from './mock/film.js';
+
 import {generateProfile} from './mock/profile.js';
 // import {generateComments} from './mock/comment.js';
 // import {countFilmsFilter} from './mock/menu.js';
@@ -33,11 +38,14 @@ render(headerElement, new ProfileComponent(watchedMovies).getElement(), RenderPo
 // 2. Меню, где кнопка Stat и фильтры для фильмов
 const menuComponent = new MenuComponent();
 
-const films = generateFilms(FILM_COUNT);
+// const films = generateFilms(FILM_COUNT);
+const api = new API(END_POINT, AUTHORIZATION);
 const filmsModel = new FilmsModel();
-filmsModel.setFilms(films);
+// filmsModel.setFilms(films);
 
-const pageController = new PageController(mainElement, filmsModel);
+// debugger;
+
+const pageController = new PageController(mainElement, filmsModel, api);
 
 const StatiscticsPeriod = {
   ALLTIME: `all-time`,
@@ -47,31 +55,31 @@ const StatiscticsPeriod = {
   YEAR: `year`
 };
 
-const countingStatistic = (filmsAll) => {
+// const countingStatistic = (filmsAll) => {
 
-  const count = filmsAll.filter((film) => film.isWatched).length;
-  const duration = filmsAll
-    .reduce((accumulator, currentValue) => accumulator + currentValue.duration, 0);
+//   const count = filmsAll.filter((film) => film.isWatched).length;
+//   const duration = filmsAll
+//     .reduce((accumulator, currentValue) => accumulator + currentValue.duration, 0);
 
-  const genre = `Musical`;
-
-
-  return {count, duration, genre};
-};
+//   const genre = `Musical`;
 
 
-const stat = countingStatistic(filmsModel.getFilms(films));
-const statisticsComponent = new StatisticsComponent(filmsModel, StatiscticsPeriod.ALLTIME, stat);
+//   return {count, duration, genre};
+// };
+
+
+// const stat = countingStatistic(filmsModel.getFilms(films));
+const statisticsComponent = new StatisticsComponent(filmsModel, StatiscticsPeriod.ALLTIME);
+// const statisticsComponent = new StatisticsComponent(filmsModel, StatiscticsPeriod.ALLTIME, stat);
 
 const filterController = new FilterController(mainElement, filmsModel, menuComponent);
 
 filterController.render();
 
-pageController.render();
+// pageController.render();
 render(mainElement, statisticsComponent.getElement(), RenderPosition.BEFOREEND);
 
-// statisticsComponent.hide();
-pageController.hide();
+statisticsComponent.hide();
 
 // 9. вставка количества фильмов
 const footerStatistics = footerElement.querySelector(`.footer__statistics`);
@@ -96,3 +104,26 @@ menuComponent.setStatisticsClickHandler((mode) => {
 // statisticsComponent.setStatisticsFilterClickHandler((period) => {
 //   debugger;
 // });
+
+
+  // api.getComments(`0`)
+// api.getFilms()
+// .then((films) => {
+//   filmsModel.setFilms(films);
+//   films.map((film) => api.getComments(film.id))
+// })
+
+// .then((films) => {
+//   // console.log(films);
+//   filmsModel.setFilms(films);
+//   pageController.render();
+// });
+
+api.getFilms()
+.then((films) => {
+  // console.log(films);
+  filmsModel.setFilms(films);
+  pageController.render();
+});
+
+

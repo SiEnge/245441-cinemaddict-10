@@ -40,9 +40,10 @@ const renderFilms = (filmListElement, films, onDataChange, onViewChange, onComme
 
 
 export default class PageController {
-  constructor(container, filmsModel) {
+  constructor(container, filmsModel, api) {
     this._container = container;
     this._filmsModel = filmsModel;
+    this._api = api;
 
     this._films = [];
     this._sortedFilms = [];
@@ -184,11 +185,23 @@ export default class PageController {
 
 
   _onDataChange(filmController, oldData, newData) {
-    const isSuccess = this._filmsModel.updateFilm(oldData.id, newData);
+    // const isSuccess = this._filmsModel.updateFilm(oldData.id, newData);
 
-    if (isSuccess) {
-      filmController.render(newData);
-    }
+    // if (isSuccess) {
+    //   filmController.render(newData);
+    // }
+
+
+
+    this._api.updateFilm(oldData.id, newData)
+    .then((filmModel) => {
+      const isSuccess = this._filmsModel.updateFilm(oldData.id, filmModel);
+
+      if (isSuccess) {
+        filmController.render(filmModel, FilmControllerMode.DEFAULT);
+        this._updateFilms(this._showingFilmsCount);
+      }
+    });
   }
 
   _onViewChange() {
