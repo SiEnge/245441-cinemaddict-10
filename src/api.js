@@ -16,7 +16,7 @@ const checkStatus = (response) => {
   }
 };
 
-const API = class {
+export default class API {
   constructor(endPoint, authorization) {
     this._endPoint = endPoint;
     this._authorization = authorization;
@@ -28,13 +28,12 @@ const API = class {
       .then(Film.parseFilms);
   }
 
-  getComments(movieId) {
-    return this._load({url: `comments/${movieId}`})
+  getComments(id) {
+    return this._load({url: `comments/${id}`})
       .then((response) => response.json())
-      // .then(Film.parseFilms);
+      .then(Film.parseFilms);
   }
 
-  // создание задачи
   createFilm(film) {
     return this._load({
       url: `films`,
@@ -46,10 +45,9 @@ const API = class {
       .then(Film.parseFilm);
   }
 
-  // обновление таска на сервере
   updateFilm(id, data) {
     return this._load({
-      url: `films/${id}`,
+      url: `movies/${id}`,
       method: Method.PUT,
       body: JSON.stringify(data.toRAW()),
       headers: new Headers({'Content-Type': `application/json`})
@@ -58,9 +56,8 @@ const API = class {
       .then(Film.parseFilm);
   }
 
-  // удаление задачи
   deleteFilm(id) {
-    return this._load({url: `films/${id}`, method: Method.DELETE});
+    return this._load({url: `movies/${id}`, method: Method.DELETE});
   }
 
   _load({url, method = Method.GET, body = null, headers = new Headers()}) {
@@ -72,6 +69,4 @@ const API = class {
         throw err;
       });
   }
-};
-
-export default API;
+}

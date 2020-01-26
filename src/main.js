@@ -45,7 +45,7 @@ const filmsModel = new FilmsModel();
 
 // debugger;
 
-const pageController = new PageController(mainElement, filmsModel);
+const pageController = new PageController(mainElement, filmsModel, api);
 
 const StatiscticsPeriod = {
   ALLTIME: `all-time`,

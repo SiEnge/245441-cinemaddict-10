@@ -2,6 +2,7 @@ import FilmComponent from '../components/film.js';
 import PopupComponent from '../components/popup.js';
 import PopupContainerComponent from '../components/popup-container.js';
 import {render, replace, RenderPosition} from '../util.js';
+import FilmModel from '../models/movie.js';
 
 const Mode = {
   DEFAULT: `default`,
@@ -67,21 +68,34 @@ export default class MovieController {
     // => вызывает метод, который описан в контроллере уровнем выше, ктр
     // при этом обновляет данные в модели
     this._filmComponent.setAddToWatchlistButtonClickHandler(() => {
-      this._onDataChange(this, film, Object.assign({}, film, {
-        isWatchlist: !film.isWatchlist,
-      }));
+      const newFilm = FilmModel.clone(film);
+      newFilm.isWatchlist = !newFilm.isWatchlist;
+      this._onDataChange(this, film, newFilm);
+
+      // this._onDataChange(this, film, Object.assign({}, film, {
+      //   isWatchlist: !film.isWatchlist,
+      // }));
     });
 
     this._filmComponent.setMarkAsWatchedButtonClickHandler(() => {
-      this._onDataChange(this, film, Object.assign({}, film, {
-        isWatched: !film.isWatched,
-      }));
+      const newFilm = FilmModel.clone(film);
+      newFilm.isWatched = !newFilm.isWatched;
+
+      this._onDataChange(this, film, newFilm);
+      // this._onDataChange(this, film, Object.assign({}, film, {
+      //   isWatched: !film.isWatched,
+      // }));
     });
 
     this._filmComponent.setFavoriteButtonClickHandler(() => {
-      this._onDataChange(this, film, Object.assign({}, film, {
-        isFavorite: !film.isFavorite,
-      }));
+      const newFilm = FilmModel.clone(film);
+      newFilm.isFavorite = !newFilm.isFavorite;
+
+      this._onDataChange(this, film, newFilm);
+
+      // this._onDataChange(this, film, Object.assign({}, film, {
+      //   isFavorite: !film.isFavorite,
+      // }));
     });
 
     // здесь логика отрисовки фильма если он новый или нужно только изменить данные
