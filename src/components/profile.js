@@ -1,22 +1,6 @@
 // компонент "Звание пользователя"
 import AbstractComponent from './abstract-component.js';
-
-const getTitleProfile = (countFilm) => {
-  let titleProfile;
-  if (countFilm === 0) {
-    titleProfile = false;
-  }
-  if (countFilm > 0 && countFilm <= 10) {
-    titleProfile = `Novice`;
-  }
-  if (countFilm > 10 && countFilm <= 20) {
-    titleProfile = `Fan`;
-  }
-  if (countFilm > 20) {
-    titleProfile = `Movie Buff`;
-  }
-  return titleProfile;
-};
+import {getTitleProfile} from '../util.js';
 
 
 const createProfileTemplate = (watchedMovies) => {

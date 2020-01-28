@@ -1,9 +1,11 @@
 import moment from 'moment';
-import {FilterType} from './const.js';
+import {FilterType, ONE_HOUR_IN_MINUTE, TEN_MINUTES} from './const.js';
+
+// import {ONE_HOUR_IN_MINUTE, TEN_MINUTES} from '../const.js';
 
 // перенести в константы
-const ONE_HOUR_IN_MINUTE = 60;
-const TEN_MINUTES = 10;
+// const ONE_HOUR_IN_MINUTE = 60;
+// const TEN_MINUTES = 10;
 
 
 export const formatDate = (date) => {
@@ -83,10 +85,30 @@ export const replace = (newComponent, oldComponent) => {
   }
 };
 
+
+
 // функция для удаления элемента
 export const remove = (component) => {
   component.getElement().remove();
   component.removeElement();
+};
+
+// получение звания пользователя
+export const getTitleProfile = (countFilm) => {
+  let titleProfile;
+  if (countFilm === 0) {
+    titleProfile = ``;
+  }
+  if (countFilm > 0 && countFilm <= 10) {
+    titleProfile = `Novice`;
+  }
+  if (countFilm > 10 && countFilm <= 20) {
+    titleProfile = `Fan`;
+  }
+  if (countFilm > 20) {
+    titleProfile = `Movie Buff`;
+  }
+  return titleProfile;
 };
 
 // фильтры (перенести в отдельный утиль)

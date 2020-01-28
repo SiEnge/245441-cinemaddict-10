@@ -19,7 +19,8 @@ export default class Film {
     this.userRating = data.user_details.personal_rating;
     this.isWatchlist = data.user_details.watchlist;
     this.isWatched = data.user_details.already_watched;
-    this.watchindDate = data.user_details.watching_date; // ?
+    this.watchingDate = data.user_details.watching_date ? new Date(data.user_details.watching_date) : null;
+    // this.watchingDate = data.user_details.watching_date; // ?
     this.isFavorite = data.user_details.favorite;
 
     this.comments = data.comments; // ?
@@ -58,6 +59,10 @@ export default class Film {
       },
       'comments': this.comments
     };
+  }
+
+  toRAWComment() {
+
   }
 
   static parseFilm(data) {

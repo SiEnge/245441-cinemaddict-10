@@ -34,17 +34,6 @@ export default class API {
       .then(Film.parseFilms);
   }
 
-  createFilm(film) {
-    return this._load({
-      url: `films`,
-      method: Method.POST,
-      body: JSON.stringify(film.toRAW()),
-      headers: new Headers({'Content-Type': `application/json`})
-    })
-      .then((response) => response.json())
-      .then(Film.parseFilm);
-  }
-
   updateFilm(id, data) {
     return this._load({
       url: `movies/${id}`,
@@ -56,8 +45,19 @@ export default class API {
       .then(Film.parseFilm);
   }
 
-  deleteFilm(id) {
-    return this._load({url: `movies/${id}`, method: Method.DELETE});
+  createComment(filmId, data) {
+    return this._load({
+      url: `comments/${filmId}`,
+      method: Method.POST,
+      body: JSON.stringify(data.toRAWComment()),
+      headers: new Headers({'Content-Type': `application/json`})
+    })
+      .then((response) => response.json())
+      // .then(Film.parseFilm);
+  }
+
+  deleteComment(commentId) {
+    return this._load({url: `comments/${commentId}`, method: Method.DELETE});
   }
 
   _load({url, method = Method.GET, body = null, headers = new Headers()}) {
