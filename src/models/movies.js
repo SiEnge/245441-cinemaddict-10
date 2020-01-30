@@ -22,9 +22,12 @@ export default class Films {
     this._films = Array.from(films);
   }
 
+  setComments(filmId, comments) {
+    this._films[filmId].textComments = comments;
+  }
+
   setFilter(filterType) {
     this._activeFilterType = filterType;
-    // debugger;
     this._filterChangeHandlers.forEach((handler) => handler());
   }
 
@@ -41,9 +44,9 @@ export default class Films {
     return true;
   }
 
-  deleteComment(film, oldData) {
+  deleteComment(film, commentId) {
     const comments = film.comments;
-    const index = comments.findIndex((it) => it.id === oldData.id);
+    const index = comments.findIndex((it) => it === commentId);
 
     if (index === -1) {
       return false;
@@ -55,13 +58,8 @@ export default class Films {
     return this.updateFilm(film.id, film);
   }
 
-  addComment(film, newData) {
-    const comments = film.comments;
-    newData.id = String(comments.length + 1);
-
-    const updatedComments = [].concat(newData, comments.slice(0));
-    film.comments = updatedComments;
-    return this.updateFilm(film.id, film);
+  addComments(film, newData) {
+    film.comments = newData.comments;
   }
 
   setFilterChangeHandler(handler) {
@@ -72,11 +70,3 @@ export default class Films {
     this._dataChangeHandlers.push(handler);
   }
 }
-
-// отправка коммента по комбинации клавиш ctrl + enter
-// нужно
-// подписаться на событие нажатия именно этих клавиш когда открыт попап
-// отправлять новые данные по событию oncommentChange
-// создать в модели новый метод - добавить коммент
-// если нет текста, то и не отправлять
-// отработать клик на смайлик - он должен подставляться и юез него может отправиться сообщение(?)

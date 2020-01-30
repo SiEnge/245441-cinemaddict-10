@@ -3,7 +3,7 @@ import AbstractComponent from './abstract-component.js';
 import Chart from 'chart.js';
 import ChartDataLabels from 'chartjs-plugin-datalabels';
 
-import {ONE_HOUR_IN_MINUTE, StatiscticsPeriod} from '../const.js';
+import {ONE_HOUR_IN_MINUTE} from '../const.js';
 
 const NameToTitlePeriod = {
   'all-time': `All time`,
@@ -83,7 +83,7 @@ const createFilterStatisticsMarkup = (period, isChecked) => {
 
 const createUserRankMarkup = (userRank) => {
   if (userRank === ``) {
-    return ``
+    return ``;
   }
 
   return (
@@ -93,15 +93,15 @@ const createUserRankMarkup = (userRank) => {
       <span class="statistic__rank-label">${userRank}</span>
     </p>`
   );
-}
+};
 
 const createStatisticsTemplate = (statistic, periods) => {
   const {count, duration, genre, userRank} = statistic;
 
-  const hour = (duration >= ONE_HOUR_IN_MINUTE) ? Math.floor(duration / ONE_HOUR_IN_MINUTE) : '';
+  const hour = (duration >= ONE_HOUR_IN_MINUTE) ? Math.floor(duration / ONE_HOUR_IN_MINUTE) : ``;
   const minute = duration % ONE_HOUR_IN_MINUTE;
 
-  const hourDuration = (hour) ? `${hour} <span class="statistic__item-description">h</span>` : '';
+  const hourDuration = (hour) ? `${hour} <span class="statistic__item-description">h</span>` : ``;
   const miniteDuration = `${minute} <span class="statistic__item-description">m</span>`;
 
   const filterStatisticsMarkup = periods.map((it) => createFilterStatisticsMarkup(it, it.checked)).join(`\n`);
@@ -146,7 +146,6 @@ export default class Statistics extends AbstractComponent {
     this._ratingGenres = ratingGenres;
     this._periods = periods;
 
-
     this._statisticsChart = null;
 
     this._renderCharts();
@@ -179,11 +178,3 @@ export default class Statistics extends AbstractComponent {
     });
   }
 }
-
-
-// при отрисовке страницы статистики нужно выделять текущий фильтр
-// вывести текущий профиль пользователя (выводится на основе количества просмотренных фильмов, без учета периода)
-// переименовать StatiscticsPeriod в StatiscticsFilter
-
-// Если для статистики недостаточно данных (например, пользователь ничего не успел посмотреть),
-// то для числовых значений статистики выводится «0», а для текстовых (Любимый жанр) — «-». Диаграмма не отображается.

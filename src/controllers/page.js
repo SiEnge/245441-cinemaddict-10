@@ -30,10 +30,11 @@ const SHOWING_FILMS_COUNT_BY_BUTTON = 5;
 // т.е. карточка меняет свой вид не когда на нее кликнули, а когда сработала вся цепочка внесения изменений
 // в общий массив, и если все он, то обновить ее
 
-const renderFilms = (filmListElement, films, onDataChange, onViewChange, onCommentsChange) => {
+const renderFilms = (filmListElement, films, api, onDataChange, onViewChange, onCommentsChange) => {
   return films.map((film) => {
-    const filmController = new FilmController(filmListElement, onDataChange, onViewChange, onCommentsChange);
+    const filmController = new FilmController(filmListElement, api, onDataChange, onViewChange, onCommentsChange);
     filmController.render(film);
+    // debugger;
     return filmController;
   });
 };
@@ -43,9 +44,11 @@ export default class PageController {
   constructor(container, filmsModel, api) {
     this._container = container;
     this._filmsModel = filmsModel;
+    // this._commentsModel = commentsModel;
     this._api = api;
 
     this._films = [];
+    // this._comments = [];
     this._sortedFilms = [];
     this._showedFilmControllers = [];
     this._showingFilmsCount = SHOWING_FILMS_COUNT_ON_START;
@@ -74,6 +77,7 @@ export default class PageController {
   render() {
     const container = this._container;
     const films = this._filmsModel.getFilms();
+    // const comments = this._commentsModel.getComments();
 
     render(container, this._sortComponent.getElement(), RenderPosition.BEFOREEND);
     render(container, this._filmsContainerComponent.getElement(), RenderPosition.BEFOREEND);
@@ -96,6 +100,7 @@ export default class PageController {
   // отрисовка блока с экстраФИльмами
   _renderExtraFilms(films) {
     const container = this._filmsContainerComponent.getElement();
+    // const comments = this._commentsModel.getComments();
 
     const extraTopRatedFilms = films.slice()
       .sort((a, b) => b.rating - a.rating)
@@ -109,12 +114,12 @@ export default class PageController {
 
     if (extraTopRatedFilms.length > 0) {
       render(container, this._filmListExtraTopRated.getElement(), RenderPosition.BEFOREEND);
-      renderFilms(this._filmListExtraTopRated.getElement(), extraTopRatedFilms, this._onDataChange, this._onViewChange);
+      renderFilms(this._filmListExtraTopRated.getElement(), extraTopRatedFilms, this._api, this._onDataChange, this._onViewChange);
     }
 
     if (extraMostCommentedFilms.length > 0) {
       render(container, this._filmListExtraMostCommented.getElement(), RenderPosition.BEFOREEND);
-      renderFilms(this._filmListExtraMostCommented.getElement(), extraMostCommentedFilms, this._onDataChange, this._onViewChange);
+      renderFilms(this._filmListExtraMostCommented.getElement(), extraMostCommentedFilms, this._api, this._onDataChange, this._onViewChange);
     }
   }
 
@@ -141,14 +146,17 @@ export default class PageController {
   // отрисовка фильмов
   _renderFilms(films) {
     const filmListElement = this._filmList.getElement();
+    // const comments = this.
 
-    const newFilms = renderFilms(filmListElement, films, this._onDataChange, this._onViewChange, this._onCommentsChange);
+    const newFilms = renderFilms(filmListElement, films, this._api, this._onDataChange, this._onViewChange, this._onCommentsChange);
     this._showedFilmControllers = this._showedFilmControllers.concat(newFilms);
     this._showingFilmsCount = this._showedFilmControllers.length;
   }
 
   // а здесь логика клика на кнопку
   _onShowMoreButtonClick() {
+    // const comments = this._commentsModel.getComments();
+
     const prevFilmsCount = this._showingFilmsCount;
     this._showingFilmsCount = this._showingFilmsCount + SHOWING_FILMS_COUNT_BY_BUTTON;
 
@@ -161,6 +169,8 @@ export default class PageController {
   }
 
   _onSortTypeChange(sortType) {
+    // const comments = this._commentsModel.getComments();
+
     const films = this._filmsModel.getFilms();
     this._sortedFilms = [];
 
@@ -183,22 +193,20 @@ export default class PageController {
     this._renderShowMoreButton();
   }
 
+  _updateFilms(count) {
+    this._removeFilms();
+    this._renderFilms(this._filmsModel.getFilms().slice(0, count));
+    this._renderShowMoreButton();
+  }
+
 
   _onDataChange(filmController, oldData, newData) {
-    // const isSuccess = this._filmsModel.updateFilm(oldData.id, newData);
-
-    // if (isSuccess) {
-    //   filmController.render(newData);
-    // }
-
-
-
     this._api.updateFilm(oldData.id, newData)
     .then((filmModel) => {
       const isSuccess = this._filmsModel.updateFilm(oldData.id, filmModel);
 
       if (isSuccess) {
-        filmController.render(filmModel, FilmControllerMode.DEFAULT);
+        filmController.render(filmModel);
         this._updateFilms(this._showingFilmsCount);
       }
     });
@@ -210,6 +218,8 @@ export default class PageController {
 
   _onFilterChange() {
     const films = this._filmsModel.getFilms();
+    // const comments = this._commentsModel.getComments();
+
     this._sortedFilms = films;
 
     this._removeFilms();
@@ -217,20 +227,48 @@ export default class PageController {
     this._renderShowMoreButton();
   }
 
+  // _onCommentsChange(filmController, popupController, film, oldData, newData) {
   _onCommentsChange(filmController, film, oldData, newData) {
-    let isSuccess = false;
+    // let isSuccess = false;
 
+    // добавление комментария
     if (oldData === null) {
-      isSuccess = this._filmsModel.addComment(film, newData);
+      this._api.createComment(film.id, newData)
+      .then((response) => {
+        this._filmsModel.addComments(film, response.movie);
+        filmController.render(film);
+        // debugger;
+
+        // const isSuccess = this._filmsModel.updateFilm(oldData.id, filmModel);
+
+        // if (isSuccess) {
+        //     filmController.render(filmModel);
+        //     this._updateFilms(this._showingFilmsCount);
+        //   }
+      });
+      // isSuccess = this._filmsModel.addComment(film, newData);
     }
 
+    // удаление комментария
     if (newData === null) {
-      isSuccess = this._filmsModel.deleteComment(film, oldData);
+      this._api.deleteComment(oldData.id)
+        .then(() => {
+          const isSuccess = this._filmsModel.deleteComment(film, oldData.id);
+          if (isSuccess) {
+            filmController.render(film);
+          }
+          // обновление попапа
+
+        });
+
+      // isSuccess = this._filmsModel.deleteComment(film, oldData);
     }
 
-    if (isSuccess) {
-      filmController.render(film);
-    }
+    // debugger;
+    //
+    // if (isSuccess) {
+    //   filmController.render(film);
+    // }
   }
 
   hide() {

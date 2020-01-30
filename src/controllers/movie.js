@@ -3,15 +3,20 @@ import PopupComponent from '../components/popup.js';
 import PopupContainerComponent from '../components/popup-container.js';
 import {render, replace, RenderPosition} from '../util.js';
 import FilmModel from '../models/movie.js';
+// import CommentsModel from '../models/comments.js';
+import LocalCommentModel from '../models/local-comment.js';
+// import {CommentEmotion} from '../const.js';
 
 const Mode = {
   DEFAULT: `default`,
   POPUP: `popup`,
 };
 
+
 export default class MovieController {
-  constructor(container, onDataChange, onViewChange, onCommentsChange) {
+  constructor(container, api, onDataChange, onViewChange, onCommentsChange) {
     this._container = container.querySelector(`.films-list__container`);
+    this._api = api;
 
     // присвоение обработчиков pageController контроллеру фильма
     this._onDataChange = onDataChange; // при изменении  данных
@@ -27,6 +32,7 @@ export default class MovieController {
     // режим контроллера, т.е. по умолчанию показывать карточку фильма
     this._mode = Mode.DEFAULT;
     this._film = null;
+    this._comments = null;
 
 
     // активация обработчика Escape
@@ -37,18 +43,9 @@ export default class MovieController {
 
   render(film) {
     this._film = film;
-    // для перерисовки конкретной карточки нужно завести новые переменные
     const oldFilmComponent = this._filmComponent;
-    // const oldPopupComponent = this._popupComponent;
 
     this._filmComponent = new FilmComponent(film);
-    // this._popupComponent = new PopupComponent(film);
-
-
-    // обработчики на карточке фильма
-    // клик по карточке в определенной области (переделать на клики по каждой области)
-    // => открывает попап
-
 
     this._filmComponent.setTitleClickHandler(() => {
       this._showPopup(film);
@@ -56,57 +53,35 @@ export default class MovieController {
 
     this._filmComponent.setPosterClickHandler(() => {
       this._showPopup(film);
-      // document.addEventListener(`keydown`, this._onEscKeyDown);
     });
 
     this._filmComponent.setCommentsClickHandler(() => {
       this._showPopup(film);
-      // document.addEventListener(`keydown`, this._onEscKeyDown);
     });
 
-    // клик по кнопке добавить в вишлист
-    // => вызывает метод, который описан в контроллере уровнем выше, ктр
-    // при этом обновляет данные в модели
     this._filmComponent.setAddToWatchlistButtonClickHandler(() => {
       const newFilm = FilmModel.clone(film);
       newFilm.isWatchlist = !newFilm.isWatchlist;
       this._onDataChange(this, film, newFilm);
-
-      // this._onDataChange(this, film, Object.assign({}, film, {
-      //   isWatchlist: !film.isWatchlist,
-      // }));
     });
 
     this._filmComponent.setMarkAsWatchedButtonClickHandler(() => {
       const newFilm = FilmModel.clone(film);
       newFilm.isWatched = !newFilm.isWatched;
-
       this._onDataChange(this, film, newFilm);
-      // this._onDataChange(this, film, Object.assign({}, film, {
-      //   isWatched: !film.isWatched,
-      // }));
     });
 
     this._filmComponent.setFavoriteButtonClickHandler(() => {
       const newFilm = FilmModel.clone(film);
       newFilm.isFavorite = !newFilm.isFavorite;
-
       this._onDataChange(this, film, newFilm);
-
-      // this._onDataChange(this, film, Object.assign({}, film, {
-      //   isFavorite: !film.isFavorite,
-      // }));
     });
 
-    // здесь логика отрисовки фильма если он новый или нужно только изменить данные
-    if (oldFilmComponent) { // если в этом инстансе уже есть фильм, то заменить новым
-      // debugger;
+    if (oldFilmComponent) {
       replace(this._filmComponent, oldFilmComponent);
-      // replace(this._popupComponent, oldPopupComponent);
-    } else { // если нет, то просто отрисовать
+    } else {
       render(this._container, this._filmComponent.getElement(), RenderPosition.BEFOREEND);
     }
-
   }
 
   setDefaultView() {
@@ -120,50 +95,64 @@ export default class MovieController {
   _showPopup(film) {
     this._onViewChange();
 
+    // при открытии попапа загружать список комментарий
+    // т.е. создать попап, повесить обработчики
+
     render(document.querySelector(`body`), this._popupContainerComponent.getElement(), RenderPosition.BEFOREEND);
 
+    // запрос списка комментарий и потом уже отрисовывать попап
+    // хорошо бы его перевестив контроллер, типа PopupController
+    this._api.getComments(film.id)
+    .then((comments) => {
+      this._comments = comments;
+      // нужно ли это?
+      // const commentsModel = new CommentsModel();
+      // commentsModel.setComments(comments);
 
-    this._popupComponent = new PopupComponent(film);
-    render(this._popupContainerComponent.getElement(), this._popupComponent.getElement(), RenderPosition.BEFOREEND);
-    // render(document.querySelector(`body`), this._popupComponent.getElement(), RenderPosition.BEFOREEND);
+      // const comments = commentsModel.getComments();
 
-    document.addEventListener(`keydown`, this._onEscKeyDown);
-    document.addEventListener(`keydown`, this._onCtrlEnterDown);
+      this._popupComponent = new PopupComponent(film, comments);
 
-    // обработчики на попапе фильма
-    this._popupComponent.setCloseButtonClickHandler(() => {
-      // debugger;
-      this._closePopup();
+      // отрисовка и навешивание обработчиков на попап
+      render(this._popupContainerComponent.getElement(), this._popupComponent.getElement(), RenderPosition.BEFOREEND);
+
+      document.addEventListener(`keydown`, this._onEscKeyDown);
+      document.addEventListener(`keydown`, this._onCtrlEnterDown);
+
+      // обработчики на попапе фильма
+      this._popupComponent.setCloseButtonClickHandler(() => {
+        this._closePopup();
+      });
+
+      this._popupComponent.setAddToWatchlistButtonClickHandler(() => {
+        const newFilm = FilmModel.clone(film);
+        newFilm.isWatchlist = !newFilm.isWatchlist;
+        this._onDataChange(this, film, newFilm);
+      });
+
+      this._popupComponent.setMarkAsWatchedButtonClickHandler(() => {
+        const newFilm = FilmModel.clone(film);
+        newFilm.isWatched = !newFilm.isWatched;
+        this._onDataChange(this, film, newFilm);
+      });
+
+      this._popupComponent.setFavoriteButtonClickHandler(() => {
+        const newFilm = FilmModel.clone(film);
+        newFilm.isFavorite = !newFilm.isFavorite;
+        this._onDataChange(this, film, newFilm);
+      });
+
+      this._popupComponent.setRatingButtonClickHandler((userRating) => {
+        const newFilm = FilmModel.clone(film);
+        newFilm.userRating = userRating;
+        this._onDataChange(this, film, newFilm);
+      });
+
+      this._popupComponent.setDeleteCommentButtonClickHandler((commentId) => {
+        const index = this._comments.findIndex((it) => it.id === commentId);
+        this._onCommentsChange(this, film, this._comments[index], null);
+      });
     });
-
-    this._popupComponent.setAddToWatchlistButtonClickHandler(() => {
-      this._onDataChange(this, film, Object.assign({}, film, {
-        isWatchlist: !film.isWatchlist,
-      }));
-    });
-
-    this._popupComponent.setMarkAsWatchedButtonClickHandler(() => {
-      this._onDataChange(this, film, Object.assign({}, film, {
-        isWatched: !film.isWatched,
-      }));
-    });
-
-    this._popupComponent.setFavoriteButtonClickHandler(() => {
-      this._onDataChange(this, film, Object.assign({}, film, {
-        isFavorite: !film.isFavorite,
-      }));
-    });
-
-    this._popupComponent.setDeleteCommentButtonClickHandler((commentId) => {
-      const index = film.comments.findIndex((it) => it.id === commentId);
-      this._onCommentsChange(this, film, film.comments[index], null);
-    });
-
-    // this._popupComponent.setAddCommentButtonClickHandler((comment) => {
-    //   // debugger;
-    //   // const index = film.comments.findIndex((it) => it.id === commentId);
-    //   this._onCommentsChange(this, film, null, comment);
-    // });
 
     this._mode = Mode.POPUP;
   }
@@ -199,13 +188,25 @@ export default class MovieController {
     const isEnterKey = evt.key === `Enter`;
 
     if ((evt.ctrlKey || evt.metaKey) && isEnterKey) {
-      const input = this._popupComponent.getElement().querySelector(`.film-details__comment-input`);
+      const inputElement = this._popupComponent.getElement().querySelector(`.film-details__comment-input`);
 
-      this._onCommentsChange(this, this._film, null, {
-        text: input.value,
+      if (inputElement.value === ``) {
+        return;
+      }
+
+      const emotionElement = this._popupComponent.getElement().querySelector(`.film-details__add-emoji-label`);
+
+      const comment = {
+        text: inputElement.value,
         date: new Date(),
-        emoji: `angry.png`
-      });
+        emotion: emotionElement.dataset.emotion,
+      };
+
+      // debugger;
+
+      const newComment = LocalCommentModel.parseComment(comment);
+      this._onCommentsChange(this, this._film, null, newComment);
+
 
       this._popupComponent.rerender();
     }
@@ -228,3 +229,12 @@ export default class MovieController {
 // сохраняем в переменную новую разметку с новыми данными (а новая разметка создается
 //   на момент получения ссылки на этот элемент getElement(если элемент пустой то сделать новую разметку))
 // и меняем разметку старую на новую
+
+
+// при открытии попапа запрашивать все комментарии для конкретно этого фильма
+// потом
+// - или добавить его в данные фильма или создать новый данные типа комментарии
+// и тогда при обновлении именно данных фильмов - комментарии сохраняются (по крайней мере должны)
+
+// при отправке комментария при клике на e,oji подставлять в соответствующее окно
+// и не отправлять, пока эмоция не выбрана (всплываюищий текст - выберите эмоцию)

@@ -85,8 +85,6 @@ export const replace = (newComponent, oldComponent) => {
   }
 };
 
-
-
 // функция для удаления элемента
 export const remove = (component) => {
   component.getElement().remove();

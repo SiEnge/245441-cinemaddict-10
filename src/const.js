@@ -18,6 +18,12 @@ export const StatiscticsPeriod = {
   YEAR: `year`
 };
 
+export const CommentEmotion = {
+  SMILE: `smile`,
+  SLEEPING: `sleeping`,
+  PUKE: `puke`,
+  ANGRY: `angry`
+};
 
 
 export const ONE_HOUR_IN_MINUTE = 60;

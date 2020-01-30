@@ -14,17 +14,12 @@ export default class Statistics {
     this._activePeriod = StatiscticsPeriod.ALLTIME;
   }
 
-  recoveryListeners() {
-  }
-
   render() {
     const container = this._container;
     const allFilms = this._filmsModel.getFilmsAll();
-
     const watchedFilms = allFilms.filter((film) => film.isWatched);
-
     const watchedFilmsByPeriod = getWatchedFilmsByPeriod(watchedFilms, this._activePeriod);
-    // debugger;
+
     const statisticsData = {
       count: watchedFilmsByPeriod.length,
       duration: getDurationFilm(watchedFilmsByPeriod),
@@ -50,11 +45,8 @@ export default class Statistics {
       replace(this._statisticsComponent, oldComponent);
     } else {
       render(container, this._statisticsComponent.getElement(), RenderPosition.BEFOREEND);
+      this.hide();
     }
-  }
-
-  rerender() {
-
   }
 
   _onStatisticsPeriodChange(period) {
@@ -70,16 +62,3 @@ export default class Statistics {
     this._statisticsComponent.show();
   }
 }
-
-
-
-// добавить методы
-// +показать/скрыть
-// +реагирование на кнопки смены периода
-// -перерисовка данных при изменении периода
-// +подготовить данные в убывании для диаграммы
-// +перенести расчеты колчиества и качества фильмов из компонента в контроллер
-
-// !!!проблема - при изменении периода, мы говорим что надо компонент отрисовать заново,
-// но тогда у нас и перерисовывается и поля меню
-// значит нужен все-таки ререндер

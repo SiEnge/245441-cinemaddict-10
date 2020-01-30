@@ -64,17 +64,15 @@ export const getDurationFilm = (films) => {
 };
 
 export const getSortCountFilmGenres = (films) => {
-  let accumulator = 0;
+  // let accumulator = 0;
   const genresRating = {};
   let ratings = [];
 
-  const genres = films
-  .map((film) => Array.from(film.genres))
+  films.map((film) => Array.from(film.genres))
   .flat()
   .reduce((accumulator, genre) => {
-    return genresRating[genre] = (genresRating[genre] || 0) + 1;
+    genresRating[genre] = (genresRating[genre] || 0) + 1;
   }, 0);
-
 
   for (let genre in genresRating) {
     ratings.push({genre, count: genresRating[genre]});
@@ -90,4 +88,3 @@ export const getTopGenreFilm = (films) => {
     return `–`;
   }
 };
-
