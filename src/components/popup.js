@@ -1,6 +1,6 @@
 // компонент "Попап"
 import AbstractSmartComponent from './abstract-smart-component.js';
-import {formatDate, formatDateComment, parseDuration} from '../util.js';
+import {formatDate, formatDateComment, parseDuration} from '../utils/common.js';
 import {CommentEmotion} from '../const.js';
 
 const createGenresMarkup = (genres) => {

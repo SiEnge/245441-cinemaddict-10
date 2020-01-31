@@ -5,8 +5,8 @@ import StatisticsController from './controllers/statistics.js';
 import ProfileComponent from './components/profile.js';
 import MenuComponent from './components/menu.js';
 import FilmsModel from './models/movies.js';
-import {render, RenderPosition} from './util.js';
-import {getWatchedMovies} from './utils/statistics.js';
+import {render, RenderPosition} from './utils/render.js';
+import {getWatchedMovies} from './utils/common.js';
 import {PageMode} from './const.js';
 
 const AUTHORIZATION = `Basic 6Idsiz23kTy9g17`;

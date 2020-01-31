@@ -34,10 +34,6 @@ const getFilmsForYear = (films) => {
   return films.filter((film) => isPeriod(film.watchingDate, today, MomentPeriod.YEAR));
 };
 
-export const getWatchedMovies = (allMovies) => {
-  return allMovies.filter((movie) => movie.isWatched);
-};
-
 export const getWatchedFilmsByPeriod = (watchedFilms, period) => {
   let watchedFilmsByPeriod;
   switch (period) {

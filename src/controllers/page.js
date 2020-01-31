@@ -5,10 +5,11 @@ import FilmListComponent from '../components/film-list.js';
 import NoFilmsListComponent from '../components/film-list-no-data.js';
 import FilmListExtraComponent from '../components/film-list-extra.js';
 import ShowMoreButtonComponent from '../components/show-more-button.js';
-import {render, remove, RenderPosition} from '../util.js';
+import {render, remove, RenderPosition} from '../utils/render.js';
+import {getTopRatedMovies, getMostCommentedMovies} from '../utils/common.js';
 import FilmController from './movie.js';
 // import {countFilmsFilter} from '../mock/menu.js';
-
+//
 
 const SHOWING_FILMS_COUNT_ON_START = 5;
 const SHOWING_FILMS_COUNT_BY_BUTTON = 5;
@@ -100,26 +101,18 @@ export default class PageController {
   // отрисовка блока с экстраФИльмами
   _renderExtraFilms(films) {
     const container = this._filmsContainerComponent.getElement();
-    // const comments = this._commentsModel.getComments();
 
-    const extraTopRatedFilms = films.slice()
-      .sort((a, b) => b.rating - a.rating)
-      .filter((film) => film.rating !== 0)
-      .slice(0, 2);
-
-    const extraMostCommentedFilms = films.slice()
-      .sort((a, b) => b.comments.length - a.comments.length)
-      .filter((film) => film.comments !== 0)
-      .slice(0, 2);
+    const extraTopRatedFilms = getTopRatedMovies(films);
+    const extraMostCommentedFilms = getMostCommentedMovies(films);
 
     if (extraTopRatedFilms.length > 0) {
       render(container, this._filmListExtraTopRated.getElement(), RenderPosition.BEFOREEND);
-      renderFilms(this._filmListExtraTopRated.getElement(), extraTopRatedFilms, this._api, this._onDataChange, this._onViewChange);
+      renderFilms(this._filmListExtraTopRated.getElement(), extraTopRatedFilms.slice(0, 2), this._api, this._onDataChange, this._onViewChange);
     }
 
     if (extraMostCommentedFilms.length > 0) {
       render(container, this._filmListExtraMostCommented.getElement(), RenderPosition.BEFOREEND);
-      renderFilms(this._filmListExtraMostCommented.getElement(), extraMostCommentedFilms, this._api, this._onDataChange, this._onViewChange);
+      renderFilms(this._filmListExtraMostCommented.getElement(), extraMostCommentedFilms.slice(0, 2), this._api, this._onDataChange, this._onViewChange);
     }
   }
 

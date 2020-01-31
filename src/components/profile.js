@@ -1,5 +1,5 @@
 import AbstractComponent from './abstract-component.js';
-import {getTitleProfile} from '../util.js';
+import {getTitleProfile} from '../utils/common.js';
 
 const createProfileTemplate = (watchedMovies) => {
   const countMovies = watchedMovies.length;

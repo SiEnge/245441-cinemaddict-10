@@ -1,9 +1,9 @@
 import FilmComponent from '../components/film.js';
 import PopupComponent from '../components/popup.js';
 import PopupContainerComponent from '../components/popup-container.js';
-import {render, replace, RenderPosition} from '../util.js';
 import FilmModel from '../models/movie.js';
 import LocalCommentModel from '../models/local-comment.js';
+import {render, replace, RenderPosition} from '../utils/render.js';
 // import {CommentEmotion} from '../const.js';
 
 const Mode = {

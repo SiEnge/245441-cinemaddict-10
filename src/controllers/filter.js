@@ -1,7 +1,7 @@
 import FilterComponent from '../components/filter.js';
+import {render, replace, RenderPosition} from '../utils/render.js';
+import {getFilmsByFilter} from '../utils/filter.js';
 import {FilterType} from '../const.js';
-import {render, replace, RenderPosition} from '../util.js';
-import {getFilmsByFilter} from '../util.js';
 
 export default class Filter {
   constructor(container, filmsModel, menuComponent) {

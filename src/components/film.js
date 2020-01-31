@@ -1,6 +1,6 @@
 // компонент "Карточка фильма"
 import AbstractComponent from './abstract-component.js';
-import {formatDateYear, parseDuration} from '../util.js';
+import {formatDateYear, parseDuration} from '../utils/common.js';
 
 const createBooleanItemMarkup = (isBoolean) => {
   if (isBoolean) {

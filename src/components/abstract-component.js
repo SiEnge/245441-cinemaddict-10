@@ -1,4 +1,4 @@
-import {createElement} from '../util.js';
+import {createElement} from '../utils/render.js';
 
 const HIDDEN_CLASS = `visually-hidden`;
 
@@ -39,7 +39,3 @@ export default class AbstractComponent {
     }
   }
 }
-
-
-// Допишите в AbstractComponent методы show/hide для показа и скрытия компонента.
-// Для этого будет достаточно добавлять и удалять с корневого элемента класс visually-hidden соотвественно.
