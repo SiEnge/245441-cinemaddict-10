@@ -14,6 +14,7 @@ const END_POINT = `https://htmlacademy-es-10.appspot.com/cinemaddict/`;
 
 const mainElement = document.querySelector(`.main`);
 const headerElement = document.querySelector(`.header`);
+const footerElement = document.querySelector(`.footer`);
 
 
 const api = new API(END_POINT, AUTHORIZATION);
@@ -25,7 +26,6 @@ const menuComponent = new MenuComponent();
 const filterController = new FilterController(mainElement, filmsModel, menuComponent);
 const statisticsController = new StatisticsController(mainElement, filmsModel);
 
-// вставка данных пользователя в шапку
 const renderProfileUser = (allMovies) => {
   const watchedMovies = getWatchedMovies(allMovies);
   const countMovies = watchedMovies.length;
@@ -37,6 +37,12 @@ const renderProfileUser = (allMovies) => {
   render(headerElement, new ProfileComponent(watchedMovies).getElement(), RenderPosition.BEFOREEND);
 };
 
+const renderCountAllMovies = (allMovies) => {
+  const footerStatistics = footerElement.querySelector(`.footer__statistics`);
+  const countMovies = allMovies.length;
+
+  footerStatistics.querySelector(`p`).textContent = `${countMovies} movies inside`;
+};
 
 menuComponent.setStatisticsClickHandler((mode) => {
   switch (mode) {
@@ -57,10 +63,7 @@ api.getFilms()
     renderProfileUser(films);
     filterController.render();
     pageController.render();
+    renderCountAllMovies(films);
 
     statisticsController.render();
   });
-
-
-
-
