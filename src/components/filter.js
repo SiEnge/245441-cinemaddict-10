@@ -28,7 +28,6 @@ const createFilterTemplate = (filters) => {
   );
 };
 
-
 export default class Filter extends AbstractComponent {
   constructor(filters) {
     super();
@@ -47,7 +46,13 @@ export default class Filter extends AbstractComponent {
         return;
       }
 
-      const filterName = evt.target.dataset.filterType;
+      const newActiveFilterElement = evt.target;
+      const oldActiveFilterElement = this.getElement().querySelector(`.main-navigation__item--active`);
+
+      oldActiveFilterElement.classList.remove(`main-navigation__item--active`);
+      newActiveFilterElement.classList.add(`main-navigation__item--active`);
+
+      const filterName = newActiveFilterElement.dataset.filterType;
       handler(filterName);
     });
   }
@@ -65,6 +70,3 @@ export default class Filter extends AbstractComponent {
     });
   }
 }
-
-
-// выделить выбранный филтр/статистику, а с остальных сбросить выделение
