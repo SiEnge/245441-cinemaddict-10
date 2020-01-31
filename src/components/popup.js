@@ -1,5 +1,4 @@
 // компонент "Попап"
-// import AbstractComponent from './abstract-component.js';
 import AbstractSmartComponent from './abstract-smart-component.js';
 import {formatDate, formatDateComment, parseDuration} from '../util.js';
 import {CommentEmotion} from '../const.js';
@@ -51,17 +50,14 @@ const createEmotionMarkup = () => {
     );
   })
   .join(`\n`);
-
 };
 
 // компонент "Попап"
 const createPopupTemplate = (film, comments, options = {}) => {
   const {title, originalTitle, poster, description, director, writers, actors, releaseDate,
-    duration, country, genres, rating, userRating, age} = film;
-    // duration, country, genres, rating, userRating, age, textComments} = film;
-  const {isWatchlist, isWatched, isFavorite} = options;
+    duration, country, genres, rating, age} = film;
+  const {isWatchlist, isWatched, isFavorite, userRating} = options;
 
-  // const comments = textComments;
   const durationText = parseDuration(duration);
 
   const genresMarkup = createGenresMarkup(Array.from(genres));
@@ -210,7 +206,7 @@ const createPopupTemplate = (film, comments, options = {}) => {
           </ul>
 
           <div class="film-details__new-comment">
-            <div for="add-emoji" class="film-details__add-emoji-label"></div>
+            <div for="add-emoji" class="film-details__add-emoji-label" data-emotion=""></div>
 
             <label class="film-details__comment-label">
               <textarea class="film-details__comment-input" placeholder="Select reaction below and write comment here" name="comment"></textarea>
@@ -244,7 +240,7 @@ export default class Popup extends AbstractSmartComponent {
     this._clickFavoriteButtonHandler = null;
     this._clickRatingButtonHandler = null;
     this._clickDeleteCommentButtonHandler = null;
-    // this._clickAddEmotionButtonHandler = null;
+
     this._setAddEmotionBtnClickHandler();
   }
 
@@ -252,7 +248,8 @@ export default class Popup extends AbstractSmartComponent {
     return createPopupTemplate(this._film, this._comments, {
       isWatchlist: this._isWatchlist,
       isWatched: this._isWatched,
-      isFavorite: this._isFavorite
+      isFavorite: this._isFavorite,
+      userRating: this._userRating
     });
   }
 
@@ -268,12 +265,12 @@ export default class Popup extends AbstractSmartComponent {
 
   recoveryListeners() {
     this.setCloseButtonClickHandler(this._clickCloseButtonHandler);
-    // debugger;
     this.setAddToWatchlistButtonClickHandler(this._clickAddToWatchlistButtonHandler);
     this.setMarkAsWatchedButtonClickHandler(this._clickMarkAsWatchedButtonHandler);
     this.setFavoriteButtonClickHandler(this._clickFavoriteButtonHandler);
     this.setRatingButtonClickHandler(this._clickRatingButtonHandler);
     this.setDeleteCommentButtonClickHandler(this._clickDeleteCommentButtonHandler);
+    this._setAddEmotionBtnClickHandler();
   }
 
   setCloseButtonClickHandler(handler) {
@@ -315,21 +312,21 @@ export default class Popup extends AbstractSmartComponent {
   }
 
   setRatingButtonClickHandler(handler) {
+    if (!this.getElement().querySelector(`.film-details__user-rating-score`)) {
+      return;
+    }
+
     this.getElement().querySelector(`.film-details__user-rating-score`)
     .addEventListener(`click`, (evt) => {
-      // evt.preventDefault();
       const target = evt.target;
-      // debugger;
 
       if (!target.classList.contains(`film-details__user-rating-input`)) {
         return;
       }
-      // debugger;
-      const userRating = target.value;
 
-      this._userRating = userRating;
+      this._userRating = target.value;
 
-      handler(userRating);
+      handler(this._userRating);
       this.rerender();
     });
 

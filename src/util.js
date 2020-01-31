@@ -94,6 +94,7 @@ export const remove = (component) => {
 // получение звания пользователя
 export const getTitleProfile = (countFilm) => {
   let titleProfile;
+
   if (countFilm === 0) {
     titleProfile = ``;
   }

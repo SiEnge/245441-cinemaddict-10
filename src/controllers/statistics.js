@@ -1,7 +1,7 @@
 import StatisticsComponent from '../components/statistics.js';
 import {StatiscticsPeriod} from '../const.js';
 import {render, replace, RenderPosition, getTitleProfile} from '../util.js';
-import {getWatchedFilmsByPeriod, getDurationFilm, getTopGenreFilm, getSortCountFilmGenres} from '../utils/statistics.js';
+import {getWatchedMovies, getWatchedFilmsByPeriod, getDurationFilm, getTopGenreFilm, getSortCountFilmGenres} from '../utils/statistics.js';
 
 export default class Statistics {
   constructor(container, filmsModel) {
@@ -17,7 +17,7 @@ export default class Statistics {
   render() {
     const container = this._container;
     const allFilms = this._filmsModel.getFilmsAll();
-    const watchedFilms = allFilms.filter((film) => film.isWatched);
+    const watchedFilms = getWatchedMovies(allFilms);
     const watchedFilmsByPeriod = getWatchedFilmsByPeriod(watchedFilms, this._activePeriod);
 
     const statisticsData = {

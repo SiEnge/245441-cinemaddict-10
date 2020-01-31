@@ -1,14 +1,10 @@
-// компонент "Звание пользователя"
 import AbstractComponent from './abstract-component.js';
 import {getTitleProfile} from '../util.js';
 
-
 const createProfileTemplate = (watchedMovies) => {
-  const titleProfile = getTitleProfile(watchedMovies);
+  const countMovies = watchedMovies.length;
 
-  if (!titleProfile) {
-    return ``;
-  }
+  const titleProfile = getTitleProfile(countMovies);
 
   return (
     `<section class="header__profile profile">
