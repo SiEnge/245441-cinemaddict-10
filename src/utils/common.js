@@ -45,6 +45,10 @@ export const getMostCommentedMovies = (allMovies) => {
     .sort((a, b) => b.comments.length - a.comments.length);
 };
 
+export const getSortDownReleaseDateMovies = (allMovies) => {
+  return allMovies.sort((a, b) => b.releaseDate - a.releaseDate);
+};
+
 export const parseDuration = (duration) => {
   if (duration > ONE_HOUR_IN_MINUTE) {
     const hour = Math.floor(duration / ONE_HOUR_IN_MINUTE);
@@ -55,3 +59,8 @@ export const parseDuration = (duration) => {
   }
 };
 
+export const activateElement = (wrap, activeElement, activeClassName) => {
+  const currentActiveElement = wrap.querySelector(`.${activeClassName}`);
+  currentActiveElement.classList.remove(activeClassName);
+  activeElement.classList.add(activeClassName);
+};

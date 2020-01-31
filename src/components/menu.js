@@ -1,8 +1,6 @@
 // компонент "Меню"
 import AbstractComponent from './abstract-component.js';
-import {PageMode} from '../const.js';
-
-const ACTIVE_CLASS = `main-navigation__item--active`;
+import {PageMode, ACTIVE_NAVIGATION_CLASS} from '../const.js';
 
 const createMenuTemplate = () => {
   return (
@@ -21,12 +19,12 @@ export default class Menu extends AbstractComponent {
 
       const btnStat = evt.target;
 
-      if (btnStat.classList.contains(ACTIVE_CLASS)) {
+      if (btnStat.classList.contains(ACTIVE_NAVIGATION_CLASS)) {
         handler(PageMode.MOVIE);
-        btnStat.classList.remove(ACTIVE_CLASS);
+        btnStat.classList.remove(ACTIVE_NAVIGATION_CLASS);
       } else {
         handler(PageMode.STAT);
-        btnStat.classList.add(ACTIVE_CLASS);
+        btnStat.classList.add(ACTIVE_NAVIGATION_CLASS);
       }
     });
   }

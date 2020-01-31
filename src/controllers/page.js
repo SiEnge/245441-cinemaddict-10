@@ -1,35 +1,16 @@
-// import FilterComponent from '../components/filter.js';
-import SortComponent, {SortType} from '../components/sort.js';
+import SortComponent from '../components/sort.js';
+import {SortType} from '../const.js';
 import FilmsContainerComponent from '../components/films-container.js';
 import FilmListComponent from '../components/film-list.js';
 import NoFilmsListComponent from '../components/film-list-no-data.js';
 import FilmListExtraComponent from '../components/film-list-extra.js';
 import ShowMoreButtonComponent from '../components/show-more-button.js';
 import {render, remove, RenderPosition} from '../utils/render.js';
-import {getTopRatedMovies, getMostCommentedMovies} from '../utils/common.js';
+import {getTopRatedMovies, getMostCommentedMovies, getSortDownReleaseDateMovies} from '../utils/common.js';
 import FilmController from './movie.js';
-// import {countFilmsFilter} from '../mock/menu.js';
-//
 
 const SHOWING_FILMS_COUNT_ON_START = 5;
 const SHOWING_FILMS_COUNT_BY_BUTTON = 5;
-
-// отрисовка нескольких фильмов. Передаются фильмы и блок в который нужно отрисовать
-// т.е. тут ищется films-list__container и туда отрисовываются фильмы
-
-// для отрисовки фильмов проходит методом map по всему массиву фильмов,
-// которые планируется отрисовать
-// для каждого фильма создаем инстанс класса FilmController
-// и потом его отрисовываем своим методом render
-// в который входит помимо отрисовки, навешивание обработчиков и логики переключения карточки/попапа
-
-// при создании инстанса передается контейнер куда отрисовать и
-// метода onDataChange, который будет срабатывать когда данные изменятся
-// а сам этот флаг относится к PageController и его основная функции
-// - сохранить новые данные в общем массиве данных Films
-// - дать команду на перерисовку карточки
-// т.е. карточка меняет свой вид не когда на нее кликнули, а когда сработала вся цепочка внесения изменений
-// в общий массив, и если все он, то обновить ее
 
 const renderFilms = (filmListElement, films, api, onDataChange, onViewChange, onCommentsChange) => {
   return films.map((film) => {
@@ -173,10 +154,10 @@ export default class PageController {
         this._sortedFilms = films;
         break;
       case SortType.DATE:
-        this._sortedFilms = films.slice().sort((a, b) => b.releaseDate - a.releaseDate);
+        this._sortedFilms = getSortDownReleaseDateMovies(films);
         break;
       case SortType.RATING:
-        this._sortedFilms = films.slice().sort((a, b) => b.rating - a.rating);
+        this._sortedFilms = getTopRatedMovies(films);
         break;
     }
 

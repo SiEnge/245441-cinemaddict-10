@@ -11,7 +11,7 @@ export default class Film {
     this.director = data.film_info.director;
     this.writers = data.film_info.writers.join(`, `);
     this.actors = data.film_info.actors.join(`, `);
-    this.releaseDate = data.film_info.release.date;
+    this.releaseDate = new Date(data.film_info.release.date);
     this.country = data.film_info.release.release_country;
     this.duration = data.film_info.runtime;
     this.genres = new Set(data.film_info.genre);

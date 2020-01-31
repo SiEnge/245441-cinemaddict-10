@@ -1,71 +1,65 @@
 // компонент "Сортировка"
 import AbstractComponent from './abstract-component.js';
 
-// варианты сортировки для подстановки в разметку и для отлавливания
-export const SortType = {
-  DEFAULT: `default`,
-  DATE: `date`,
-  RATING: `rating`
-};
+import {SortType, ACTIVE_SORT_CLASS} from '../const.js';
+import {activateElement} from '../utils/common.js';
 
-const createSortTemplate = () => {
+const createSortingMarkup = (sorting, isChecked) => {
+  const {name} = sorting;
+
   return (
-    `<ul class="sort">
-      <li><a href="#" data-sort-type="${SortType.DEFAULT}" class="sort__button sort__button--active">Sort by default</a></li>
-      <li><a href="#" data-sort-type="${SortType.DATE}" class="sort__button">Sort by date</a></li>
-      <li><a href="#" data-sort-type="${SortType.RATING}" class="sort__button">Sort by rating</a></li>
-    </ul>`
+    `<li><a href="#" data-sort-type="${name}" class="sort__button ${isChecked ? ACTIVE_SORT_CLASS : ``}">Sort by ${name}</a></li>`
   );
 };
 
-const activeSortType = (wrap, currentSortType) => {
-  const activeSort = wrap.querySelector(`.sort__button--active`);
-  activeSort.classList.remove(`sort__button--active`);
-  currentSortType.classList.add(`sort__button--active`);
+const createSortTemplate = (activeSortType) => {
+  const sorting = Object.values(SortType).map((sortType) => {
+    return {
+      name: sortType,
+      checked: sortType === activeSortType,
+    };
+  });
+
+  const sortingMarkup = sorting.map((it) => createSortingMarkup(it, it.checked)).join(`\n`);
+
+  return (
+    `<ul class="sort">
+      ${sortingMarkup}
+    </ul>`
+  );
 };
 
 export default class Sort extends AbstractComponent {
   constructor() {
     super();
-
-    // установка сортировки по умолчанию
-    // если бы нужно было сохранить сортировку, то при создании объекта переносилась переменная с нужной сортировкой
-    this._currentSortType = SortType.DEFAULT;
+    this._activeSortType = SortType.DEFAULT;
   }
 
   getTemplate() {
-    return createSortTemplate();
+    return createSortTemplate(this._activeSortType);
   }
 
-  // определение выбранной пользователем сортировки
   setSortTypeChangeHandler(handler) {
-    // событие клик на блоке сортировке
     this.getElement().addEventListener(`click`, (evt) => {
-      // т.к. сортировка выполнена ссылкой, то нужно предотвращать поведение по умолчанию
       evt.preventDefault();
 
       const target = evt.target;
 
-      // если клик не по ссылке, то выход
       if (target.tagName !== `A`) {
         return;
       }
 
       const sortType = target.dataset.sortType;
 
-      // если такая сортировка уже выбрана, то выход
-      // текущая сортировка current устанавливается при создании объекта Sort и равна сортировке по умолчанию
-      if (this._currentSortType === sortType) {
+      if (this._activeSortType === sortType) {
         return;
       }
 
-      // запись новой сортировки в current
-      this._currentSortType = sortType;
-      // подсветить текущую сортировку - sort__button--active
-      activeSortType(this.getElement(), target);
+      this._activeSortType = sortType;
 
-      // выхов обработчика с новой сортировкой
-      handler(this._currentSortType);
+      activateElement(this.getElement(), target, ACTIVE_SORT_CLASS);
+
+      handler(this._activeSortType);
     });
   }
 }
