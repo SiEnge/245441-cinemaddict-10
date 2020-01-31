@@ -186,63 +186,38 @@ export default class PageController {
     });
   }
 
+  _onCommentsChange(filmController, film, comments, oldData, newData) {
+    if (oldData === null) {
+      this._api.createComment(film.id, newData)
+      .then((response) => {
+        this._filmsModel.addComments(film, response.movie);
+        filmController.render(film);
+      });
+    }
+
+    if (newData === null) {
+      this._api.deleteComment(oldData.id)
+      .then(() => {
+        const isSuccess = this._filmsModel.deleteComment(film, oldData.id);
+        if (isSuccess) {
+          filmController.render(film);
+        }
+      });
+    }
+  }
+
   _onViewChange() {
     this._showedFilmControllers.forEach((it) => it.setDefaultView());
   }
 
   _onFilterChange() {
     const films = this._filmsModel.getFilms();
-    // const comments = this._commentsModel.getComments();
 
     this._sortedFilms = films;
 
     this._removeFilms();
     this._renderFilms(this._sortedFilms.slice(0, SHOWING_FILMS_COUNT_ON_START));
     this._renderShowMoreButton();
-  }
-
-  // _onCommentsChange(filmController, popupController, film, oldData, newData) {
-  _onCommentsChange(filmController, film, oldData, newData) {
-    // let isSuccess = false;
-
-    // добавление комментария
-    if (oldData === null) {
-      this._api.createComment(film.id, newData)
-      .then((response) => {
-        this._filmsModel.addComments(film, response.movie);
-        filmController.render(film);
-        // debugger;
-
-        // const isSuccess = this._filmsModel.updateFilm(oldData.id, filmModel);
-
-        // if (isSuccess) {
-        //     filmController.render(filmModel);
-        //     this._updateFilms(this._showingFilmsCount);
-        //   }
-      });
-      // isSuccess = this._filmsModel.addComment(film, newData);
-    }
-
-    // удаление комментария
-    if (newData === null) {
-      this._api.deleteComment(oldData.id)
-        .then(() => {
-          const isSuccess = this._filmsModel.deleteComment(film, oldData.id);
-          if (isSuccess) {
-            filmController.render(film);
-          }
-          // обновление попапа
-
-        });
-
-      // isSuccess = this._filmsModel.deleteComment(film, oldData);
-    }
-
-    // debugger;
-    //
-    // if (isSuccess) {
-    //   filmController.render(film);
-    // }
   }
 
   hide() {

@@ -55,7 +55,8 @@ export default class Films {
     const updatedComments = [].concat(comments.slice(0, index), comments.slice(index + 1));
     film.comments = updatedComments;
 
-    return this.updateFilm(film.id, film);
+    return true;
+    // return this.updateFilm(film.id, film);
   }
 
   addComments(film, newData) {

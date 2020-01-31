@@ -280,10 +280,10 @@ export default class Popup extends AbstractSmartComponent {
 
   setAddToWatchlistButtonClickHandler(handler) {
     this.getElement().querySelector(`.film-details__control-label--watchlist`)
-    .addEventListener(`click`, () => {
-      handler();
+    .addEventListener(`click`, (evt) => {
+      evt.preventDefault();
       this._isWatchlist = !this._isWatchlist;
-      this.rerender();
+      handler();
     });
 
     this._clickAddToWatchlistButtonHandler = handler;
@@ -291,10 +291,10 @@ export default class Popup extends AbstractSmartComponent {
 
   setMarkAsWatchedButtonClickHandler(handler) {
     this.getElement().querySelector(`.film-details__control-label--watched`)
-    .addEventListener(`click`, () => {
-      handler();
+    .addEventListener(`click`, (evt) => {
+      evt.preventDefault();
       this._isWatched = !this._isWatched;
-      this.rerender();
+      handler();
     });
 
     this._clickMarkAsWatchedButtonHandler = handler;
@@ -302,10 +302,10 @@ export default class Popup extends AbstractSmartComponent {
 
   setFavoriteButtonClickHandler(handler) {
     this.getElement().querySelector(`.film-details__control-label--favorite`)
-    .addEventListener(`click`, () => {
+    .addEventListener(`click`, (evt) => {
+      evt.preventDefault();
       this._isFavorite = !this._isFavorite;
       handler();
-      this.rerender();
     });
 
     this._clickFavoriteButtonHandler = handler;
@@ -345,13 +345,14 @@ export default class Popup extends AbstractSmartComponent {
       }
 
       handler(target.dataset.commentId);
-
-      // this.rerender();
     });
 
     this._clickDeleteCommentButtonHandler = handler;
   }
 
+  setComments(comments) {
+    this._comments = comments;
+  }
 
   _setAddEmotionBtnClickHandler() {
     const emotionLabelElements = this.getElement().querySelectorAll(`.film-details__emoji-item`);
