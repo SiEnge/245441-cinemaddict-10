@@ -1,6 +1,6 @@
 // компонент "Карточка фильма"
 import AbstractComponent from './abstract-component.js';
-import {formatDateYear, parseDuration} from '../util.js';
+import {formatDateYear, parseDuration} from '../utils/common.js';
 
 const createBooleanItemMarkup = (isBoolean) => {
   if (isBoolean) {
@@ -69,17 +69,26 @@ export default class Film extends AbstractComponent {
 
   setAddToWatchlistButtonClickHandler(handler) {
     this.getElement().querySelector(`.film-card__controls-item--add-to-watchlist`)
-      .addEventListener(`click`, handler);
+      .addEventListener(`click`, (evt) => {
+        evt.preventDefault();
+        handler();
+      });
   }
 
   setMarkAsWatchedButtonClickHandler(handler) {
     this.getElement().querySelector(`.film-card__controls-item--mark-as-watched`)
-      .addEventListener(`click`, handler);
+      .addEventListener(`click`, (evt) => {
+        evt.preventDefault();
+        handler();
+      });
   }
 
   setFavoriteButtonClickHandler(handler) {
     this.getElement().querySelector(`.film-card__controls-item--favorite`)
-      .addEventListener(`click`, handler);
+      .addEventListener(`click`, (evt) => {
+        evt.preventDefault();
+        handler();
+      });
   }
 }
 

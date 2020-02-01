@@ -1,36 +1,21 @@
 // компонент "Статистика"
-import AbstractSmartComponent from './abstract-smart-component.js';
+import AbstractComponent from './abstract-component.js';
 import Chart from 'chart.js';
 import ChartDataLabels from 'chartjs-plugin-datalabels';
 
+import {ONE_HOUR_IN_MINUTE} from '../const.js';
 
-// для вывода диаграммы нужен массив с жанрами и массив с их количествами
-// т.е. берем данные и анализируем их
-// - сначала получаем массив всех возможных фильмов
-// - потом ищем сколько раз они встречаются в данных
+const NameToTitlePeriod = {
+  'all-time': `All time`,
+  'today': `Today`,
+  'week': `Week`,
+  'month': `Month`,
+  'year': `Year`,
+};
 
-// на статистике нужно определить и запомнить клики на клавиши
-// наверно в main нужно определить действия по этим кликам и сюда переносить период за который нужно выводить данны
-
-
-const renderStaticticsChart = (statisticsCtx, films) => {
-
-  let set = new Set();
-
-  films.forEach((film) => {
-    const genres = Array.from(film.genres);
-    genres.forEach((genre) => set.add(genre));
-  });
-
-  const genresFilm = Array.from(set);
-
-  const filmCount = genresFilm.map((genre) => {
-    return films.filter((film) => {
-      const genres = Array.from(film.genres);
-      return genres.includes(genre);
-    }).length;
-  });
-
+const renderStaticticsChart = (statisticsCtx, ratingGenres) => {
+  const genres = ratingGenres.map((it) => it.genre);
+  const count = ratingGenres.map((it) => it.count);
 
   Chart.defaults.global.defaultFontSize = 20;
   Chart.defaults.global.defaultFontColor = `white`;
@@ -39,10 +24,10 @@ const renderStaticticsChart = (statisticsCtx, films) => {
     plugins: [ChartDataLabels],
     type: `horizontalBar`,
     data: {
-      labels: genresFilm,
+      labels: genres,
       datasets: [{
         label: `Population`,
-        data: filmCount,
+        data: count,
         backgroundColor: `rgba(255, 232, 0, 1)`,
         barThickness: 30,
       }]
@@ -87,42 +72,48 @@ const renderStaticticsChart = (statisticsCtx, films) => {
   });
 };
 
-const createStatisticsTemplate = (statistic) => {
-  // const {count, duration, genre} = statistic;
-  const count = 0;
-  const duration = 125;
-  const genre = `musical`;
+const createFilterStatisticsMarkup = (period, isChecked) => {
+  const {name} = period;
 
-  const hour = Math.floor(duration / 60);
-  const minute = duration % 60;
-  const hourDuration = `${hour} <span class="statistic__item-description">h</span>`;
+  return (
+    `<input type="radio" class="statistic__filters-input visually-hidden" name="statistic-filter" id="statistic-${name}" value="${name}" ${(isChecked) ? `checked` : ``}>
+      <label for="statistic-${name}" class="statistic__filters-label">${NameToTitlePeriod[name]}</label>`
+  );
+};
+
+const createUserRankMarkup = (userRank) => {
+  if (userRank === ``) {
+    return ``;
+  }
+
+  return (
+    `<p class="statistic__rank">
+      Your rank
+      <img class="statistic__img" src="images/bitmap@2x.png" alt="Avatar" width="35" height="35">
+      <span class="statistic__rank-label">${userRank}</span>
+    </p>`
+  );
+};
+
+const createStatisticsTemplate = (statistic, periods) => {
+  const {count, duration, genre, userRank} = statistic;
+
+  const hour = (duration >= ONE_HOUR_IN_MINUTE) ? Math.floor(duration / ONE_HOUR_IN_MINUTE) : ``;
+  const minute = duration % ONE_HOUR_IN_MINUTE;
+
+  const hourDuration = (hour) ? `${hour} <span class="statistic__item-description">h</span>` : ``;
   const miniteDuration = `${minute} <span class="statistic__item-description">m</span>`;
+
+  const filterStatisticsMarkup = periods.map((it) => createFilterStatisticsMarkup(it, it.checked)).join(`\n`);
+  const userRankMarkup = createUserRankMarkup(userRank);
 
   return (
     `<section class="statistic">
-      <p class="statistic__rank">
-        Your rank
-        <img class="statistic__img" src="images/bitmap@2x.png" alt="Avatar" width="35" height="35">
-        <span class="statistic__rank-label">Sci-Fighter</span>
-      </p>
+        ${userRankMarkup}
 
       <form action="https://echo.htmlacademy.ru/" method="get" class="statistic__filters">
         <p class="statistic__filters-description">Show stats:</p>
-
-        <input type="radio" class="statistic__filters-input visually-hidden" name="statistic-filter" id="statistic-all-time" value="all-time" checked>
-        <label for="statistic-all-time" class="statistic__filters-label">All time</label>
-
-        <input type="radio" class="statistic__filters-input visually-hidden" name="statistic-filter" id="statistic-today" value="today">
-        <label for="statistic-today" class="statistic__filters-label">Today</label>
-
-        <input type="radio" class="statistic__filters-input visually-hidden" name="statistic-filter" id="statistic-week" value="week">
-        <label for="statistic-week" class="statistic__filters-label">Week</label>
-
-        <input type="radio" class="statistic__filters-input visually-hidden" name="statistic-filter" id="statistic-month" value="month">
-        <label for="statistic-month" class="statistic__filters-label">Month</label>
-
-        <input type="radio" class="statistic__filters-input visually-hidden" name="statistic-filter" id="statistic-year" value="year">
-        <label for="statistic-year" class="statistic__filters-label">Year</label>
+        ${filterStatisticsMarkup}
       </form>
 
       <ul class="statistic__text-list">
@@ -148,55 +139,30 @@ const createStatisticsTemplate = (statistic) => {
   );
 };
 
-export default class Statistics extends AbstractSmartComponent {
-  constructor(films, period, statisticsData) {
+export default class Statistics extends AbstractComponent {
+  constructor(data, ratingGenres, periods) {
     super();
-
-    this._films = films;
-    this._period = period;
+    this._data = data;
+    this._ratingGenres = ratingGenres;
+    this._periods = periods;
 
     this._statisticsChart = null;
-    // this._statisctics = null;
-    // this._statiscticsData = {10, 125, `Musical`};
-    this._statiscticsData = statisticsData;
 
     this._renderCharts();
-    // this._countingStatistic();
   }
-
 
   getTemplate() {
-    return createStatisticsTemplate(this._statiscticsData);
+    return createStatisticsTemplate(this._data, this._periods);
   }
-
-  recoveryListeners() {}
-
-  rerender(films, period) {
-    this._films = films;
-    this.period = period;
-
-    super.rerender();
-
-    this._renderCharts();
-  }
-
-  // _countingStatistic() {
-  //   const films = this._film;
-  //   const count = 10;
-  //   const duration = 125;
-  //   const genre = `Musical`;
-
-  //   this._statiscticsData = {count, duration, genre};
-  // }
 
   _renderCharts() {
+    if (this._ratingGenres.length === 0) {
+      return;
+    }
     const element = this.getElement();
-
     const statisticsCtx = element.querySelector(`.statistic__chart`);
 
-    // this._resetCharts();
-
-    this._statisticsChart = renderStaticticsChart(statisticsCtx, this._films.getFilms(), this.period);
+    this._statisticsChart = renderStaticticsChart(statisticsCtx, this._ratingGenres);
   }
 
   setStatisticsFilterClickHandler(handler) {

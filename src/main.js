@@ -1,129 +1,69 @@
 import API from './api.js';
-const AUTHORIZATION = `Basic kTy9gIdsiz2317=rD666`;
-const END_POINT = `https://htmlacademy-es-10.appspot.com/cinemaddict/`;
-
-// import {getRandomIntegerNumber} from './util.js';
-
-// import {createCommentTemplate} from './components/comment.js';
-
-// import {generateFilms} from './mock/film.js';
-
-import {generateProfile} from './mock/profile.js';
-// import {generateComments} from './mock/comment.js';
-// import {countFilmsFilter} from './mock/menu.js';
-
+import PageController from './controllers/page.js';
+import FilterController from './controllers/filter.js';
+import StatisticsController from './controllers/statistics.js';
 import ProfileComponent from './components/profile.js';
 import MenuComponent from './components/menu.js';
-import StatisticsComponent from './components/statistics.js';
-// import PopupContainerComponent from './components/popup-container.js';
-import PageController from './controllers/page.js';
-
-import FilterController from './controllers/filter.js';
-
 import FilmsModel from './models/movies.js';
-
-import {render, RenderPosition} from './util.js';
+import {render, RenderPosition} from './utils/render.js';
+import {getWatchedMovies} from './utils/common.js';
 import {PageMode} from './const.js';
 
-const FILM_COUNT = 17;
+const AUTHORIZATION = `Basic 6Idsiz23kTy9g17`;
+const END_POINT = `https://htmlacademy-es-10.appspot.com/cinemaddict/`;
 
-const headerElement = document.querySelector(`.header`);
 const mainElement = document.querySelector(`.main`);
+const headerElement = document.querySelector(`.header`);
 const footerElement = document.querySelector(`.footer`);
 
-// 1. вставка в шапку "Звание пользователя"
-const watchedMovies = generateProfile();
-render(headerElement, new ProfileComponent(watchedMovies).getElement(), RenderPosition.BEFOREEND);
 
-// 2. Меню, где кнопка Stat и фильтры для фильмов
-const menuComponent = new MenuComponent();
-
-// const films = generateFilms(FILM_COUNT);
 const api = new API(END_POINT, AUTHORIZATION);
 const filmsModel = new FilmsModel();
-// filmsModel.setFilms(films);
-
-// debugger;
 
 const pageController = new PageController(mainElement, filmsModel, api);
 
-const StatiscticsPeriod = {
-  ALLTIME: `all-time`,
-  TODAY: `today`,
-  WEEK: `week`,
-  MONTH: `month`,
-  YEAR: `year`
+const menuComponent = new MenuComponent();
+const filterController = new FilterController(mainElement, filmsModel, menuComponent);
+const statisticsController = new StatisticsController(mainElement, filmsModel);
+
+const renderProfileUser = (allMovies) => {
+  const watchedMovies = getWatchedMovies(allMovies);
+  const countMovies = watchedMovies.length;
+
+  if (countMovies === 0) {
+    return;
+  }
+
+  render(headerElement, new ProfileComponent(watchedMovies).getElement(), RenderPosition.BEFOREEND);
 };
 
-// const countingStatistic = (filmsAll) => {
+const renderCountAllMovies = (allMovies) => {
+  const footerStatistics = footerElement.querySelector(`.footer__statistics`);
+  const countMovies = allMovies.length;
 
-//   const count = filmsAll.filter((film) => film.isWatched).length;
-//   const duration = filmsAll
-//     .reduce((accumulator, currentValue) => accumulator + currentValue.duration, 0);
-
-//   const genre = `Musical`;
-
-
-//   return {count, duration, genre};
-// };
-
-
-// const stat = countingStatistic(filmsModel.getFilms(films));
-const statisticsComponent = new StatisticsComponent(filmsModel, StatiscticsPeriod.ALLTIME);
-// const statisticsComponent = new StatisticsComponent(filmsModel, StatiscticsPeriod.ALLTIME, stat);
-
-const filterController = new FilterController(mainElement, filmsModel, menuComponent);
-
-filterController.render();
-
-// pageController.render();
-render(mainElement, statisticsComponent.getElement(), RenderPosition.BEFOREEND);
-
-statisticsComponent.hide();
-
-// 9. вставка количества фильмов
-const footerStatistics = footerElement.querySelector(`.footer__statistics`);
-footerStatistics.querySelector(`p`).textContent = `${FILM_COUNT} movies inside`;
-
-// вставка количества фильма - переработать и убрать из main обращение к dom
-
+  footerStatistics.querySelector(`p`).textContent = `${countMovies} movies inside`;
+};
 
 menuComponent.setStatisticsClickHandler((mode) => {
   switch (mode) {
     case PageMode.STAT:
       pageController.hide();
-      statisticsComponent.show();
+      statisticsController.show();
       break;
     case PageMode.MOVIE:
       pageController.show();
-      statisticsComponent.hide();
+      statisticsController.hide();
       break;
   }
 });
 
-// statisticsComponent.setStatisticsFilterClickHandler((period) => {
-//   debugger;
-// });
-
-
-  // api.getComments(`0`)
-// api.getFilms()
-// .then((films) => {
-//   filmsModel.setFilms(films);
-//   films.map((film) => api.getComments(film.id))
-// })
-
-// .then((films) => {
-//   // console.log(films);
-//   filmsModel.setFilms(films);
-//   pageController.render();
-// });
-
 api.getFilms()
-.then((films) => {
-  // console.log(films);
-  filmsModel.setFilms(films);
-  pageController.render();
-});
+  .then((films) => {
+    filmsModel.setFilms(films);
+    renderProfileUser(films);
+    filterController.render();
+    pageController.render();
+    renderCountAllMovies(films);
 
-
+    statisticsController.render();
+  });
