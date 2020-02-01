@@ -5,6 +5,7 @@ import FilmModel from '../models/movie.js';
 import LocalCommentModel from '../models/local-comment.js';
 import {render, replace, RenderPosition} from '../utils/render.js';
 // import {CommentEmotion} from '../const.js';
+const SHAKE_ANIMATION_TIMEOUT = 600;
 
 const Mode = {
   DEFAULT: `default`,
@@ -86,6 +87,21 @@ export default class MovieController {
     }
   }
 
+  shake() {
+    // this._taskEditComponent.getElement().style.animation = `shake ${SHAKE_ANIMATION_TIMEOUT / 1000}s`;
+    this._popupComponent.getElement().style.animation = `shake ${SHAKE_ANIMATION_TIMEOUT / 1000}s`;
+
+    setTimeout(() => {
+      // this._taskEditComponent.getElement().style.animation = ``;
+      this._popupComponent.getElement().style.animation = ``;
+
+      this._popupComponent.setData({
+        // saveButtonText: `Save`,
+        deleteButtonText: `Delete`,
+      });
+    }, SHAKE_ANIMATION_TIMEOUT);
+  }
+
   _updatePopup(film) {
     this._api.getComments(film.id)
     .then((comments) => {
@@ -122,6 +138,9 @@ export default class MovieController {
       this._popupComponent.setMarkAsWatchedButtonClickHandler(() => {
         const newFilm = FilmModel.clone(this._film);
         newFilm.isWatched = !newFilm.isWatched;
+        if (!newFilm.isWatched) {
+          newFilm.userRating = 0;
+        }
         this._onDataChange(this, this._film, newFilm);
       });
 
@@ -137,8 +156,25 @@ export default class MovieController {
         this._onDataChange(this, this._film, newFilm);
       });
 
+      this._popupComponent.setUndoRatingButtonClickHandler(() => {
+        const newFilm = FilmModel.clone(this._film);
+        newFilm.userRating = 0;
+
+        this._onDataChange(this, this._film, newFilm);
+      });
+
       this._popupComponent.setDeleteCommentButtonClickHandler((commentId) => {
         const index = this._comments.findIndex((it) => it.id === commentId);
+
+        if (index === -1) {
+          return;
+        }
+        // debugger;
+
+        // this._popupComponent.setData({
+        //   deleteButtonText: `Deleting...`,
+        // });
+
         this._onCommentsChange(this, this._film, this._comments, this._comments[index], null);
       });
 
@@ -181,6 +217,7 @@ export default class MovieController {
     }
   }
 
+  // отправка сообщения
   _onCtrlEnterDown(evt) {
     const isEnterKey = evt.key === `Enter`;
 
@@ -191,6 +228,7 @@ export default class MovieController {
       if (inputElement.value === `` || emotionElement.dataset.emotion === ``) {
         return;
       }
+      this._popupComponent.disabledCommentForm();
 
       this._sendComment(inputElement.value, emotionElement.dataset.emotion);
     }

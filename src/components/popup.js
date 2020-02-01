@@ -3,6 +3,13 @@ import AbstractSmartComponent from './abstract-smart-component.js';
 import {formatDate, formatDateComment, parseDuration} from '../utils/common.js';
 import {CommentEmotion} from '../const.js';
 
+const DefaultData = {
+  deleteButtonText: `Delete`,
+  // saveButtonText: `Save`,
+};
+
+const COUNT_RATING = 9;
+
 const createGenresMarkup = (genres) => {
   return genres
   .map((genre) => {
@@ -13,7 +20,53 @@ const createGenresMarkup = (genres) => {
   .join(`\n`);
 };
 
-const createCommentMarkup = (comment) => {
+const createRatingScoreMarkup = (userRating) => {
+  let markups = [];
+
+  for (let i = 0; i < COUNT_RATING; i++) {
+    const rating = i + 1;
+    const isChecked = !!(userRating === rating);
+
+    const ratingScoreMarkup = `<input type="radio" name="score" class="film-details__user-rating-input visually-hidden" value="${rating}" id="rating-${rating}" ${(isChecked) ? `checked` : ``}>
+    <label class="film-details__user-rating-label" for="rating-${rating}">${rating}</label>`;
+
+    markups.push(ratingScoreMarkup);
+  }
+
+  return markups.join(`\n`);
+};
+
+const createUserRatingControlsMarkup = (title, poster, userRating) => {
+  const ratingScoreMarkup = createRatingScoreMarkup(userRating);
+
+  return (
+    `<div class="form-details__middle-container">
+      <section class="film-details__user-rating-wrap">
+        <div class="film-details__user-rating-controls">
+          <button class="film-details__watched-reset" type="button">Undo</button>
+        </div>
+
+        <div class="film-details__user-score">
+          <div class="film-details__user-rating-poster">
+            <img src="${poster}" alt="film-poster" class="film-details__user-rating-img">
+          </div>
+
+          <section class="film-details__user-rating-inner">
+            <h3 class="film-details__user-rating-title">${title}</h3>
+
+            <p class="film-details__user-rating-feelings">How you feel it?</p>
+
+            <div class="film-details__user-rating-score">
+              ${ratingScoreMarkup}
+            </div>
+          </section>
+        </div>
+      </section>
+    </div>`
+  );
+};
+
+const createCommentMarkup = (comment, deleteButtonText) => {
   const {id, emotion, text, author, date} = comment;
 
   return (
@@ -26,16 +79,16 @@ const createCommentMarkup = (comment) => {
         <p class="film-details__comment-info">
           <span class="film-details__comment-author">${author}</span>
           <span class="film-details__comment-day">${formatDateComment(date)}</span>
-          <button class="film-details__comment-delete" data-comment-id="${id}">Delete</button>
+          <button class="film-details__comment-delete" data-comment-id="${id}">${deleteButtonText}</button>
         </p>
       </div>
     </li>`
   );
 };
 
-const createCommentsMarkup = (comments) => {
+const createCommentsMarkup = (comments, deleteButtonText) => {
   return comments
-  .map((it) => createCommentMarkup(it))
+  .map((it) => createCommentMarkup(it, deleteButtonText))
   .join(`\n`);
 };
 
@@ -52,11 +105,10 @@ const createEmotionMarkup = () => {
   .join(`\n`);
 };
 
-// компонент "Попап"
 const createPopupTemplate = (film, comments, options = {}) => {
   const {title, originalTitle, poster, description, director, writers, actors, releaseDate,
     duration, country, genres, rating, age} = film;
-  const {isWatchlist, isWatched, isFavorite, userRating} = options;
+  const {isWatchlist, isWatched, isFavorite, userRating, externalData} = options;
 
   const durationText = parseDuration(duration);
 
@@ -64,8 +116,12 @@ const createPopupTemplate = (film, comments, options = {}) => {
   const genreTitle = (genres.size === 1) ? `Genre` : `Genres`;
   const userRatingMarkup = (userRating) ? `<p class="film-details__user-rating">Your rate ${userRating}</p>` : ``;
 
+  const userRatingControlsMarkup = (isWatched) ? createUserRatingControlsMarkup(title, poster, userRating) : ``;
+
+  const deleteButtonText = externalData.deleteButtonText;
+
   const commentsCount = comments.length;
-  const commentsMarkup = (comments.length > 0) ? createCommentsMarkup(comments) : ``;
+  const commentsMarkup = (comments.length > 0) ? createCommentsMarkup(comments, deleteButtonText) : ``;
   const emotionMarkup = createEmotionMarkup();
 
   return (
@@ -145,57 +201,7 @@ const createPopupTemplate = (film, comments, options = {}) => {
         </section>
       </div>
 
-      ${isWatched ?
-      `<div class="form-details__middle-container">
-        <section class="film-details__user-rating-wrap">
-          <div class="film-details__user-rating-controls">
-            <button class="film-details__watched-reset" type="button">Undo</button>
-          </div>
-
-          <div class="film-details__user-score">
-            <div class="film-details__user-rating-poster">
-              <img src="./images/posters/the-great-flamarion.jpg" alt="film-poster" class="film-details__user-rating-img">
-            </div>
-
-            <section class="film-details__user-rating-inner">
-              <h3 class="film-details__user-rating-title">${title}</h3>
-
-              <p class="film-details__user-rating-feelings">How you feel it?</p>
-
-              <div class="film-details__user-rating-score">
-                <input type="radio" name="score" class="film-details__user-rating-input visually-hidden" value="1" id="rating-1">
-                <label class="film-details__user-rating-label" for="rating-1">1</label>
-
-                <input type="radio" name="score" class="film-details__user-rating-input visually-hidden" value="2" id="rating-2">
-                <label class="film-details__user-rating-label" for="rating-2">2</label>
-
-                <input type="radio" name="score" class="film-details__user-rating-input visually-hidden" value="3" id="rating-3">
-                <label class="film-details__user-rating-label" for="rating-3">3</label>
-
-                <input type="radio" name="score" class="film-details__user-rating-input visually-hidden" value="4" id="rating-4">
-                <label class="film-details__user-rating-label" for="rating-4">4</label>
-
-                <input type="radio" name="score" class="film-details__user-rating-input visually-hidden" value="5" id="rating-5">
-                <label class="film-details__user-rating-label" for="rating-5">5</label>
-
-                <input type="radio" name="score" class="film-details__user-rating-input visually-hidden" value="6" id="rating-6">
-                <label class="film-details__user-rating-label" for="rating-6">6</label>
-
-                <input type="radio" name="score" class="film-details__user-rating-input visually-hidden" value="7" id="rating-7">
-                <label class="film-details__user-rating-label" for="rating-7">7</label>
-
-                <input type="radio" name="score" class="film-details__user-rating-input visually-hidden" value="8" id="rating-8">
-                <label class="film-details__user-rating-label" for="rating-8">8</label>
-
-                <input type="radio" name="score" class="film-details__user-rating-input visually-hidden" value="9" id="rating-9" checked>
-                <label class="film-details__user-rating-label" for="rating-9">9</label>
-
-              </div>
-            </section>
-          </div>
-        </section>
-      </div>`
-      : ``}
+      ${userRatingControlsMarkup}
 
       <div class="form-details__bottom-container">
         <section class="film-details__comments-wrap">
@@ -233,12 +239,14 @@ export default class Popup extends AbstractSmartComponent {
     this._isWatched = !!film.isWatched;
     this._isFavorite = !!film.isFavorite;
     this._userRating = film.userRating;
+    this._externalData = DefaultData;
 
     this._clickCloseButtonHandler = null;
     this._clickAddToWatchlistButtonHandler = null;
     this._clickMarkAsWatchedButtonHandler = null;
     this._clickFavoriteButtonHandler = null;
     this._clickRatingButtonHandler = null;
+    this._clickUndoRatingButtonHandler = null;
     this._clickDeleteCommentButtonHandler = null;
 
     this._setAddEmotionBtnClickHandler();
@@ -249,19 +257,37 @@ export default class Popup extends AbstractSmartComponent {
       isWatchlist: this._isWatchlist,
       isWatched: this._isWatched,
       isFavorite: this._isFavorite,
-      userRating: this._userRating
+      userRating: this._userRating,
+      externalData: this._externalData,
     });
   }
 
-  // _subscribeOnEvents() {
-  //   this.setCloseButtonClickHandler(this._clickCloseButtonHandler);
-  //   debugger;
-  //   this.setAddToWatchlistButtonClickHandler(this._clickAddToWatchlistButtonHandler);
-  //   this.setMarkAsWatchedButtonClickHandler(this._clickMarkAsWatchedButtonHandler);
-  //   this.setFavoriteButtonClickHandler(this._clickFavoriteButtonHandler);
-  //   this.setDeleteCommentButtonClickHandler(this._clickDeleteCommentButtonHandler);
-  //   this._setAddEmotionBtnClickHandler();
-  // }
+  setData(data) {
+    this._externalData = Object.assign({}, DefaultData, data);
+    this.rerender();
+  }
+
+  disabledCommentForm() {
+    this.getElement().querySelector(`.film-details__comment-input`).disabled = true;
+  }
+
+  activatedCommentForm() {
+    this.getElement().querySelector(`.film-details__comment-input`).disabled = false;
+  }
+
+  disabledRatingScoreForm() {
+    const userRatingInputs = this.getElement().querySelectorAll(`.film-details__user-rating-input`);
+    userRatingInputs.forEach((input) => {
+      input.disabled = true;
+    });
+  }
+
+  activatedRatingScoreForm() {
+    const userRatingInputs = this.getElement().querySelectorAll(`.film-details__user-rating-input`);
+    userRatingInputs.forEach((input) => {
+      input.disabled = false;
+    });
+  }
 
   recoveryListeners() {
     this.setCloseButtonClickHandler(this._clickCloseButtonHandler);
@@ -269,6 +295,7 @@ export default class Popup extends AbstractSmartComponent {
     this.setMarkAsWatchedButtonClickHandler(this._clickMarkAsWatchedButtonHandler);
     this.setFavoriteButtonClickHandler(this._clickFavoriteButtonHandler);
     this.setRatingButtonClickHandler(this._clickRatingButtonHandler);
+    this.setUndoRatingButtonClickHandler(this._clickUndoRatingButtonHandler);
     this.setDeleteCommentButtonClickHandler(this._clickDeleteCommentButtonHandler);
     this._setAddEmotionBtnClickHandler();
   }
@@ -279,39 +306,44 @@ export default class Popup extends AbstractSmartComponent {
   }
 
   setAddToWatchlistButtonClickHandler(handler) {
+    this._clickAddToWatchlistButtonHandler = handler;
+
     this.getElement().querySelector(`.film-details__control-label--watchlist`)
     .addEventListener(`click`, (evt) => {
       evt.preventDefault();
       this._isWatchlist = !this._isWatchlist;
       handler();
     });
-
-    this._clickAddToWatchlistButtonHandler = handler;
   }
 
   setMarkAsWatchedButtonClickHandler(handler) {
+    this._clickMarkAsWatchedButtonHandler = handler;
+
     this.getElement().querySelector(`.film-details__control-label--watched`)
     .addEventListener(`click`, (evt) => {
       evt.preventDefault();
       this._isWatched = !this._isWatched;
+      if (!this._isWatched) {
+        this._userRating = 0;
+      }
       handler();
     });
-
-    this._clickMarkAsWatchedButtonHandler = handler;
   }
 
   setFavoriteButtonClickHandler(handler) {
+    this._clickFavoriteButtonHandler = handler;
+
     this.getElement().querySelector(`.film-details__control-label--favorite`)
     .addEventListener(`click`, (evt) => {
       evt.preventDefault();
       this._isFavorite = !this._isFavorite;
       handler();
     });
-
-    this._clickFavoriteButtonHandler = handler;
   }
 
   setRatingButtonClickHandler(handler) {
+    this._clickRatingButtonHandler = handler;
+
     if (!this.getElement().querySelector(`.film-details__user-rating-score`)) {
       return;
     }
@@ -324,17 +356,35 @@ export default class Popup extends AbstractSmartComponent {
         return;
       }
 
-      this._userRating = target.value;
+      this._userRating = +target.value;
+
+
+      this.disabledRatingScoreForm();
 
       handler(this._userRating);
-      this.rerender();
     });
 
-    this._clickRatingButtonHandler = handler;
+  }
+
+  setUndoRatingButtonClickHandler(handler) {
+    this._clickUndoRatingButtonHandler = handler;
+
+    if (!this.getElement().querySelector(`.film-details__watched-reset`)) {
+      return;
+    }
+
+    this.getElement().querySelector(`.film-details__watched-reset`)
+    .addEventListener(`click`, (evt) => {
+      evt.preventDefault();
+      this._userRating = 0;
+      handler();
+    });
   }
 
   // удалить коммент
   setDeleteCommentButtonClickHandler(handler) {
+    this._clickDeleteCommentButtonHandler = handler;
+
     this.getElement().querySelector(`.film-details__comments-list`)
     .addEventListener(`click`, (evt) => {
       evt.preventDefault();
@@ -344,10 +394,12 @@ export default class Popup extends AbstractSmartComponent {
         return;
       }
 
+      // this._popupComponent.setData({
+      //   deleteButtonText: `Deleting...`,
+      // });
+
       handler(target.dataset.commentId);
     });
-
-    this._clickDeleteCommentButtonHandler = handler;
   }
 
   setComments(comments) {
@@ -376,15 +428,3 @@ export default class Popup extends AbstractSmartComponent {
     addEmotionElement.dataset.emotion = emotion;
   }
 }
-
-
-// если есть клик на кнопке что фильм просмотрен, то появляется блок
-// для оценки в котором можно проставить оценку фильму
-
-// выводить оценку пользователя если есть и назначать ее
-
-// убрать обработчик esc
-
-
-// при открытии страницы с оценкой userRating выделять ту оценку которая есть
-// не добавлять обработчик если фильм не просмотрен

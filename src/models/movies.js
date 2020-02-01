@@ -56,7 +56,6 @@ export default class Films {
     film.comments = updatedComments;
 
     return true;
-    // return this.updateFilm(film.id, film);
   }
 
   addComments(film, newData) {
