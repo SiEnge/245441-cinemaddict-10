@@ -11,7 +11,7 @@ self.addEventListener(`install`, (evt) => {
           `/index.html`,
           `/bundle.js`,
           `/css/normalize.css`,
-          `/css/style.css`,
+          `/css/main.css`,
           // `/fonts/HelveticaNeueCyr-Bold.woff`,
           // `/fonts/HelveticaNeueCyr-Bold.woff2`,
           // `/fonts/HelveticaNeueCyr-Medium.woff`,
