@@ -166,7 +166,7 @@ export default class PageController {
   }
 
 
-  _onDataChange(filmController, oldData, newData) {
+  _onDataChange(filmController, oldData, newData, mode) {
     this._api.updateFilm(oldData.id, newData)
     .then((filmModel) => {
       const isSuccess = this._filmsModel.updateFilm(oldData.id, filmModel);
@@ -176,10 +176,17 @@ export default class PageController {
         this._updateFilms(this._showingFilmsCount);
 
         this._renderExtraFilms();
+
+        if (mode && mode === `setRating`) {
+          filmController.showErrorRatingScoreForm();
+        }
       }
     })
     .catch(() => {
-      filmController.shake();
+      if (mode && mode === `setRating`) {
+        filmController.showErrorRatingScoreForm();
+      }
+      // filmController.shake();
     });
   }
 
@@ -192,7 +199,7 @@ export default class PageController {
         this._renderExtraFilms();
       })
       .catch(() => {
-        filmController.shake();
+        filmController.showErrorCommentForm();
       });
     }
 
@@ -202,12 +209,11 @@ export default class PageController {
         const isSuccess = this._filmsModel.deleteComment(film, oldData.id);
         if (isSuccess) {
           filmController.render(film);
-          // debugger;
           this._renderExtraFilms();
         }
       })
       .catch(() => {
-        filmController.shake();
+        filmController.showErrorCommentForm();
       });
     }
   }

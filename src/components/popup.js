@@ -262,10 +262,10 @@ export default class Popup extends AbstractSmartComponent {
     });
   }
 
-  setData(data) {
-    this._externalData = Object.assign({}, DefaultData, data);
-    this.rerender();
-  }
+  // setData(data) {
+  //   this._externalData = Object.assign({}, DefaultData, data);
+  //   this.rerender();
+  // }
 
   disabledCommentForm() {
     this.getElement().querySelector(`.film-details__comment-input`).disabled = true;
@@ -273,6 +273,18 @@ export default class Popup extends AbstractSmartComponent {
 
   activatedCommentForm() {
     this.getElement().querySelector(`.film-details__comment-input`).disabled = false;
+  }
+
+  showErrorCommentForm() {
+    const commentForm = this.getElement().querySelector(`.film-details__comment-input`);
+    commentForm.value = ``;
+    commentForm.style.border = `2px solid red`;
+    this._popupComponent.activatedCommentForm();
+  }
+
+  showDefaultCommentForm() {
+    const commentForm = this.getElement().querySelector(`.film-details__comment-input`);
+    commentForm.style.border = ``;
   }
 
   disabledRatingScoreForm() {
@@ -287,6 +299,26 @@ export default class Popup extends AbstractSmartComponent {
     userRatingInputs.forEach((input) => {
       input.disabled = false;
     });
+  }
+
+  showErrorRatingScoreForm() {
+    const ratingScoreForm = this.getElement().querySelector(`.film-details__user-rating-score`);
+    // ratingScoreForm.value = ``;
+
+    const userRatingInputs = ratingScoreForm.querySelectorAll(`.film-details__user-rating-input`);
+    userRatingInputs.forEach((input) => {
+      input.checked = false;
+    });
+
+    ratingScoreForm.style.border = `2px solid red`;
+    ratingScoreForm.style.borderRadius = `5px`;
+    this._popupComponent.activatedRatingScoreForm();
+  }
+
+  showDefaultRatingScoreForm() {
+    const ratingScoreForm = this.getElement().querySelector(`.film-details__user-rating-score`);
+    ratingScoreForm.style.border = ``;
+    ratingScoreForm.style.borderRadius = ``;
   }
 
   recoveryListeners() {
@@ -358,6 +390,7 @@ export default class Popup extends AbstractSmartComponent {
 
       this._userRating = +target.value;
 
+      this.showDefaultRatingScoreForm();
 
       this.disabledRatingScoreForm();
 

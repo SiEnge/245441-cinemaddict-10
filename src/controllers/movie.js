@@ -5,7 +5,7 @@ import FilmModel from '../models/movie.js';
 import LocalCommentModel from '../models/local-comment.js';
 import {render, replace, RenderPosition} from '../utils/render.js';
 // import {CommentEmotion} from '../const.js';
-const SHAKE_ANIMATION_TIMEOUT = 600;
+const SHAKE_ANIMATION_TIMEOUT = 6000;
 
 const Mode = {
   DEFAULT: `default`,
@@ -87,18 +87,29 @@ export default class MovieController {
     }
   }
 
-  shake() {
-    // this._taskEditComponent.getElement().style.animation = `shake ${SHAKE_ANIMATION_TIMEOUT / 1000}s`;
-    this._popupComponent.getElement().style.animation = `shake ${SHAKE_ANIMATION_TIMEOUT / 1000}s`;
+  showErrorCommentForm() {
+    const commentForm = this._popupComponent.getElement().querySelector(`.film-details__comment-input`);
+    this._popupComponent.showErrorCommentForm();
+    this.shake(commentForm);
+  }
+
+  showErrorRatingScoreForm() {
+    const ratingScoreForm = this._popupComponent.getElement().querySelector(`.film-details__user-rating-score`);
+    this._popupComponent.showErrorRatingScoreForm();
+    this.shake(ratingScoreForm);
+  }
+
+
+  shake(element) {
+    element.style.animation = `shake ${SHAKE_ANIMATION_TIMEOUT / 1000}s`;
 
     setTimeout(() => {
-      // this._taskEditComponent.getElement().style.animation = ``;
-      this._popupComponent.getElement().style.animation = ``;
+      element.style.animation = ``;
 
-      this._popupComponent.setData({
-        // saveButtonText: `Save`,
-        deleteButtonText: `Delete`,
-      });
+      // this._popupComponent.setData({
+      //   // saveButtonText: `Save`,
+      //   deleteButtonText: `Delete`,
+      // });
     }, SHAKE_ANIMATION_TIMEOUT);
   }
 
@@ -153,7 +164,7 @@ export default class MovieController {
       this._popupComponent.setRatingButtonClickHandler((userRating) => {
         const newFilm = FilmModel.clone(this._film);
         newFilm.userRating = userRating;
-        this._onDataChange(this, this._film, newFilm);
+        this._onDataChange(this, this._film, newFilm, `setRating`);
       });
 
       this._popupComponent.setUndoRatingButtonClickHandler(() => {
@@ -228,6 +239,8 @@ export default class MovieController {
       if (inputElement.value === `` || emotionElement.dataset.emotion === ``) {
         return;
       }
+
+      this._popupComponent.showDefaultCommentForm();
       this._popupComponent.disabledCommentForm();
 
       this._sendComment(inputElement.value, emotionElement.dataset.emotion);
