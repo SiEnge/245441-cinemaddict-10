@@ -1,4 +1,5 @@
 import Film from './models/movie.js';
+import Comment from './models/comment.js';
 
 const Method = {
   GET: `GET`,
@@ -22,44 +23,52 @@ export default class API {
     this._authorization = authorization;
   }
 
+  // +получение списка фильмов
   getFilms() {
     return this._load({url: `movies`})
       .then((response) => response.json())
       .then(Film.parseFilms);
   }
 
-  getComments(id) {
-    return this._load({url: `comments/${id}`})
+  // +получение списка комментарий для конкретного фильма
+  getComments(filmId) {
+    return this._load({url: `comments/${filmId}`})
       .then((response) => response.json())
-      .then(Film.parseFilms);
+      .then(Comment.parseComments);
   }
 
-  createFilm(film) {
-    return this._load({
-      url: `films`,
-      method: Method.POST,
-      body: JSON.stringify(film.toRAW()),
-      headers: new Headers({'Content-Type': `application/json`})
-    })
-      .then((response) => response.json())
-      .then(Film.parseFilm);
-  }
-
+  // +-обновление фильма (=изменение флагов + оценка пользователя)
   updateFilm(id, data) {
+    const newData = data.toRAW();
+    const newData2 = JSON.stringify(newData);
     return this._load({
       url: `movies/${id}`,
       method: Method.PUT,
-      body: JSON.stringify(data.toRAW()),
+      body: newData2,
       headers: new Headers({'Content-Type': `application/json`})
     })
       .then((response) => response.json())
       .then(Film.parseFilm);
   }
 
-  deleteFilm(id) {
-    return this._load({url: `movies/${id}`, method: Method.DELETE});
+  // -создание комментария
+  createComment(filmId, data) {
+    return this._load({
+      url: `comments/${filmId}`,
+      method: Method.POST,
+      body: JSON.stringify(data.toRAW()),
+      headers: new Headers({'Content-Type': `application/json`})
+    })
+    .then((response) => response.json());
+    // .then(Film.parseFilm);
   }
 
+  // +удаление комментария
+  deleteComment(commentId) {
+    return this._load({url: `comments/${commentId}`, method: Method.DELETE});
+  }
+
+  // +загрузочные данные
   _load({url, method = Method.GET, body = null, headers = new Headers()}) {
     headers.append(`Authorization`, this._authorization);
 

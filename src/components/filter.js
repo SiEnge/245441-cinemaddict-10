@@ -1,6 +1,7 @@
 // компонент "Меню"
 import AbstractComponent from './abstract-component.js';
-import {FilterType} from '../const.js';
+import {activateElement} from '../utils/common.js';
+import {FilterType, ACTIVE_NAVIGATION_CLASS} from '../const.js';
 
 const NameToTitleFilter = {
   'all': `All movies`,
@@ -14,7 +15,7 @@ const createFilterMarkup = (filter, isChecked) => {
   const countMarkup = (name === FilterType.ALL) ? NameToTitleFilter[name] : `${NameToTitleFilter[name]} <span class="main-navigation__item-count">${count}</span>`;
 
   return (
-    `<a href="#${name}" data-filter-type="${name}" class="main-navigation__item ${isChecked ? `main-navigation__item--active` : ``}">${countMarkup}</a>`
+    `<a href="#${name}" data-filter-type="${name}" class="main-navigation__item ${isChecked ? ACTIVE_NAVIGATION_CLASS : ``}">${countMarkup}</a>`
   );
 };
 
@@ -27,7 +28,6 @@ const createFilterTemplate = (filters) => {
     </nav>`
   );
 };
-
 
 export default class Filter extends AbstractComponent {
   constructor(filters) {
@@ -42,12 +42,15 @@ export default class Filter extends AbstractComponent {
   setFilterChangeHandler(handler) {
     this.getElement().addEventListener(`click`, (evt) => {
       evt.preventDefault();
+      const target = evt.target;
 
-      if (evt.target.classList.contains(`main-navigation__item--additional`)) {
+      if (target.classList.contains(`main-navigation__item--additional`)) {
         return;
       }
 
-      const filterName = evt.target.dataset.filterType;
+      activateElement(this.getElement(), target, ACTIVE_NAVIGATION_CLASS);
+
+      const filterName = target.dataset.filterType;
       handler(filterName);
     });
   }
@@ -57,7 +60,7 @@ export default class Filter extends AbstractComponent {
     .addEventListener(`click`, (evt) => {
       evt.preventDefault();
 
-      if (evt.target.classList.contains(`main-navigation__item--active`)) {
+      if (evt.target.classList.contains(ACTIVE_NAVIGATION_CLASS)) {
         return;
       }
 
@@ -65,6 +68,3 @@ export default class Filter extends AbstractComponent {
     });
   }
 }
-
-
-// выделить выбранный филтр/статистику, а с остальных сбросить выделение

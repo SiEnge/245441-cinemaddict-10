@@ -1,6 +1,7 @@
 export default class Film {
   constructor(data) {
     this.id = data.id;
+    // debugger;
 
     this.title = data.film_info.title;
     this.originalTitle = data.film_info.alternative_title;
@@ -10,32 +11,31 @@ export default class Film {
     this.director = data.film_info.director;
     this.writers = data.film_info.writers.join(`, `);
     this.actors = data.film_info.actors.join(`, `);
-    this.releaseDate = data.film_info.release.date;
+    this.releaseDate = new Date(data.film_info.release.date);
     this.country = data.film_info.release.release_country;
     this.duration = data.film_info.runtime;
-    this.genres = new Set(data.film_info.genre); // ?
+    this.genres = new Set(data.film_info.genre);
     this.description = data.film_info.description;
 
     this.userRating = data.user_details.personal_rating;
     this.isWatchlist = data.user_details.watchlist;
     this.isWatched = data.user_details.already_watched;
-    this.watchindDate = data.user_details.watching_date; // ?
+    this.watchingDate = data.user_details.watching_date ? new Date(data.user_details.watching_date) : null;
     this.isFavorite = data.user_details.favorite;
-
     this.comments = data.comments; // ?
-
-    // this.comments = (Math.random() > 0.5) ? generateComments(getRandomIntegerNumber(COUNT_COMMENTS_MIN, COUNT_COMMENTS_MAX))  = [];
+    // this.textComments = data.comments; // ?
 
   }
 
   // подготовка данных для отравки на сервер
   toRAW() {
+    // debugger;
     return {
       'id': this.id,
       'film_info': {
         'title': this.title,
         'alternative_title': this.originalTitle,
-        'total_rating': this.rating,
+        'total_rating': +this.rating,
         'poster': this.poster,
         'age_rating': this.age,
         'director': this.director,
@@ -50,13 +50,16 @@ export default class Film {
         'description': this.description,
       },
       'user_details': {
-        'personal_rating': this.userRating, // перевести в число?
+        'personal_rating': +this.userRating,
         'watchlist': this.isWatchlist,
         'already_watched': this.isWatched,
-        'watching_date': this.watchindDate,
+
+        'watching_date': this.watchingDate,
+        // 'watching_date': this.watchingDate ? this.watchingDate.toISOString() : '',
         'favorite': this.isFavorite,
       },
-      'comments': this.comments
+      'comments': this.comments,
+      // 'comments': this.comments,
     };
   }
 
