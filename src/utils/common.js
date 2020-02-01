@@ -64,3 +64,7 @@ export const activateElement = (wrap, activeElement, activeClassName) => {
   currentActiveElement.classList.remove(activeClassName);
   activeElement.classList.add(activeClassName);
 };
+
+export const createId = () => {
+  return String(new Date() + Math.random());
+};

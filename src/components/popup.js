@@ -2,6 +2,7 @@
 import AbstractSmartComponent from './abstract-smart-component.js';
 import {formatDate, formatDateComment, parseDuration} from '../utils/common.js';
 import {CommentEmotion} from '../const.js';
+// import debounce from 'lodash.debounce';
 
 const DefaultData = {
   deleteButtonText: `Delete`,
@@ -364,6 +365,8 @@ export default class Popup extends AbstractSmartComponent {
 
   setFavoriteButtonClickHandler(handler) {
     this._clickFavoriteButtonHandler = handler;
+
+    // .addEventListener(`click`, debounce(handler, DEBOUNCE_TIMEOUT));
 
     this.getElement().querySelector(`.film-details__control-label--favorite`)
     .addEventListener(`click`, (evt) => {

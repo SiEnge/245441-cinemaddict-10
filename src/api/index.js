@@ -1,5 +1,5 @@
-import Film from './models/movie.js';
-import Comment from './models/comment.js';
+import Film from '../models/movie.js';
+import Comment from '../models/comment.js';
 
 const Method = {
   GET: `GET`,
@@ -66,6 +66,16 @@ export default class API {
   // +удаление комментария
   deleteComment(commentId) {
     return this._load({url: `comments/${commentId}`, method: Method.DELETE});
+  }
+
+  sync(data) {
+    return this._load({
+      url: `movies/sync`,
+      method: Method.POST,
+      body: JSON.stringify(data),
+      headers: new Headers({'Content-Type': `application/json`})
+    })
+      .then((response) => response.json());
   }
 
   // +загрузочные данные

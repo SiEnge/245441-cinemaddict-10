@@ -1,4 +1,6 @@
-import API from './api.js';
+import API from './api/index.js';
+import Store from './api/store.js';
+import Provider from './api/provider.js';
 import PageController from './controllers/page.js';
 import FilterController from './controllers/filter.js';
 import StatisticsController from './controllers/statistics.js';
@@ -9,6 +11,9 @@ import {render, RenderPosition} from './utils/render.js';
 import {getWatchedMovies} from './utils/common.js';
 import {PageMode} from './const.js';
 
+const STORE_PREFIX = `cinemaddict-localstorage`;
+const STORE_VER = `v1`;
+const STORE_NAME = `${STORE_PREFIX}-${STORE_VER}`;
 const AUTHORIZATION = `Basic 6Idsiz23kTy9g17`;
 const END_POINT = `https://htmlacademy-es-10.appspot.com/cinemaddict/`;
 
@@ -27,9 +32,12 @@ const footerElement = document.querySelector(`.footer`);
 
 
 const api = new API(END_POINT, AUTHORIZATION);
+const store = new Store(STORE_NAME, window.localStorage);
+const apiWithProvider = new Provider(api, store);
+
 const filmsModel = new FilmsModel();
 
-const pageController = new PageController(mainElement, filmsModel, api);
+const pageController = new PageController(mainElement, filmsModel, apiWithProvider);
 
 const menuComponent = new MenuComponent();
 const filterController = new FilterController(mainElement, filmsModel, menuComponent);
@@ -46,10 +54,9 @@ const renderProfileUser = (allMovies) => {
   render(headerElement, new ProfileComponent(watchedMovies).getElement(), RenderPosition.BEFOREEND);
 };
 
-const renderCountAllMovies = (allMovies) => {
-  const footerStatistics = footerElement.querySelector(`.footer__statistics`);
-  const countMovies = allMovies.length;
 
+const renderCountAllMoviesFooter = (countMovies) => {
+  const footerStatistics = footerElement.querySelector(`.footer__statistics`);
   footerStatistics.querySelector(`p`).textContent = `${countMovies} movies inside`;
 };
 
@@ -66,13 +73,34 @@ menuComponent.setStatisticsClickHandler((mode) => {
   }
 });
 
-api.getFilms()
-  .then((films) => {
-    filmsModel.setFilms(films);
-    renderProfileUser(films);
-    filterController.render();
-    pageController.render();
-    renderCountAllMovies(films);
 
-    statisticsController.render();
-  });
+renderCountAllMoviesFooter(0);
+
+apiWithProvider.getFilms()
+.then((films) => {
+  filmsModel.setFilms(films);
+  renderProfileUser(films);
+  filterController.render();
+  pageController.render();
+  renderCountAllMoviesFooter(films.length);
+
+  statisticsController.render();
+});
+
+
+window.addEventListener(`online`, () => {
+  document.title = document.title.replace(` [offline]`, ``);
+  if (!apiWithProvider.getSynchronize()) {
+    apiWithProvider.sync()
+    .then(() => {
+      // Действие, в случае успешной синхронизации
+    })
+    .catch(() => {
+      // Действие, в случае ошибки синхронизации
+    });
+  }
+});
+
+window.addEventListener(`offline`, () => {
+  document.title += ` [offline]`;
+});
