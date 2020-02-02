@@ -1,6 +1,8 @@
 // компонент "Карточка фильма"
+import debounce from 'lodash/debounce';
 import AbstractComponent from './abstract-component.js';
 import {formatDateYear, parseDuration} from '../utils/common.js';
+import {DEBOUNCE_TIMEOUT} from '../const.js';
 
 const createBooleanItemMarkup = (isBoolean) => {
   if (isBoolean) {
@@ -33,9 +35,9 @@ const createFilmCardTemplate = (film) => {
       <p class="film-card__description">${descriptionText}</p>
       <a class="film-card__comments">${comments.length} comments</a>
       <form class="film-card__controls">
-        <button class="film-card__controls-item button film-card__controls-item--add-to-watchlist ${watchlist}">Add to watchlist</button>
-        <button class="film-card__controls-item button film-card__controls-item--mark-as-watched ${watched}">Mark as watched</button>
-        <button class="film-card__controls-item button film-card__controls-item--favorite ${favorite}">Mark as favorite</button>
+        <button class="film-card__controls-item button film-card__controls-item--add-to-watchlist ${watchlist}" type="button">Add to watchlist</button>
+        <button class="film-card__controls-item button film-card__controls-item--mark-as-watched ${watched}" type="button">Mark as watched</button>
+        <button class="film-card__controls-item button film-card__controls-item--favorite ${favorite}" type="button">Mark as favorite</button>
       </form>
     </article>`
   );
@@ -69,26 +71,17 @@ export default class Film extends AbstractComponent {
 
   setAddToWatchlistButtonClickHandler(handler) {
     this.getElement().querySelector(`.film-card__controls-item--add-to-watchlist`)
-      .addEventListener(`click`, (evt) => {
-        evt.preventDefault();
-        handler();
-      });
+      .addEventListener(`click`, debounce(handler, DEBOUNCE_TIMEOUT));
   }
 
   setMarkAsWatchedButtonClickHandler(handler) {
     this.getElement().querySelector(`.film-card__controls-item--mark-as-watched`)
-      .addEventListener(`click`, (evt) => {
-        evt.preventDefault();
-        handler();
-      });
+    .addEventListener(`click`, debounce(handler, DEBOUNCE_TIMEOUT));
   }
 
   setFavoriteButtonClickHandler(handler) {
     this.getElement().querySelector(`.film-card__controls-item--favorite`)
-      .addEventListener(`click`, (evt) => {
-        evt.preventDefault();
-        handler();
-      });
+    .addEventListener(`click`, debounce(handler, DEBOUNCE_TIMEOUT));
   }
 }
 
