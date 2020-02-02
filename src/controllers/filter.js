@@ -13,7 +13,6 @@ export default class Filter {
     this._menuComponent = menuComponent;
 
     this._onDataChange = this._onDataChange.bind(this);
-
     this._onFilterChange = this._onFilterChange.bind(this);
 
     this._filmsModel.setDataChangeHandler(this._onDataChange);
@@ -37,6 +36,7 @@ export default class Filter {
 
     if (oldComponent) {
       replace(this._filterComponent, oldComponent);
+      render(this._filterComponent.getElement(), this._menuComponent.getElement(), RenderPosition.BEFOREEND);
     } else {
       render(container, this._filterComponent.getElement(), RenderPosition.BEFOREEND);
       render(this._filterComponent.getElement(), this._menuComponent.getElement(), RenderPosition.BEFOREEND);
@@ -49,6 +49,7 @@ export default class Filter {
   }
 
   _onDataChange() {
+
     this.render();
   }
 }

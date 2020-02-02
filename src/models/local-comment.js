@@ -1,14 +1,13 @@
 export default class LocalComment {
   constructor(data) {
-    this.date = data.date;
-    this.text = data.text;
+    this.date = new Date(data.date);
+    this.comment = data.comment;
     this.emotion = data.emotion;
   }
 
-  // подготовка данных для отравки на сервер
   toRAW() {
     return {
-      "comment": this.text,
+      "comment": this.comment,
       "date": this.date.toISOString(),
       "emotion": this.emotion
     };
@@ -17,15 +16,6 @@ export default class LocalComment {
   static parseComment(data) {
     return new LocalComment(data);
   }
-
-  // static parseComments(data) {
-  //   return data.map(Comment.parseComment);
-  // }
-
-
-  // static clone(data) {
-  //   return new Comment(data.toRAW());
-  // }
 }
 
 

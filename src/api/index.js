@@ -31,15 +31,15 @@ export default class API {
   }
 
   // +получение списка комментарий для конкретного фильма
-  getComments(filmId) {
-    return this._load({url: `comments/${filmId}`})
+  getComments(movie) {
+    return this._load({url: `comments/${movie.id}`})
       .then((response) => response.json())
       .then(Comment.parseComments);
   }
 
   // +-обновление фильма (=изменение флагов + оценка пользователя)
-  updateFilm(id, data) {
-    const newData = data.toRAW();
+  updateFilm(id, movie) {
+    const newData = movie.toRAW();
     const newData2 = JSON.stringify(newData);
     return this._load({
       url: `movies/${id}`,
@@ -52,11 +52,11 @@ export default class API {
   }
 
   // -создание комментария
-  createComment(filmId, data) {
+  createComment(movie, localComment) {
     return this._load({
-      url: `comments/${filmId}`,
+      url: `comments/${movie.id}`,
       method: Method.POST,
-      body: JSON.stringify(data.toRAW()),
+      body: JSON.stringify(localComment.toRAW()),
       headers: new Headers({'Content-Type': `application/json`})
     })
     .then((response) => response.json());

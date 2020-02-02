@@ -1,12 +1,12 @@
-// компонент "Попап"
+import he from 'he';
 import AbstractSmartComponent from './abstract-smart-component.js';
-import {formatDate, formatDateComment, parseDuration} from '../utils/common.js';
+import {formatDate, parseDuration, getRelativeTimeFromNow} from '../utils/common.js';
 import {CommentEmotion} from '../const.js';
 // import debounce from 'lodash.debounce';
 
-const DefaultData = {
-  deleteButtonText: `Delete`,
-  // saveButtonText: `Save`,
+const NameDeleteButton = {
+  DELETE: `Delete`,
+  DELETING: `Deleting...`,
 };
 
 const COUNT_RATING = 9;
@@ -67,8 +67,13 @@ const createUserRatingControlsMarkup = (title, poster, userRating) => {
   );
 };
 
-const createCommentMarkup = (comment, deleteButtonText) => {
+const createCommentMarkup = (comment) => {
   const {id, emotion, text, author, date} = comment;
+
+  const currentText = he.encode(text);
+
+  // const currentDate = formatDateComment(date);
+  const currentDate = getRelativeTimeFromNow(date);
 
   return (
     `<li class="film-details__comment">
@@ -76,11 +81,11 @@ const createCommentMarkup = (comment, deleteButtonText) => {
         <img src="./images/emoji/${emotion}.png" width="55" height="55" alt="emoji">
       </span>
       <div>
-        <p class="film-details__comment-text">${text}</p>
+        <p class="film-details__comment-text">${currentText}</p>
         <p class="film-details__comment-info">
           <span class="film-details__comment-author">${author}</span>
-          <span class="film-details__comment-day">${formatDateComment(date)}</span>
-          <button class="film-details__comment-delete" data-comment-id="${id}">${deleteButtonText}</button>
+          <span class="film-details__comment-day">${currentDate}</span>
+          <button class="film-details__comment-delete" data-comment-id="${id}">${NameDeleteButton.DELETE}</button>
         </p>
       </div>
     </li>`
@@ -109,7 +114,7 @@ const createEmotionMarkup = () => {
 const createPopupTemplate = (film, comments, options = {}) => {
   const {title, originalTitle, poster, description, director, writers, actors, releaseDate,
     duration, country, genres, rating, age} = film;
-  const {isWatchlist, isWatched, isFavorite, userRating, externalData} = options;
+  const {isWatchlist, isWatched, isFavorite, userRating} = options;
 
   const durationText = parseDuration(duration);
 
@@ -119,10 +124,8 @@ const createPopupTemplate = (film, comments, options = {}) => {
 
   const userRatingControlsMarkup = (isWatched) ? createUserRatingControlsMarkup(title, poster, userRating) : ``;
 
-  const deleteButtonText = externalData.deleteButtonText;
-
   const commentsCount = comments.length;
-  const commentsMarkup = (comments.length > 0) ? createCommentsMarkup(comments, deleteButtonText) : ``;
+  const commentsMarkup = (comments.length > 0) ? createCommentsMarkup(comments) : ``;
   const emotionMarkup = createEmotionMarkup();
 
   return (
@@ -240,7 +243,6 @@ export default class Popup extends AbstractSmartComponent {
     this._isWatched = !!film.isWatched;
     this._isFavorite = !!film.isFavorite;
     this._userRating = film.userRating;
-    this._externalData = DefaultData;
 
     this._clickCloseButtonHandler = null;
     this._clickAddToWatchlistButtonHandler = null;
@@ -251,6 +253,9 @@ export default class Popup extends AbstractSmartComponent {
     this._clickDeleteCommentButtonHandler = null;
 
     this._setAddEmotionBtnClickHandler();
+
+    this._newOptions = null;
+    this._setNewOptions();
   }
 
   getTemplate() {
@@ -259,14 +264,47 @@ export default class Popup extends AbstractSmartComponent {
       isWatched: this._isWatched,
       isFavorite: this._isFavorite,
       userRating: this._userRating,
-      externalData: this._externalData,
     });
   }
 
-  // setData(data) {
-  //   this._externalData = Object.assign({}, DefaultData, data);
-  //   this.rerender();
-  // }
+  rerender() {
+    super.rerender();
+  }
+
+  reset() {
+    this._setNewOptions();
+    this.rerender();
+  }
+
+  rerender() {
+    super.rerender();
+  }
+
+  update() {
+    this._setOptions();
+    this._setNewOptions();
+    this.rerender();
+  }
+
+  _setNewOptions() {
+    this._newOptions = this._getOptions();
+  }
+
+  _getOptions() {
+    return {
+      isWatchlist: this._isWatchlist,
+      isWatched: this._isWatched,
+      isFavorite: this._isFavorite,
+      userRating: this._userRating,
+    };
+  }
+
+  _setOptions() {
+    this._isWatchlist = this._newOptions.isWatchlist;
+    this._isWatched = this._newOptions.isWatched;
+    this._isFavorite = this._newOptions.isFavorite;
+    this._userRating = this._newOptions.userRating;
+  }
 
   disabledCommentForm() {
     this.getElement().querySelector(`.film-details__comment-input`).disabled = true;
@@ -278,9 +316,8 @@ export default class Popup extends AbstractSmartComponent {
 
   showErrorCommentForm() {
     const commentForm = this.getElement().querySelector(`.film-details__comment-input`);
-    commentForm.value = ``;
     commentForm.style.border = `2px solid red`;
-    this._popupComponent.activatedCommentForm();
+    this.activatedCommentForm();
   }
 
   showDefaultCommentForm() {
@@ -304,16 +341,15 @@ export default class Popup extends AbstractSmartComponent {
 
   showErrorRatingScoreForm() {
     const ratingScoreForm = this.getElement().querySelector(`.film-details__user-rating-score`);
-    // ratingScoreForm.value = ``;
 
-    const userRatingInputs = ratingScoreForm.querySelectorAll(`.film-details__user-rating-input`);
-    userRatingInputs.forEach((input) => {
-      input.checked = false;
-    });
+    // const userRatingInputs = ratingScoreForm.querySelectorAll(`.film-details__user-rating-input`);
+    // userRatingInputs.forEach((input) => {
+    //   input.checked = false;
+    // });
 
     ratingScoreForm.style.border = `2px solid red`;
     ratingScoreForm.style.borderRadius = `5px`;
-    this._popupComponent.activatedRatingScoreForm();
+    this.activatedRatingScoreForm();
   }
 
   showDefaultRatingScoreForm() {
@@ -344,10 +380,17 @@ export default class Popup extends AbstractSmartComponent {
     this.getElement().querySelector(`.film-details__control-label--watchlist`)
     .addEventListener(`click`, (evt) => {
       evt.preventDefault();
-      this._isWatchlist = !this._isWatchlist;
+
+      this._newOptions.isWatchlist = !this._isWatchlist;
+
       handler();
     });
   }
+
+  // если не запрашивать новые комменты при добавлении удалении, то
+  // сделать по аналогии с флагам
+  // в конструкторе попапа добавить комментарии
+  // при добавлении
 
   setMarkAsWatchedButtonClickHandler(handler) {
     this._clickMarkAsWatchedButtonHandler = handler;
@@ -355,10 +398,16 @@ export default class Popup extends AbstractSmartComponent {
     this.getElement().querySelector(`.film-details__control-label--watched`)
     .addEventListener(`click`, (evt) => {
       evt.preventDefault();
-      this._isWatched = !this._isWatched;
-      if (!this._isWatched) {
-        this._userRating = 0;
+      // this._isWatched = !this._isWatched;
+      // if (!this._isWatched) {
+      //   this._userRating = 0;
+      // }
+
+      this._newOptions.isWatched = !this._isWatched;
+      if (!this._newOptions.isWatched) {
+        this._newOptions.userRating = 0;
       }
+
       handler();
     });
   }
@@ -371,7 +420,10 @@ export default class Popup extends AbstractSmartComponent {
     this.getElement().querySelector(`.film-details__control-label--favorite`)
     .addEventListener(`click`, (evt) => {
       evt.preventDefault();
-      this._isFavorite = !this._isFavorite;
+
+      // this._isFavorite = !this._isFavorite;
+      this._newOptions.isWatched = !this._isFavorite;
+
       handler();
     });
   }
@@ -385,19 +437,20 @@ export default class Popup extends AbstractSmartComponent {
 
     this.getElement().querySelector(`.film-details__user-rating-score`)
     .addEventListener(`click`, (evt) => {
+      // evt.preventDefault();
       const target = evt.target;
 
       if (!target.classList.contains(`film-details__user-rating-input`)) {
         return;
       }
-
-      this._userRating = +target.value;
-
       this.showDefaultRatingScoreForm();
 
+      this._newOptions.userRating = +target.value;
+
+      // this._userRating = +target.value;
       this.disabledRatingScoreForm();
 
-      handler(this._userRating);
+      handler(this._newOptions.userRating);
     });
 
   }
@@ -412,9 +465,19 @@ export default class Popup extends AbstractSmartComponent {
     this.getElement().querySelector(`.film-details__watched-reset`)
     .addEventListener(`click`, (evt) => {
       evt.preventDefault();
-      this._userRating = 0;
+
+      this._newOptions.userRating = 0;
+
       handler();
     });
+  }
+
+  _setNameDeleteButton(button, name) {
+    button.textContent = name;
+  }
+
+  _disabledDeleteButton(button) {
+    button.disabled = true;
   }
 
   // удалить коммент
@@ -430,9 +493,8 @@ export default class Popup extends AbstractSmartComponent {
         return;
       }
 
-      // this._popupComponent.setData({
-      //   deleteButtonText: `Deleting...`,
-      // });
+      this._disabledDeleteButton(target);
+      this._setNameDeleteButton(target, NameDeleteButton.DELETING);
 
       handler(target.dataset.commentId);
     });
