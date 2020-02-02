@@ -1,8 +1,8 @@
 import he from 'he';
+import debounce from 'lodash/debounce';
 import AbstractSmartComponent from './abstract-smart-component.js';
 import {formatDate, parseDuration, getRelativeTimeFromNow} from '../utils/common.js';
-import {CommentEmotion} from '../const.js';
-// import debounce from 'lodash.debounce';
+import {CommentEmotion, DEBOUNCE_TIMEOUT} from '../const.js';
 
 const NameDeleteButton = {
   DELETE: `Delete`,
@@ -252,6 +252,11 @@ export default class Popup extends AbstractSmartComponent {
     this._clickUndoRatingButtonHandler = null;
     this._clickDeleteCommentButtonHandler = null;
 
+
+    this._addToWatchlistButtonClickHandler = this._addToWatchlistButtonClickHandler.bind(this);
+    this._markAsWatchedButtonClickHandler = this._markAsWatchedButtonClickHandler.bind(this);
+    this._favoriteButtonClickHandler = this._favoriteButtonClickHandler.bind(this);
+
     this._setAddEmotionBtnClickHandler();
 
     this._newOptions = null;
@@ -342,11 +347,6 @@ export default class Popup extends AbstractSmartComponent {
   showErrorRatingScoreForm() {
     const ratingScoreForm = this.getElement().querySelector(`.film-details__user-rating-score`);
 
-    // const userRatingInputs = ratingScoreForm.querySelectorAll(`.film-details__user-rating-input`);
-    // userRatingInputs.forEach((input) => {
-    //   input.checked = false;
-    // });
-
     ratingScoreForm.style.border = `2px solid red`;
     ratingScoreForm.style.borderRadius = `5px`;
     this.activatedRatingScoreForm();
@@ -378,54 +378,46 @@ export default class Popup extends AbstractSmartComponent {
     this._clickAddToWatchlistButtonHandler = handler;
 
     this.getElement().querySelector(`.film-details__control-label--watchlist`)
-    .addEventListener(`click`, (evt) => {
-      evt.preventDefault();
-
-      this._newOptions.isWatchlist = !this._isWatchlist;
-
-      handler();
-    });
+      .addEventListener(`click`, debounce(this._addToWatchlistButtonClickHandler, DEBOUNCE_TIMEOUT));
   }
-
-  // если не запрашивать новые комменты при добавлении удалении, то
-  // сделать по аналогии с флагам
-  // в конструкторе попапа добавить комментарии
-  // при добавлении
 
   setMarkAsWatchedButtonClickHandler(handler) {
     this._clickMarkAsWatchedButtonHandler = handler;
 
     this.getElement().querySelector(`.film-details__control-label--watched`)
-    .addEventListener(`click`, (evt) => {
-      evt.preventDefault();
-      // this._isWatched = !this._isWatched;
-      // if (!this._isWatched) {
-      //   this._userRating = 0;
-      // }
-
-      this._newOptions.isWatched = !this._isWatched;
-      if (!this._newOptions.isWatched) {
-        this._newOptions.userRating = 0;
-      }
-
-      handler();
-    });
+      .addEventListener(`click`, debounce(this._markAsWatchedButtonClickHandler, DEBOUNCE_TIMEOUT));
   }
 
   setFavoriteButtonClickHandler(handler) {
     this._clickFavoriteButtonHandler = handler;
 
-    // .addEventListener(`click`, debounce(handler, DEBOUNCE_TIMEOUT));
-
     this.getElement().querySelector(`.film-details__control-label--favorite`)
-    .addEventListener(`click`, (evt) => {
-      evt.preventDefault();
+      .addEventListener(`click`, debounce(this._favoriteButtonClickHandler, DEBOUNCE_TIMEOUT));
+  }
 
-      // this._isFavorite = !this._isFavorite;
-      this._newOptions.isWatched = !this._isFavorite;
+  _addToWatchlistButtonClickHandler(evt) {
+    evt.preventDefault();
 
-      handler();
-    });
+    this._newOptions.isWatchlist = !this._isWatchlist;
+    this._clickAddToWatchlistButtonHandler();
+  }
+
+  _markAsWatchedButtonClickHandler(evt) {
+    evt.preventDefault();
+
+    this._newOptions.isWatched = !this._isWatched;
+    if (!this._newOptions.isWatched) {
+      this._newOptions.userRating = 0;
+    }
+
+    this._clickMarkAsWatchedButtonHandler();
+  }
+
+  _favoriteButtonClickHandler(evt) {
+    evt.preventDefault();
+
+    this._newOptions.isWatched = !this._isFavorite;
+    this._clickFavoriteButtonHandler();
   }
 
   setRatingButtonClickHandler(handler) {
@@ -437,7 +429,6 @@ export default class Popup extends AbstractSmartComponent {
 
     this.getElement().querySelector(`.film-details__user-rating-score`)
     .addEventListener(`click`, (evt) => {
-      // evt.preventDefault();
       const target = evt.target;
 
       if (!target.classList.contains(`film-details__user-rating-input`)) {
@@ -447,7 +438,6 @@ export default class Popup extends AbstractSmartComponent {
 
       this._newOptions.userRating = +target.value;
 
-      // this._userRating = +target.value;
       this.disabledRatingScoreForm();
 
       handler(this._newOptions.userRating);
@@ -480,7 +470,6 @@ export default class Popup extends AbstractSmartComponent {
     button.disabled = true;
   }
 
-  // удалить коммент
   setDeleteCommentButtonClickHandler(handler) {
     this._clickDeleteCommentButtonHandler = handler;
 
@@ -514,7 +503,6 @@ export default class Popup extends AbstractSmartComponent {
         this._setNewCommentEmotion(emotionItem.value);
       });
     });
-
   }
 
   _setNewCommentEmotion(emotion) {

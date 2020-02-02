@@ -15,7 +15,7 @@
     "eslint": "6.1.0",
     "eslint-config-htmlacademy": "0.5.2",
     "he": "1.2.0",
-    "lodash.debounce": "4.0.8",
+    "lodash": "4.17.15",
     "moment-locales-webpack-plugin": "1.1.2",
     "nanoid": "2.1.11",
     "webpack": "4.41.2",
