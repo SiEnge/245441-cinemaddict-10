@@ -5,7 +5,7 @@ import FilmModel from '../models/movie.js';
 import LocalCommentModel from '../models/local-comment.js';
 import {render, replace, RenderPosition} from '../utils/render.js';
 // import {CommentEmotion} from '../const.js';
-const SHAKE_ANIMATION_TIMEOUT = 6000;
+const SHAKE_ANIMATION_TIMEOUT = 600;
 
 const Mode = {
   DEFAULT: `default`,
@@ -62,6 +62,9 @@ export default class MovieController {
     this._filmComponent.setMarkAsWatchedButtonClickHandler(() => {
       const newFilm = FilmModel.clone(film);
       newFilm.isWatched = !newFilm.isWatched;
+      if (newFilm.isWatched) {
+        newFilm.watchingDate = new Date();
+      }
       this._onDataChange(this, film, newFilm);
     });
 
@@ -79,6 +82,10 @@ export default class MovieController {
     } else {
       render(this._container, this._filmComponent.getElement(), RenderPosition.BEFOREEND);
     }
+  }
+
+  resetPopup() {
+    this._popupComponent.reset();
   }
 
   setDefaultView() {
@@ -105,20 +112,15 @@ export default class MovieController {
 
     setTimeout(() => {
       element.style.animation = ``;
-
-      // this._popupComponent.setData({
-      //   // saveButtonText: `Save`,
-      //   deleteButtonText: `Delete`,
-      // });
     }, SHAKE_ANIMATION_TIMEOUT);
   }
 
   _updatePopup(film) {
-    this._api.getComments(film.id)
+    this._api.getComments(film)
     .then((comments) => {
       this._comments = comments;
       this._popupComponent.setComments(comments);
-      this._popupComponent.rerender();
+      this._popupComponent.update();
     });
 
   }
@@ -129,7 +131,7 @@ export default class MovieController {
 
     render(document.querySelector(`body`), this._popupContainerComponent.getElement(), RenderPosition.BEFOREEND);
 
-    this._api.getComments(film.id)
+    this._api.getComments(film)
     .then((comments) => {
       this._comments = comments;
       this._popupComponent = new PopupComponent(film, comments);
@@ -151,6 +153,8 @@ export default class MovieController {
         newFilm.isWatched = !newFilm.isWatched;
         if (!newFilm.isWatched) {
           newFilm.userRating = 0;
+        } else {
+          newFilm.watchingDate = new Date();
         }
         this._onDataChange(this, this._film, newFilm);
       });
@@ -180,11 +184,6 @@ export default class MovieController {
         if (index === -1) {
           return;
         }
-        // debugger;
-
-        // this._popupComponent.setData({
-        //   deleteButtonText: `Deleting...`,
-        // });
 
         this._onCommentsChange(this, this._film, this._comments, this._comments[index], null);
       });
@@ -208,16 +207,10 @@ export default class MovieController {
   }
 
   _sendComment(textComment, emotionComment) {
-    const comment = {
-      text: textComment,
-      date: new Date(),
-      emotion: emotionComment,
-    };
+    // const comment = {comment: textComment, date: new Date(), emotion: emotionComment};
 
-    const newComment = LocalCommentModel.parseComment(comment);
+    const newComment = LocalCommentModel.parseComment({comment: textComment, date: new Date(), emotion: emotionComment});
     this._onCommentsChange(this, this._film, this._comments, null, newComment);
-
-    // this._popupComponent.rerender();
   }
 
   _onEscKeyDown(evt) {

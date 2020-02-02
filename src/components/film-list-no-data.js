@@ -1,7 +1,7 @@
 // компонент "Нет данных для отображения"
 import AbstractComponent from './abstract-component.js';
 
-const createFilmListNoFilmsTemplate = () => {
+const createFilmListNoDataTemplate = () => {
   return (
     `<section class="films-list">
       <h2 class="films-list__title">There are no movies in our database</h2>
@@ -9,8 +9,8 @@ const createFilmListNoFilmsTemplate = () => {
   );
 };
 
-export default class NoFilms extends AbstractComponent {
+export default class FilmsListNoData extends AbstractComponent {
   getTemplate() {
-    return createFilmListNoFilmsTemplate();
+    return createFilmListNoDataTemplate();
   }
 }

@@ -156,13 +156,23 @@ export default class Statistics extends AbstractComponent {
   }
 
   _renderCharts() {
+    this._resetCharts();
+
     if (this._ratingGenres.length === 0) {
       return;
     }
+
     const element = this.getElement();
     const statisticsCtx = element.querySelector(`.statistic__chart`);
 
     this._statisticsChart = renderStaticticsChart(statisticsCtx, this._ratingGenres);
+  }
+
+  _resetCharts() {
+    if (this._statisticsChart) {
+      this._statisticsChart.destroy();
+      this._statisticsChart = null;
+    }
   }
 
   setStatisticsFilterClickHandler(handler) {

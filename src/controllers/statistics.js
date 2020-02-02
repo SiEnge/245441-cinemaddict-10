@@ -60,6 +60,7 @@ export default class Statistics {
   }
 
   show() {
+    this.render();
     this._statisticsComponent.show();
   }
 }

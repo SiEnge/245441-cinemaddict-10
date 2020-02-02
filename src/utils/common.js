@@ -36,12 +36,14 @@ export const getWatchedMovies = (allMovies) => {
 };
 
 export const getTopRatedMovies = (allMovies) => {
-  return allMovies.filter((film) => film.rating !== 0)
+  return allMovies
+    .filter((film) => film.rating !== 0)
     .sort((a, b) => b.rating - a.rating);
 };
 
 export const getMostCommentedMovies = (allMovies) => {
-  return allMovies.filter((film) => film.comments !== 0)
+  return allMovies
+    .filter((film) => film.comments !== 0)
     .sort((a, b) => b.comments.length - a.comments.length);
 };
 
@@ -64,3 +66,8 @@ export const activateElement = (wrap, activeElement, activeClassName) => {
   currentActiveElement.classList.remove(activeClassName);
   activeElement.classList.add(activeClassName);
 };
+
+export const getRelativeTimeFromNow = (date) => {
+  return moment(date).fromNow();
+};
+

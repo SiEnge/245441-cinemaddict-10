@@ -29,7 +29,6 @@ export default class Film {
 
   // подготовка данных для отравки на сервер
   toRAW() {
-    // debugger;
     return {
       'id': this.id,
       'film_info': {
@@ -54,8 +53,8 @@ export default class Film {
         'watchlist': this.isWatchlist,
         'already_watched': this.isWatched,
 
-        'watching_date': this.watchingDate,
-        // 'watching_date': this.watchingDate ? this.watchingDate.toISOString() : '',
+        // 'watching_date': this.watchingDate.toISOString(),
+        'watching_date': this.watchingDate ? this.watchingDate.toISOString() : 0,
         'favorite': this.isFavorite,
       },
       'comments': this.comments,
