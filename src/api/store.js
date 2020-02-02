@@ -1,42 +1,40 @@
 export default class Store {
-  constructor(key, storage) {
+  constructor(storage) {
     this._storage = storage;
-    this._storeKey = key;
   }
 
-  getAll() {
+  getAll(storeKey) {
     try {
-      return JSON.parse(this._storage.getItem(this._storeKey));
+      return JSON.parse(this._storage.getItem(storeKey));
     } catch (err) {
       return {};
     }
   }
 
-  dropAll() {
-    this._storage.setItem(this._storeKey, ``);
+  dropAll(storeKey) {
+    this._storage.setItem(storeKey, ``);
   }
 
-  setItem(key, value) {
-    const store = this.getAll();
+  setItem(storeKey, key, value) {
+    const store = this.getAll(storeKey);
 
-    this._storage.setItem(
-        this._storeKey,
-        JSON.stringify(
-            Object.assign({}, store, {[key]: value})
-        )
-    );
+    this._storage.setItem(storeKey, JSON.stringify(Object.assign({}, store, {[key]: value})));
   }
 
-  removeItem(key) {
-    const store = this.getAll();
+  getItem(storeKey, key) {
+    const store = this.getAll(storeKey);
+    if (!store[key]) {
+      return false;
+    }
+
+    return store[key];
+  }
+
+  removeItem(storeKey, key) {
+    const store = this.getAll(storeKey);
 
     delete store[key];
 
-    this._storage.setItem(
-        this._storeKey,
-        JSON.stringify(
-            Object.assign({}, store)
-        )
-    );
+    this._storage.setItem(storeKey, JSON.stringify(Object.assign({}, store)));
   }
 }

@@ -19,8 +19,7 @@ export default class StoreComments {
   setItem(key, value) {
     const store = this.getAll();
 
-    this._storage.setItem(
-        this._storeKey,
+    this._storage.setItem(this._storeKey,
         JSON.stringify(
             Object.assign({}, store, {[key]: value})
         )

@@ -12,12 +12,6 @@ import {render, RenderPosition} from './utils/render.js';
 import {getWatchedMovies} from './utils/common.js';
 import {PageMode} from './const.js';
 
-const STORE_PREFIX = `cinemaddict-localstorage`;
-const STORE_VER = `v1`;
-const STORE_NAME = `${STORE_PREFIX}-${STORE_VER}`;
-
-const STORE_COMMENTS_PREFIX = `cinemaddict-comments-localstorage`;
-const STORE_COMMENTS_NAME = `${STORE_COMMENTS_PREFIX}-${STORE_VER}`;
 
 const AUTHORIZATION = `Basic 6Idsiz23kTy9g17`;
 const END_POINT = `https://htmlacademy-es-10.appspot.com/cinemaddict/`;
@@ -36,11 +30,12 @@ const mainElement = document.querySelector(`.main`);
 const headerElement = document.querySelector(`.header`);
 const footerElement = document.querySelector(`.footer`);
 
+debugger;
 
 const api = new API(END_POINT, AUTHORIZATION);
-const store = new Store(STORE_NAME, window.localStorage);
-const storeComments = new StoreComments(STORE_COMMENTS_NAME, window.localStorage);
-const apiWithProvider = new Provider(api, store, storeComments);
+const store = new Store(window.localStorage);
+// const storeComments = new StoreComments(STORE_COMMENTS_NAME, window.localStorage);
+const apiWithProvider = new Provider(api, store);
 
 const filmsModel = new FilmsModel();
 
