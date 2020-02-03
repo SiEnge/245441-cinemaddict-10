@@ -1,16 +1,14 @@
-// компонент "Статистика"
 import AbstractComponent from './abstract-component.js';
 import Chart from 'chart.js';
 import ChartDataLabels from 'chartjs-plugin-datalabels';
+import {MINUTE_IN_ONE_HOUR} from '../const.js';
 
-import {ONE_HOUR_IN_MINUTE} from '../const.js';
-
-const NameToTitlePeriod = {
-  'all-time': `All time`,
-  'today': `Today`,
-  'week': `Week`,
-  'month': `Month`,
-  'year': `Year`,
+const TitlePeriod = {
+  ALL_TIME: `All time`,
+  TODAY: `Today`,
+  WEEK: `Week`,
+  MONTH: `Month`,
+  YEAR: `Year`,
 };
 
 const renderStaticticsChart = (statisticsCtx, ratingGenres) => {
@@ -77,7 +75,7 @@ const createFilterStatisticsMarkup = (period, isChecked) => {
 
   return (
     `<input type="radio" class="statistic__filters-input visually-hidden" name="statistic-filter" id="statistic-${name}" value="${name}" ${(isChecked) ? `checked` : ``}>
-      <label for="statistic-${name}" class="statistic__filters-label">${NameToTitlePeriod[name]}</label>`
+      <label for="statistic-${name}" class="statistic__filters-label">${TitlePeriod[name.toUpperCase().replace(`-`, `_`)]}</label>`
   );
 };
 
@@ -98,8 +96,8 @@ const createUserRankMarkup = (userRank) => {
 const createStatisticsTemplate = (statistic, periods) => {
   const {count, duration, genre, userRank} = statistic;
 
-  const hour = (duration >= ONE_HOUR_IN_MINUTE) ? Math.floor(duration / ONE_HOUR_IN_MINUTE) : ``;
-  const minute = duration % ONE_HOUR_IN_MINUTE;
+  const hour = (duration >= MINUTE_IN_ONE_HOUR) ? Math.floor(duration / MINUTE_IN_ONE_HOUR) : ``;
+  const minute = duration % MINUTE_IN_ONE_HOUR;
 
   const hourDuration = (hour) ? `${hour} <span class="statistic__item-description">h</span>` : ``;
   const miniteDuration = `${minute} <span class="statistic__item-description">m</span>`;

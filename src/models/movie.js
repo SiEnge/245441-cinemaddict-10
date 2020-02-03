@@ -1,7 +1,6 @@
-export default class Film {
+export default class Movie {
   constructor(data) {
     this.id = data.id;
-    // debugger;
 
     this.title = data.film_info.title;
     this.originalTitle = data.film_info.alternative_title;
@@ -22,12 +21,9 @@ export default class Film {
     this.isWatched = data.user_details.already_watched;
     this.watchingDate = data.user_details.watching_date ? new Date(data.user_details.watching_date) : null;
     this.isFavorite = data.user_details.favorite;
-    this.comments = data.comments; // ?
-    // this.textComments = data.comments; // ?
-
+    this.comments = data.comments;
   }
 
-  // подготовка данных для отравки на сервер
   toRAW() {
     return {
       'id': this.id,
@@ -52,25 +48,22 @@ export default class Film {
         'personal_rating': +this.userRating,
         'watchlist': this.isWatchlist,
         'already_watched': this.isWatched,
-
-        // 'watching_date': this.watchingDate.toISOString(),
         'watching_date': this.watchingDate ? this.watchingDate.toISOString() : 0,
         'favorite': this.isFavorite,
       },
       'comments': this.comments,
-      // 'comments': this.comments,
     };
   }
 
-  static parseFilm(data) {
-    return new Film(data);
+  static parseMovie(data) {
+    return new Movie(data);
   }
 
-  static parseFilms(data) {
-    return data.map(Film.parseFilm);
+  static parseMovies(data) {
+    return data.map(Movie.parseMovie);
   }
 
   static clone(data) {
-    return new Film(data.toRAW());
+    return new Movie(data.toRAW());
   }
 }

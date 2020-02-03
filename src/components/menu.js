@@ -1,4 +1,3 @@
-// компонент "Меню"
 import AbstractComponent from './abstract-component.js';
 import {PageMode, ACTIVE_NAVIGATION_CLASS} from '../const.js';
 

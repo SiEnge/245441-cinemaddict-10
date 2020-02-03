@@ -1,4 +1,4 @@
-import Film from '../models/movie.js';
+import Movie from '../models/movie.js';
 import Comment from '../models/comment.js';
 
 const Method = {
@@ -8,7 +8,6 @@ const Method = {
   DELETE: `DELETE`
 };
 
-// проверка статус ответа
 const checkStatus = (response) => {
   if (response.status >= 200 && response.status < 300) {
     return response;
@@ -23,22 +22,19 @@ export default class API {
     this._authorization = authorization;
   }
 
-  // +получение списка фильмов
-  getFilms() {
+  getMovies() {
     return this._load({url: `movies`})
       .then((response) => response.json())
-      .then(Film.parseFilms);
+      .then(Movie.parseMovies);
   }
 
-  // +получение списка комментарий для конкретного фильма
   getComments(movie) {
     return this._load({url: `comments/${movie.id}`})
       .then((response) => response.json())
       .then(Comment.parseComments);
   }
 
-  // +-обновление фильма (=изменение флагов + оценка пользователя)
-  updateFilm(id, movie) {
+  updateMovie(id, movie) {
     const newData = movie.toRAW();
     const newData2 = JSON.stringify(newData);
     return this._load({
@@ -48,10 +44,9 @@ export default class API {
       headers: new Headers({'Content-Type': `application/json`})
     })
       .then((response) => response.json())
-      .then(Film.parseFilm);
+      .then(Movie.parseMovie);
   }
 
-  // -создание комментария
   createComment(movie, localComment) {
     return this._load({
       url: `comments/${movie.id}`,
@@ -60,25 +55,22 @@ export default class API {
       headers: new Headers({'Content-Type': `application/json`})
     })
     .then((response) => response.json());
-    // .then(Film.parseFilm);
   }
 
-  // +удаление комментария
   deleteComment(commentId) {
     return this._load({url: `comments/${commentId}`, method: Method.DELETE});
   }
 
-  sync(data) {
+  sync(movies) {
     return this._load({
       url: `movies/sync`,
       method: Method.POST,
-      body: JSON.stringify(data),
+      body: JSON.stringify(movies),
       headers: new Headers({'Content-Type': `application/json`})
     })
       .then((response) => response.json());
   }
 
-  // +загрузочные данные
   _load({url, method = Method.GET, body = null, headers = new Headers()}) {
     headers.append(`Authorization`, this._authorization);
 

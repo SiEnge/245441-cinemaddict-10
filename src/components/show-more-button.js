@@ -1,4 +1,3 @@
-// компонент "Кнопка «Show more»"
 import AbstractComponent from './abstract-component.js';
 
 const createShowMoreButtonTemplate = () => {

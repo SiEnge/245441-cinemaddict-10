@@ -1,10 +1,8 @@
-// компонент "Звание пользователя"
 import AbstractComponent from './abstract-component.js';
 
 const createPopupContainerTemplate = () => {
   return (
-    `<section class="film-details">
-    </section>`
+    `<section class="film-details"></section>`
   );
 };
 

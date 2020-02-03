@@ -14,74 +14,74 @@ const isPeriod = (dateA, dateB, period) => {
   return a.diff(b, period) === 0 && dateA.getDate() === dateB.getDate();
 };
 
-const getFilmsForToday = (films) => {
+const getMoviesForToday = (movies) => {
   const today = new Date();
-  return films.filter((film) => isPeriod(film.watchingDate, today, MomentPeriod.TODAY));
+  return movies.filter((movie) => isPeriod(movie.watchingDate, today, MomentPeriod.TODAY));
 };
 
-const getFilmsForWeek = (films) => {
+const getMoviesForWeek = (movies) => {
   const today = new Date();
-  return films.filter((film) => isPeriod(film.watchingDate, today, MomentPeriod.WEEK));
+  return movies.filter((movie) => isPeriod(movie.watchingDate, today, MomentPeriod.WEEK));
 };
 
-const getFilmsForMonth = (films) => {
+const getMoviesForMonth = (movies) => {
   const today = new Date();
-  return films.filter((film) => isPeriod(film.watchingDate, today, MomentPeriod.MONTH));
+  return movies.filter((movie) => isPeriod(movie.watchingDate, today, MomentPeriod.MONTH));
 };
 
-const getFilmsForYear = (films) => {
+const getMoviesForYear = (movies) => {
   const today = new Date();
-  return films.filter((film) => isPeriod(film.watchingDate, today, MomentPeriod.YEAR));
+  return movies.filter((movie) => isPeriod(movie.watchingDate, today, MomentPeriod.YEAR));
 };
 
-export const getWatchedFilmsByPeriod = (watchedFilms, period) => {
-  let watchedFilmsByPeriod;
+export const getWatchedMoviesByPeriod = (watchedMovies, period) => {
+  let watchedMoviesByPeriod;
   switch (period) {
     case StatiscticsPeriod.ALLTIME:
-      watchedFilmsByPeriod = watchedFilms;
+      watchedMoviesByPeriod = watchedMovies;
       break;
     case StatiscticsPeriod.TODAY:
-      watchedFilmsByPeriod = getFilmsForToday(watchedFilms);
+      watchedMoviesByPeriod = getMoviesForToday(watchedMovies);
       break;
     case StatiscticsPeriod.WEEK:
-      watchedFilmsByPeriod = getFilmsForWeek(watchedFilms);
+      watchedMoviesByPeriod = getMoviesForWeek(watchedMovies);
       break;
     case StatiscticsPeriod.MONTH:
-      watchedFilmsByPeriod = getFilmsForMonth(watchedFilms);
+      watchedMoviesByPeriod = getMoviesForMonth(watchedMovies);
       break;
     case StatiscticsPeriod.YEAR:
-      watchedFilmsByPeriod = getFilmsForYear(watchedFilms);
+      watchedMoviesByPeriod = getMoviesForYear(watchedMovies);
       break;
   }
-  return watchedFilmsByPeriod;
-
+  return watchedMoviesByPeriod;
 };
 
-export const getDurationFilm = (films) => {
-  return films.reduce((accumulator, currentValue) => accumulator + currentValue.duration, 0);
+export const getDurationMovie = (movies) => {
+  return movies.reduce((accumulator, currentValue) => accumulator + currentValue.duration, 0);
 };
 
-export const getSortCountFilmGenres = (films) => {
-  // let accumulator = 0;
-  const genresRating = {};
-  let ratings = [];
+export const getSortCountMovieGenres = (movies) => {
+  let ratingsGenre = [];
 
-  films.map((film) => Array.from(film.genres))
+  movies.map((movie) => Array.from(movie.genres))
+  .filter((genres) => genres.length > 0)
   .flat()
   .reduce((accumulator, genre) => {
-    genresRating[genre] = (genresRating[genre] || 0) + 1;
+    const index = ratingsGenre.findIndex((it) => it.genre === genre);
+
+    if (index === -1) {
+      ratingsGenre.push({genre, count: 1});
+    } else {
+      ratingsGenre[index].count += 1;
+    }
   }, 0);
 
-  for (let genre in genresRating) {
-    ratings.push({genre, count: genresRating[genre]});
-  }
-
-  return ratings.sort((a, b) => b.count - a.count);
+  return ratingsGenre.sort((a, b) => b.count - a.count);
 };
 
-export const getTopGenreFilm = (films) => {
-  if (films.length > 0) {
-    return getSortCountFilmGenres(films)[0].genre;
+export const getTopGenreMovie = (movies) => {
+  if (movies.length > 0 && movies[0].genres.size > 0) {
+    return getSortCountMovieGenres(movies)[0].genres;
   } else {
     return `–`;
   }

@@ -1,7 +1,6 @@
 import AbstractComponent from './abstract-component.js';
 
-const createFilmListLoadingTemplate = () => {
-  // debugger;
+const createMovieListLoadingTemplate = () => {
   return (
     `<section class="films-list">
       <h2 class="films-list__title">Loading...</h2>
@@ -9,8 +8,8 @@ const createFilmListLoadingTemplate = () => {
   );
 };
 
-export default class FilmsListLoading extends AbstractComponent {
+export default class MoviesListLoading extends AbstractComponent {
   getTemplate() {
-    return createFilmListLoadingTemplate();
+    return createMovieListLoadingTemplate();
   }
 }

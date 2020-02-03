@@ -3,7 +3,6 @@ import {getTitleProfile} from '../utils/common.js';
 
 const createProfileTemplate = (watchedMovies) => {
   const countMovies = watchedMovies.length;
-
   const titleProfile = getTitleProfile(countMovies);
 
   return (

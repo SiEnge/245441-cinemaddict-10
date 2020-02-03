@@ -1,8 +1,6 @@
-// компонент "Сортировка"
 import AbstractComponent from './abstract-component.js';
-
-import {SortType, ACTIVE_SORT_CLASS} from '../const.js';
 import {activateElement} from '../utils/common.js';
+import {SortType, ACTIVE_SORT_CLASS} from '../const.js';
 
 const createSortingMarkup = (sorting, isChecked) => {
   const {name} = sorting;

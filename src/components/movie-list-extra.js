@@ -1,7 +1,6 @@
-// компонент "Список всех фильмов Экстра""
 import AbstractComponent from './abstract-component.js';
 
-const createFilmListExtraTemplate = (title) => {
+const createMovieListExtraTemplate = (title) => {
   return (
     `<section class="films-list--extra">
       <h2 class="films-list__title">${title}</h2>
@@ -10,13 +9,13 @@ const createFilmListExtraTemplate = (title) => {
   );
 };
 
-export default class FilmListExtra extends AbstractComponent {
+export default class MovieListExtra extends AbstractComponent {
   constructor(title) {
     super();
     this._title = title;
   }
 
   getTemplate() {
-    return createFilmListExtraTemplate(this._title);
+    return createMovieListExtraTemplate(this._title);
   }
 }

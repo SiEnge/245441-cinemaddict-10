@@ -2,14 +2,15 @@ import he from 'he';
 import debounce from 'lodash/debounce';
 import AbstractSmartComponent from './abstract-smart-component.js';
 import {formatDate, parseDuration, getRelativeTimeFromNow} from '../utils/common.js';
-import {CommentEmotion, DEBOUNCE_TIMEOUT} from '../const.js';
+import {CommentEmotion, ChangeMode, DEBOUNCE_TIMEOUT, SHAKE_ANIMATION_TIMEOUT, MILLISECONDS_IN_ONE_MINUTE, EMPTY_USER_RATING, COUNT_RATING} from '../const.js';
+
+const ERROR_BORDER_STYLE = `2px solid red`;
+const ERROR_BORDER_RADIUS_STYLE = `5px`;
 
 const NameDeleteButton = {
   DELETE: `Delete`,
   DELETING: `Deleting...`,
 };
-
-const COUNT_RATING = 9;
 
 const createGenresMarkup = (genres) => {
   return genres
@@ -69,10 +70,7 @@ const createUserRatingControlsMarkup = (title, poster, userRating) => {
 
 const createCommentMarkup = (comment) => {
   const {id, emotion, text, author, date} = comment;
-
   const currentText = he.encode(text);
-
-  // const currentDate = formatDateComment(date);
   const currentDate = getRelativeTimeFromNow(date);
 
   return (
@@ -111,9 +109,9 @@ const createEmotionMarkup = () => {
   .join(`\n`);
 };
 
-const createPopupTemplate = (film, comments, options = {}) => {
+const createPopupTemplate = (movie, comments, options = {}) => {
   const {title, originalTitle, poster, description, director, writers, actors, releaseDate,
-    duration, country, genres, rating, age} = film;
+    duration, country, genres, rating, age} = movie;
   const {isWatchlist, isWatched, isFavorite, userRating} = options;
 
   const durationText = parseDuration(duration);
@@ -234,15 +232,16 @@ const createPopupTemplate = (film, comments, options = {}) => {
 };
 
 export default class Popup extends AbstractSmartComponent {
-  constructor(film, comments) {
+  constructor(movie, comments) {
     super();
-    this._film = film;
+    this._movie = movie;
     this._comments = comments;
 
-    this._isWatchlist = !!film.isWatchlist;
-    this._isWatched = !!film.isWatched;
-    this._isFavorite = !!film.isFavorite;
-    this._userRating = film.userRating;
+    this._isWatchlist = !!movie.isWatchlist;
+    this._isWatched = !!movie.isWatched;
+    this._isFavorite = !!movie.isFavorite;
+    this._userRating = movie.userRating;
+    this._newOptions = null;
 
     this._clickCloseButtonHandler = null;
     this._clickAddToWatchlistButtonHandler = null;
@@ -252,19 +251,16 @@ export default class Popup extends AbstractSmartComponent {
     this._clickUndoRatingButtonHandler = null;
     this._clickDeleteCommentButtonHandler = null;
 
-
     this._addToWatchlistButtonClickHandler = this._addToWatchlistButtonClickHandler.bind(this);
     this._markAsWatchedButtonClickHandler = this._markAsWatchedButtonClickHandler.bind(this);
     this._favoriteButtonClickHandler = this._favoriteButtonClickHandler.bind(this);
 
     this._setAddEmotionBtnClickHandler();
-
-    this._newOptions = null;
     this._setNewOptions();
   }
 
   getTemplate() {
-    return createPopupTemplate(this._film, this._comments, {
+    return createPopupTemplate(this._movie, this._comments, {
       isWatchlist: this._isWatchlist,
       isWatched: this._isWatched,
       isFavorite: this._isFavorite,
@@ -272,90 +268,8 @@ export default class Popup extends AbstractSmartComponent {
     });
   }
 
-  rerender() {
-    super.rerender();
-  }
-
-  reset() {
-    this._setNewOptions();
-    this.rerender();
-  }
-
-  rerender() {
-    super.rerender();
-  }
-
-  update() {
-    this._setOptions();
-    this._setNewOptions();
-    this.rerender();
-  }
-
-  _setNewOptions() {
-    this._newOptions = this._getOptions();
-  }
-
-  _getOptions() {
-    return {
-      isWatchlist: this._isWatchlist,
-      isWatched: this._isWatched,
-      isFavorite: this._isFavorite,
-      userRating: this._userRating,
-    };
-  }
-
-  _setOptions() {
-    this._isWatchlist = this._newOptions.isWatchlist;
-    this._isWatched = this._newOptions.isWatched;
-    this._isFavorite = this._newOptions.isFavorite;
-    this._userRating = this._newOptions.userRating;
-  }
-
-  disabledCommentForm() {
-    this.getElement().querySelector(`.film-details__comment-input`).disabled = true;
-  }
-
-  activatedCommentForm() {
-    this.getElement().querySelector(`.film-details__comment-input`).disabled = false;
-  }
-
-  showErrorCommentForm() {
-    const commentForm = this.getElement().querySelector(`.film-details__comment-input`);
-    commentForm.style.border = `2px solid red`;
-    this.activatedCommentForm();
-  }
-
-  showDefaultCommentForm() {
-    const commentForm = this.getElement().querySelector(`.film-details__comment-input`);
-    commentForm.style.border = ``;
-  }
-
-  disabledRatingScoreForm() {
-    const userRatingInputs = this.getElement().querySelectorAll(`.film-details__user-rating-input`);
-    userRatingInputs.forEach((input) => {
-      input.disabled = true;
-    });
-  }
-
-  activatedRatingScoreForm() {
-    const userRatingInputs = this.getElement().querySelectorAll(`.film-details__user-rating-input`);
-    userRatingInputs.forEach((input) => {
-      input.disabled = false;
-    });
-  }
-
-  showErrorRatingScoreForm() {
-    const ratingScoreForm = this.getElement().querySelector(`.film-details__user-rating-score`);
-
-    ratingScoreForm.style.border = `2px solid red`;
-    ratingScoreForm.style.borderRadius = `5px`;
-    this.activatedRatingScoreForm();
-  }
-
-  showDefaultRatingScoreForm() {
-    const ratingScoreForm = this.getElement().querySelector(`.film-details__user-rating-score`);
-    ratingScoreForm.style.border = ``;
-    ratingScoreForm.style.borderRadius = ``;
+  setComments(comments) {
+    this._comments = comments;
   }
 
   recoveryListeners() {
@@ -367,6 +281,163 @@ export default class Popup extends AbstractSmartComponent {
     this.setUndoRatingButtonClickHandler(this._clickUndoRatingButtonHandler);
     this.setDeleteCommentButtonClickHandler(this._clickDeleteCommentButtonHandler);
     this._setAddEmotionBtnClickHandler();
+  }
+
+  rerender() {
+    super.rerender();
+  }
+
+  reset() {
+    this._setNewOptions();
+    this.rerender();
+  }
+
+  update() {
+    this._setOptions();
+    this._setNewOptions();
+    this.rerender();
+  }
+
+  showError(changeMode) {
+    switch (changeMode) {
+      case ChangeMode.RATING:
+        this._showErrorRatingScoreForm();
+        break;
+      case ChangeMode.COMMENT:
+        this._showErrorCommentForm();
+        break;
+    }
+  }
+
+  disabledCommentForm() {
+    this.getElement().querySelector(`.film-details__comment-input`).disabled = true;
+  }
+
+  showDefaultCommentForm() {
+    const commentForm = this.getElement().querySelector(`.film-details__comment-input`);
+    commentForm.style.border = ``;
+  }
+
+  _setOptions() {
+    this._isWatchlist = this._newOptions.isWatchlist;
+    this._isWatched = this._newOptions.isWatched;
+    this._isFavorite = this._newOptions.isFavorite;
+    this._userRating = this._newOptions.userRating;
+  }
+
+  _getOptions() {
+    return {
+      isWatchlist: this._isWatchlist,
+      isWatched: this._isWatched,
+      isFavorite: this._isFavorite,
+      userRating: this._userRating,
+    };
+  }
+
+  _setNewOptions() {
+    this._newOptions = this._getOptions();
+  }
+
+  _showErrorCommentForm() {
+    const commentForm = this.getElement().querySelector(`.film-details__comment-input`);
+    commentForm.style.border = ERROR_BORDER_STYLE;
+    this._shake(commentForm);
+    this._activatedCommentForm();
+  }
+
+  _activatedCommentForm() {
+    this.getElement().querySelector(`.film-details__comment-input`).disabled = false;
+  }
+
+  _showErrorRatingScoreForm() {
+    const ratingScoreForm = this.getElement().querySelector(`.film-details__user-rating-score`);
+
+    ratingScoreForm.style.border = ERROR_BORDER_STYLE;
+    ratingScoreForm.style.borderRadius = ERROR_BORDER_RADIUS_STYLE;
+    this._shake(ratingScoreForm);
+    this._activatedRatingScoreForm();
+  }
+
+  _showDefaultRatingScoreForm() {
+    const ratingScoreForm = this.getElement().querySelector(`.film-details__user-rating-score`);
+    ratingScoreForm.style.border = ``;
+    ratingScoreForm.style.borderRadius = ``;
+  }
+
+  _disabledRatingScoreForm() {
+    const userRatingInputs = this.getElement().querySelectorAll(`.film-details__user-rating-input`);
+    userRatingInputs.forEach((input) => {
+      input.disabled = true;
+    });
+  }
+
+  _activatedRatingScoreForm() {
+    const userRatingInputs = this.getElement().querySelectorAll(`.film-details__user-rating-input`);
+    userRatingInputs.forEach((input) => {
+      input.disabled = false;
+    });
+  }
+
+  _addToWatchlistButtonClickHandler(evt) {
+    evt.preventDefault();
+
+    this._newOptions.isWatchlist = !this._isWatchlist;
+    this._clickAddToWatchlistButtonHandler();
+  }
+
+  _setNameDeleteButton(button, name) {
+    button.textContent = name;
+  }
+
+  _disabledDeleteButton(button) {
+    button.disabled = true;
+  }
+
+  _markAsWatchedButtonClickHandler(evt) {
+    evt.preventDefault();
+
+    this._newOptions.isWatched = !this._isWatched;
+    if (!this._newOptions.isWatched) {
+      this._newOptions.userRating = EMPTY_USER_RATING;
+    }
+
+    this._clickMarkAsWatchedButtonHandler();
+  }
+
+  _favoriteButtonClickHandler(evt) {
+    evt.preventDefault();
+
+    this._newOptions.isWatched = !this._isFavorite;
+    this._clickFavoriteButtonHandler();
+  }
+
+  _setAddEmotionBtnClickHandler() {
+    const emotionLabelElements = this.getElement().querySelectorAll(`.film-details__emoji-item`);
+
+    emotionLabelElements.forEach((element) => {
+      element.addEventListener(`click`, (evt) => {
+        const emotionItem = evt.currentTarget;
+
+        this._setNewCommentEmotion(emotionItem.value);
+      });
+    });
+  }
+
+  _setNewCommentEmotion(emotion) {
+    const addEmotionElement = this.getElement().querySelector(`.film-details__add-emoji-label`);
+    addEmotionElement.innerHTML = ``;
+
+    const emotionMarkup = `<img src="images/emoji/${emotion}.png" width="55" height="55" alt="emoji">`;
+    addEmotionElement.insertAdjacentHTML(`beforeend`, emotionMarkup);
+    addEmotionElement.dataset.emotion = emotion;
+  }
+
+  _shake(element) {
+    element.style.animation = `shake ${SHAKE_ANIMATION_TIMEOUT / MILLISECONDS_IN_ONE_MINUTE}s`;
+
+    setTimeout(() => {
+      element.style.animation = ``;
+    }, SHAKE_ANIMATION_TIMEOUT);
   }
 
   setCloseButtonClickHandler(handler) {
@@ -395,31 +466,6 @@ export default class Popup extends AbstractSmartComponent {
       .addEventListener(`click`, debounce(this._favoriteButtonClickHandler, DEBOUNCE_TIMEOUT));
   }
 
-  _addToWatchlistButtonClickHandler(evt) {
-    evt.preventDefault();
-
-    this._newOptions.isWatchlist = !this._isWatchlist;
-    this._clickAddToWatchlistButtonHandler();
-  }
-
-  _markAsWatchedButtonClickHandler(evt) {
-    evt.preventDefault();
-
-    this._newOptions.isWatched = !this._isWatched;
-    if (!this._newOptions.isWatched) {
-      this._newOptions.userRating = 0;
-    }
-
-    this._clickMarkAsWatchedButtonHandler();
-  }
-
-  _favoriteButtonClickHandler(evt) {
-    evt.preventDefault();
-
-    this._newOptions.isWatched = !this._isFavorite;
-    this._clickFavoriteButtonHandler();
-  }
-
   setRatingButtonClickHandler(handler) {
     this._clickRatingButtonHandler = handler;
 
@@ -434,15 +480,14 @@ export default class Popup extends AbstractSmartComponent {
       if (!target.classList.contains(`film-details__user-rating-input`)) {
         return;
       }
-      this.showDefaultRatingScoreForm();
+      this._showDefaultRatingScoreForm();
 
       this._newOptions.userRating = +target.value;
 
-      this.disabledRatingScoreForm();
+      this._disabledRatingScoreForm();
 
       handler(this._newOptions.userRating);
     });
-
   }
 
   setUndoRatingButtonClickHandler(handler) {
@@ -456,18 +501,10 @@ export default class Popup extends AbstractSmartComponent {
     .addEventListener(`click`, (evt) => {
       evt.preventDefault();
 
-      this._newOptions.userRating = 0;
+      this._newOptions.userRating = EMPTY_USER_RATING;
 
       handler();
     });
-  }
-
-  _setNameDeleteButton(button, name) {
-    button.textContent = name;
-  }
-
-  _disabledDeleteButton(button) {
-    button.disabled = true;
   }
 
   setDeleteCommentButtonClickHandler(handler) {
@@ -487,30 +524,5 @@ export default class Popup extends AbstractSmartComponent {
 
       handler(target.dataset.commentId);
     });
-  }
-
-  setComments(comments) {
-    this._comments = comments;
-  }
-
-  _setAddEmotionBtnClickHandler() {
-    const emotionLabelElements = this.getElement().querySelectorAll(`.film-details__emoji-item`);
-
-    emotionLabelElements.forEach((el) => {
-      el.addEventListener(`click`, (evt) => {
-        const emotionItem = evt.currentTarget;
-
-        this._setNewCommentEmotion(emotionItem.value);
-      });
-    });
-  }
-
-  _setNewCommentEmotion(emotion) {
-    const addEmotionElement = this.getElement().querySelector(`.film-details__add-emoji-label`);
-    addEmotionElement.innerHTML = ``;
-
-    const emotionMarkup = `<img src="images/emoji/${emotion}.png" width="55" height="55" alt="emoji">`;
-    addEmotionElement.insertAdjacentHTML(`beforeend`, emotionMarkup);
-    addEmotionElement.dataset.emotion = emotion;
   }
 }

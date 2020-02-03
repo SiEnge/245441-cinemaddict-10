@@ -1,17 +1,17 @@
-import FilmComponent from '../components/film.js';
+import MovieComponent from '../components/movie.js';
 import PopupComponent from '../components/popup.js';
 import PopupContainerComponent from '../components/popup-container.js';
-import FilmModel from '../models/movie.js';
+import MovieModel from '../models/movie.js';
 import LocalCommentModel from '../models/local-comment.js';
-import {render, replace, RenderPosition} from '../utils/render.js';
-// import {CommentEmotion} from '../const.js';
-const SHAKE_ANIMATION_TIMEOUT = 600;
+import {render, replace, remove, RenderPosition} from '../utils/render.js';
+import {ChangeMode, EMPTY_USER_RATING} from '../const.js';
 
 const Mode = {
   DEFAULT: `default`,
   POPUP: `popup`,
 };
 
+const bodyElement = document.querySelector(`body`);
 
 export default class MovieController {
   constructor(container, api, onDataChange, onViewChange, onCommentsChange) {
@@ -22,65 +22,52 @@ export default class MovieController {
     this._onCommentsChange = onCommentsChange;
     this._onViewChange = onViewChange;
 
-    this._filmComponent = null;
+    this._movieComponent = null;
     this._popupComponent = null;
     this._popupContainerComponent = new PopupContainerComponent();
 
     this._mode = Mode.DEFAULT;
-    this._film = null;
+    this._movie = null;
     this._comments = null;
     this._commentsModel = null;
 
     this._onEscKeyDown = this._onEscKeyDown.bind(this);
     this._onCtrlEnterDown = this._onCtrlEnterDown.bind(this);
+    this._setAddToWatchlistButtonClickHandler = this._setAddToWatchlistButtonClickHandler.bind(this);
+    this._setMarkAsWatchedButtonClickHandler = this._setMarkAsWatchedButtonClickHandler.bind(this);
+    this._setFavoriteButtonClickHandler = this._setFavoriteButtonClickHandler.bind(this);
+
   }
 
-  render(film) {
-    this._film = film;
-    const oldFilmComponent = this._filmComponent;
+  render(movie) {
+    this._movie = movie;
+    const oldMovieComponent = this._movieComponent;
 
-    this._filmComponent = new FilmComponent(film);
+    this._movieComponent = new MovieComponent(movie);
 
-    this._filmComponent.setTitleClickHandler(() => {
+    this._movieComponent.setTitleClickHandler(() => {
       this._showPopup();
     });
 
-    this._filmComponent.setPosterClickHandler(() => {
+    this._movieComponent.setPosterClickHandler(() => {
       this._showPopup();
     });
 
-    this._filmComponent.setCommentsClickHandler(() => {
+    this._movieComponent.setCommentsClickHandler(() => {
       this._showPopup();
     });
 
-    this._filmComponent.setAddToWatchlistButtonClickHandler(() => {
-      const newFilm = FilmModel.clone(film);
-      newFilm.isWatchlist = !newFilm.isWatchlist;
-      this._onDataChange(this, film, newFilm);
-    });
+    this._movieComponent.setAddToWatchlistButtonClickHandler(this._setAddToWatchlistButtonClickHandler);
+    this._movieComponent.setMarkAsWatchedButtonClickHandler(this._setMarkAsWatchedButtonClickHandler);
+    this._movieComponent.setFavoriteButtonClickHandler(this._setFavoriteButtonClickHandler);
 
-    this._filmComponent.setMarkAsWatchedButtonClickHandler(() => {
-      const newFilm = FilmModel.clone(film);
-      newFilm.isWatched = !newFilm.isWatched;
-      if (newFilm.isWatched) {
-        newFilm.watchingDate = new Date();
-      }
-      this._onDataChange(this, film, newFilm);
-    });
-
-    this._filmComponent.setFavoriteButtonClickHandler(() => {
-      const newFilm = FilmModel.clone(film);
-      newFilm.isFavorite = !newFilm.isFavorite;
-      this._onDataChange(this, film, newFilm);
-    });
-
-    if (oldFilmComponent) {
-      replace(this._filmComponent, oldFilmComponent);
+    if (oldMovieComponent) {
+      replace(this._movieComponent, oldMovieComponent);
       if (this._mode === Mode.POPUP) {
-        this._updatePopup(film);
+        this._updatePopup(movie);
       }
     } else {
-      render(this._container, this._filmComponent.getElement(), RenderPosition.BEFOREEND);
+      render(this._container, this._movieComponent.getElement(), RenderPosition.BEFOREEND);
     }
   }
 
@@ -94,47 +81,29 @@ export default class MovieController {
     }
   }
 
-  showErrorCommentForm() {
-    const commentForm = this._popupComponent.getElement().querySelector(`.film-details__comment-input`);
-    this._popupComponent.showErrorCommentForm();
-    this.shake(commentForm);
+  showError(changeMode) {
+    this._popupComponent.showError(changeMode);
   }
 
-  showErrorRatingScoreForm() {
-    const ratingScoreForm = this._popupComponent.getElement().querySelector(`.film-details__user-rating-score`);
-    this._popupComponent.showErrorRatingScoreForm();
-    this.shake(ratingScoreForm);
-  }
-
-
-  shake(element) {
-    element.style.animation = `shake ${SHAKE_ANIMATION_TIMEOUT / 1000}s`;
-
-    setTimeout(() => {
-      element.style.animation = ``;
-    }, SHAKE_ANIMATION_TIMEOUT);
-  }
-
-  _updatePopup(film) {
-    this._api.getComments(film)
+  _updatePopup(movie) {
+    this._api.getComments(movie)
     .then((comments) => {
       this._comments = comments;
       this._popupComponent.setComments(comments);
       this._popupComponent.update();
     });
-
   }
 
   _showPopup() {
-    const film = this._film;
+    const movie = this._movie;
     this._onViewChange();
 
-    render(document.querySelector(`body`), this._popupContainerComponent.getElement(), RenderPosition.BEFOREEND);
+    render(bodyElement, this._popupContainerComponent.getElement(), RenderPosition.BEFOREEND);
 
-    this._api.getComments(film)
+    this._api.getComments(movie)
     .then((comments) => {
       this._comments = comments;
-      this._popupComponent = new PopupComponent(film, comments);
+      this._popupComponent = new PopupComponent(movie, comments);
 
       render(this._popupContainerComponent.getElement(), this._popupComponent.getElement(), RenderPosition.BEFOREEND);
 
@@ -142,40 +111,21 @@ export default class MovieController {
         this._closePopup();
       });
 
-      this._popupComponent.setAddToWatchlistButtonClickHandler(() => {
-        const newFilm = FilmModel.clone(this._film);
-        newFilm.isWatchlist = !newFilm.isWatchlist;
-        this._onDataChange(this, this._film, newFilm);
-      });
-
-      this._popupComponent.setMarkAsWatchedButtonClickHandler(() => {
-        const newFilm = FilmModel.clone(this._film);
-        newFilm.isWatched = !newFilm.isWatched;
-        if (!newFilm.isWatched) {
-          newFilm.userRating = 0;
-        } else {
-          newFilm.watchingDate = new Date();
-        }
-        this._onDataChange(this, this._film, newFilm);
-      });
-
-      this._popupComponent.setFavoriteButtonClickHandler(() => {
-        const newFilm = FilmModel.clone(this._film);
-        newFilm.isFavorite = !newFilm.isFavorite;
-        this._onDataChange(this, this._film, newFilm);
-      });
+      this._popupComponent.setAddToWatchlistButtonClickHandler(this._setAddToWatchlistButtonClickHandler);
+      this._popupComponent.setMarkAsWatchedButtonClickHandler(this._setMarkAsWatchedButtonClickHandler);
+      this._popupComponent.setFavoriteButtonClickHandler(this._setFavoriteButtonClickHandler);
 
       this._popupComponent.setRatingButtonClickHandler((userRating) => {
-        const newFilm = FilmModel.clone(this._film);
-        newFilm.userRating = userRating;
-        this._onDataChange(this, this._film, newFilm, `setRating`);
+        const newMovie = MovieModel.clone(this._movie);
+        newMovie.userRating = userRating;
+        this._onDataChange(this, this._movie, newMovie, ChangeMode.RATING);
       });
 
       this._popupComponent.setUndoRatingButtonClickHandler(() => {
-        const newFilm = FilmModel.clone(this._film);
-        newFilm.userRating = 0;
+        const newMovie = MovieModel.clone(this._movie);
+        newMovie.userRating = EMPTY_USER_RATING;
 
-        this._onDataChange(this, this._film, newFilm);
+        this._onDataChange(this, this._movie, newMovie, ChangeMode.DEFAULT);
       });
 
       this._popupComponent.setDeleteCommentButtonClickHandler((commentId) => {
@@ -185,7 +135,7 @@ export default class MovieController {
           return;
         }
 
-        this._onCommentsChange(this, this._film, this._comments, this._comments[index], null);
+        this._onCommentsChange(this, this._movie, this._comments, this._comments[index], null);
       });
 
       document.addEventListener(`keydown`, this._onEscKeyDown);
@@ -195,22 +145,38 @@ export default class MovieController {
     this._mode = Mode.POPUP;
   }
 
-  _closePopup() {
-    this._popupContainerComponent.getElement().remove();
-    this._popupContainerComponent.removeElement();
+  _setAddToWatchlistButtonClickHandler() {
+    const newMovie = MovieModel.clone(this._movie);
+    newMovie.isWatchlist = !newMovie.isWatchlist;
+    this._onDataChange(this, this._movie, newMovie, ChangeMode.DEFAULT);
+  }
 
-    // this._popupComponent.getElement().remove();
-    // this._popupComponent.removeElement();
+  _setMarkAsWatchedButtonClickHandler() {
+    const newMovie = MovieModel.clone(this._movie);
+    newMovie.isWatched = !newMovie.isWatched;
+    if (newMovie.isWatched) {
+      newMovie.watchingDate = new Date();
+    }
+    this._onDataChange(this, this._movie, newMovie, ChangeMode.DEFAULT);
+  }
+
+  _setFavoriteButtonClickHandler() {
+    const newMovie = MovieModel.clone(this._movie);
+    newMovie.isFavorite = !newMovie.isFavorite;
+    this._onDataChange(this, this._movie, newMovie, ChangeMode.DEFAULT);
+  }
+
+  _closePopup() {
+    remove(this._popupContainerComponent);
+
     document.removeEventListener(`keydown`, this._onEscKeyDown);
     document.removeEventListener(`keydown`, this._onCtrlEnterDown);
     this._mode = Mode.DEFAULT;
   }
 
   _sendComment(textComment, emotionComment) {
-    // const comment = {comment: textComment, date: new Date(), emotion: emotionComment};
-
     const newComment = LocalCommentModel.parseComment({comment: textComment, date: new Date(), emotion: emotionComment});
-    this._onCommentsChange(this, this._film, this._comments, null, newComment);
+    this._onCommentsChange(this, this._movie, this._comments, null, newComment, ChangeMode.COMMENT);
   }
 
   _onEscKeyDown(evt) {
@@ -221,7 +187,6 @@ export default class MovieController {
     }
   }
 
-  // отправка сообщения
   _onCtrlEnterDown(evt) {
     const isEnterKey = evt.key === `Enter`;
 

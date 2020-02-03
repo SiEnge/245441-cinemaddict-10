@@ -1,18 +1,17 @@
-// компонент "Меню"
 import AbstractComponent from './abstract-component.js';
 import {activateElement} from '../utils/common.js';
 import {FilterType, ACTIVE_NAVIGATION_CLASS} from '../const.js';
 
-const NameToTitleFilter = {
-  'all': `All movies`,
-  'watchlist': `Watchlist`,
-  'history': `History`,
-  'favorites': `Favorites`
+const TitleFilter = {
+  ALL: `All movies`,
+  WATCHLIST: `Watchlist`,
+  HISTORY: `History`,
+  FAVORITES: `Favorites`,
 };
 
 const createFilterMarkup = (filter, isChecked) => {
   const {name, count} = filter;
-  const countMarkup = (name === FilterType.ALL) ? NameToTitleFilter[name] : `${NameToTitleFilter[name]} <span class="main-navigation__item-count">${count}</span>`;
+  const countMarkup = (name === FilterType.ALL) ? TitleFilter[name.toUpperCase()] : `${TitleFilter[name.toUpperCase()]} <span class="main-navigation__item-count">${count}</span>`;
 
   return (
     `<a href="#${name}" data-filter-type="${name}" class="main-navigation__item ${isChecked ? ACTIVE_NAVIGATION_CLASS : ``}">${countMarkup}</a>`

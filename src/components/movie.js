@@ -1,18 +1,16 @@
-// компонент "Карточка фильма"
 import debounce from 'lodash/debounce';
 import AbstractComponent from './abstract-component.js';
 import {formatDateYear, parseDuration} from '../utils/common.js';
 import {DEBOUNCE_TIMEOUT} from '../const.js';
 
+const MAX_COUNT_LETTER = 140;
+
 const createBooleanItemMarkup = (isBoolean) => {
-  if (isBoolean) {
-    return `film-card__controls-item--active`;
-  }
-  return ``;
+  return (isBoolean) ? `film-card__controls-item--active` : ``;
 };
 
-const createFilmCardTemplate = (film) => {
-  const {title, poster, description, releaseDate, duration, genres, rating, comments, isWatchlist, isWatched, isFavorite} = film;
+const createMovieCardTemplate = (movie) => {
+  const {title, poster, description, releaseDate, duration, genres, rating, comments, isWatchlist, isWatched, isFavorite} = movie;
 
   const durationText = parseDuration(duration);
   const watchlist = createBooleanItemMarkup(isWatchlist);
@@ -20,7 +18,7 @@ const createFilmCardTemplate = (film) => {
   const favorite = createBooleanItemMarkup(isFavorite);
   const genre = Array.from(genres);
 
-  const descriptionText = (description.length >= 140) ? `${description.slice(0, 139)}&hellip;` : description;
+  const descriptionText = (description.length >= MAX_COUNT_LETTER) ? `${description.slice(0, MAX_COUNT_LETTER - 1)}&hellip;` : description;
 
   return (
     `<article class="film-card">
@@ -43,15 +41,15 @@ const createFilmCardTemplate = (film) => {
   );
 };
 
-export default class Film extends AbstractComponent {
-  constructor(film) {
+export default class Movie extends AbstractComponent {
+  constructor(movie) {
     super();
 
-    this._film = film;
+    this._movie = movie;
   }
 
   getTemplate() {
-    return createFilmCardTemplate(this._film);
+    return createMovieCardTemplate(this._movie);
   }
 
   setTitleClickHandler(handler) {
@@ -84,10 +82,3 @@ export default class Film extends AbstractComponent {
     .addEventListener(`click`, debounce(handler, DEBOUNCE_TIMEOUT));
   }
 }
-
-
-// нужно
-// при клике на удалить фиксировать сам коммент на котором был клик
-// помечать что его нужно удалить
-// удалить в модели
-// и отрисовать все заново

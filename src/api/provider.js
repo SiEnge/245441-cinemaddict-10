@@ -14,10 +14,10 @@ export default class Provider {
     this._isSynchronized = true;
   }
 
-  getFilms() {
+  getMovies() {
     if (this._isOnLine()) {
 
-      return this._api.getFilms()
+      return this._api.getMovies()
       .then((movies) => {
         movies.forEach((movie) => this._store.setItem(NameStore.MOVIES, movie.id, movie.toRAW()));
         return movies;
@@ -27,7 +27,7 @@ export default class Provider {
     const storeMovies = Object.values(this._store.getAll(NameStore.MOVIES));
     this._isSynchronized = false;
 
-    return Promise.resolve(Movie.parseFilms(storeMovies));
+    return Promise.resolve(Movie.parseMovies(storeMovies));
   }
 
   getComments(movie) {
@@ -52,16 +52,16 @@ export default class Provider {
     return Promise.resolve(Comment.parseComments(comments));
   }
 
-  updateFilm(id, movie) {
+  updateMovie(id, movie) {
     if (this._isOnLine()) {
-      return this._api.updateFilm(id, movie)
+      return this._api.updateMovie(id, movie)
       .then((newMovie) => {
         this._store.setItem(NameStore.MOVIES, newMovie.id, newMovie.toRAW());
         return newMovie;
       });
     }
 
-    const fakeUpdatedMovie = Movie.parseFilm(Object.assign({}, movie.toRAW(), {id}));
+    const fakeUpdatedMovie = Movie.parseMovie(Object.assign({}, movie.toRAW(), {id}));
 
     this._isSynchronized = false;
     this._store.setItem(NameStore.MOVIES, id, Object.assign({}, fakeUpdatedMovie.toRAW(), {offline: true}));
@@ -142,5 +142,4 @@ export default class Provider {
   _isOnLine() {
     return window.navigator.onLine;
   }
-
 }

@@ -1,13 +1,13 @@
 import StatisticsComponent from '../components/statistics.js';
-import {StatiscticsPeriod} from '../const.js';
 import {render, replace, RenderPosition} from '../utils/render.js';
-import {getWatchedFilmsByPeriod, getDurationFilm, getTopGenreFilm, getSortCountFilmGenres} from '../utils/statistics.js';
+import {getWatchedMoviesByPeriod, getDurationMovie, getTopGenreMovie, getSortCountMovieGenres} from '../utils/statistics.js';
 import {getWatchedMovies, getTitleProfile} from '../utils/common.js';
+import {StatiscticsPeriod} from '../const.js';
 
 export default class Statistics {
-  constructor(container, filmsModel) {
+  constructor(container, moviesModel) {
     this._container = container;
-    this._filmsModel = filmsModel;
+    this._moviesModel = moviesModel;
     this._statisticsComponent = null;
 
     this._onStatisticsPeriodChange = this._onStatisticsPeriodChange.bind(this);
@@ -17,18 +17,18 @@ export default class Statistics {
 
   render() {
     const container = this._container;
-    const allFilms = this._filmsModel.getFilmsAll();
-    const watchedFilms = getWatchedMovies(allFilms);
-    const watchedFilmsByPeriod = getWatchedFilmsByPeriod(watchedFilms, this._activePeriod);
+    const allMovies = this._moviesModel.getMoviesAll();
+    const watchedMovies = getWatchedMovies(allMovies);
+    const watchedMoviesByPeriod = getWatchedMoviesByPeriod(watchedMovies, this._activePeriod);
 
     const statisticsData = {
-      count: watchedFilmsByPeriod.length,
-      duration: getDurationFilm(watchedFilmsByPeriod),
-      genre: getTopGenreFilm(watchedFilmsByPeriod),
-      userRank: getTitleProfile(watchedFilms.length),
+      count: watchedMoviesByPeriod.length,
+      duration: getDurationMovie(watchedMoviesByPeriod),
+      genre: getTopGenreMovie(watchedMoviesByPeriod),
+      userRank: getTitleProfile(watchedMovies.length),
     };
 
-    const ratingGenres = getSortCountFilmGenres(watchedFilmsByPeriod);
+    const ratingGenres = getSortCountMovieGenres(watchedMoviesByPeriod);
 
     const periods = Object.values(StatiscticsPeriod).map((statiscticsPeriod) => {
       return {

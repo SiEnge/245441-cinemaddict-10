@@ -1,29 +1,29 @@
-import {getFilmsByFilter} from '../utils/filter.js';
+import {getMoviesByFilter} from '../utils/filter.js';
 import {FilterType} from '../const.js';
 
-export default class Films {
+export default class Movies {
   constructor() {
-    this._films = [];
+    this._movies = [];
     this._activeFilterType = FilterType.ALL;
 
     this._dataChangeHandlers = [];
     this._filterChangeHandlers = [];
   }
 
-  getFilms() {
-    return getFilmsByFilter(this._films, this._activeFilterType);
+  getMovies() {
+    return getMoviesByFilter(this._movies, this._activeFilterType);
   }
 
-  getFilmsAll() {
-    return this._films;
+  getMoviesAll() {
+    return this._movies;
   }
 
-  setFilms(films) {
-    this._films = Array.from(films);
+  setMovies(movies) {
+    this._movies = Array.from(movies);
   }
 
-  setComments(filmId, comments) {
-    this._films[filmId].textComments = comments;
+  setComments(movieId, comments) {
+    this._movies[movieId].textComments = comments;
   }
 
   setFilter(filterType) {
@@ -31,21 +31,21 @@ export default class Films {
     this._filterChangeHandlers.forEach((handler) => handler());
   }
 
-  updateFilm(id, updatedFilm) {
-    const index = this._films.findIndex((it) => it.id === id);
+  updateMovie(id, updatedMovie) {
+    const index = this._movies.findIndex((it) => it.id === id);
 
     if (index === -1) {
       return false;
     }
 
-    this._films = [].concat(this._films.slice(0, index), updatedFilm, this._films.slice(index + 1));
+    this._movies = [].concat(this._movies.slice(0, index), updatedMovie, this._movies.slice(index + 1));
     this._dataChangeHandlers.forEach((handler) => handler());
 
     return true;
   }
 
-  deleteComment(film, commentId) {
-    const comments = film.comments;
+  deleteComment(movie, commentId) {
+    const comments = movie.comments;
     const index = comments.findIndex((it) => it === commentId);
 
     if (index === -1) {
@@ -53,13 +53,13 @@ export default class Films {
     }
 
     const updatedComments = [].concat(comments.slice(0, index), comments.slice(index + 1));
-    film.comments = updatedComments;
+    movie.comments = updatedComments;
 
     return true;
   }
 
-  addComments(film, newData) {
-    film.comments = newData.comments;
+  addComments(movie, newData) {
+    movie.comments = newData.comments;
   }
 
   setFilterChangeHandler(handler) {
