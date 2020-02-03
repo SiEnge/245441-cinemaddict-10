@@ -1,12 +1,13 @@
 import FilterComponent from '../components/filter.js';
 import {render, replace, RenderPosition} from '../utils/render.js';
 import {getMoviesByFilter} from '../utils/filter.js';
-import {FilterType} from '../const.js';
+import {FilterType, PageMode} from '../const.js';
 
 export default class Filter {
-  constructor(container, moviesModel, menuComponent) {
-    this._container = container;
+  constructor(containerElement, moviesModel, menuComponent, togglePageMode) {
+    this._containerElement = containerElement;
     this._moviesModel = moviesModel;
+    this._togglePageMode = togglePageMode;
 
     this._activeFilterType = FilterType.ALL;
     this._filterComponent = null;
@@ -19,7 +20,7 @@ export default class Filter {
   }
 
   render() {
-    const container = this._container;
+    const containerElement = this._containerElement;
     const allMovies = this._moviesModel.getMoviesAll();
     const filters = Object.values(FilterType).map((filterType) => {
       return {
@@ -38,7 +39,7 @@ export default class Filter {
       replace(this._filterComponent, oldComponent);
       render(this._filterComponent.getElement(), this._menuComponent.getElement(), RenderPosition.BEFOREEND);
     } else {
-      render(container, this._filterComponent.getElement(), RenderPosition.BEFOREEND);
+      render(containerElement, this._filterComponent.getElement(), RenderPosition.BEFOREEND);
       render(this._filterComponent.getElement(), this._menuComponent.getElement(), RenderPosition.BEFOREEND);
     }
   }
@@ -46,6 +47,7 @@ export default class Filter {
   _onFilterChange(filterType) {
     this._moviesModel.setFilter(filterType);
     this._activeFilterType = filterType;
+    this._togglePageMode(PageMode.MOVIE);
   }
 
   _onDataChange() {

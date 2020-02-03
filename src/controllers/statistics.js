@@ -5,8 +5,8 @@ import {getWatchedMovies, getTitleProfile} from '../utils/common.js';
 import {StatiscticsPeriod} from '../const.js';
 
 export default class Statistics {
-  constructor(container, moviesModel) {
-    this._container = container;
+  constructor(containerElement, moviesModel) {
+    this._containerElement = containerElement;
     this._moviesModel = moviesModel;
     this._statisticsComponent = null;
 
@@ -16,7 +16,7 @@ export default class Statistics {
   }
 
   render() {
-    const container = this._container;
+    const containerElement = this._containerElement;
     const allMovies = this._moviesModel.getMoviesAll();
     const watchedMovies = getWatchedMovies(allMovies);
     const watchedMoviesByPeriod = getWatchedMoviesByPeriod(watchedMovies, this._activePeriod);
@@ -45,7 +45,7 @@ export default class Statistics {
     if (oldComponent) {
       replace(this._statisticsComponent, oldComponent);
     } else {
-      render(container, this._statisticsComponent.getElement(), RenderPosition.BEFOREEND);
+      render(containerElement, this._statisticsComponent.getElement(), RenderPosition.BEFOREEND);
       this.hide();
     }
   }

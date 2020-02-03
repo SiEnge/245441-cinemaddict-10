@@ -22,8 +22,8 @@ const renderMovies = (movieListElement, movies, api, onDataChange, onViewChange,
 };
 
 export default class PageController {
-  constructor(container, moviesModel, api) {
-    this._container = container;
+  constructor(containerElement, moviesModel, api) {
+    this._containerElement = containerElement;
     this._moviesModel = moviesModel;
     this._api = api;
 
@@ -59,11 +59,11 @@ export default class PageController {
   render() {
     remove(this._moviesListLoadingComponent);
 
-    const container = this._container;
+    const containerElement = this._containerElement;
     const movies = this._moviesModel.getMovies();
 
-    render(container, this._sortComponent.getElement(), RenderPosition.BEFOREEND);
-    render(container, this._moviesContainerComponent.getElement(), RenderPosition.BEFOREEND);
+    render(containerElement, this._sortComponent.getElement(), RenderPosition.BEFOREEND);
+    render(containerElement, this._moviesContainerComponent.getElement(), RenderPosition.BEFOREEND);
 
     if (movies.length === 0) {
       render(this._moviesContainerComponent.getElement(), this._noMoviesComponent.getElement(), RenderPosition.BEFOREEND);
@@ -80,10 +80,10 @@ export default class PageController {
   }
 
   renderLoading() {
-    const container = this._container;
+    const containerElement = this._containerElement;
 
-    render(container, this._sortComponent.getElement(), RenderPosition.BEFOREEND);
-    render(container, this._moviesContainerComponent.getElement(), RenderPosition.BEFOREEND);
+    render(containerElement, this._sortComponent.getElement(), RenderPosition.BEFOREEND);
+    render(containerElement, this._moviesContainerComponent.getElement(), RenderPosition.BEFOREEND);
 
     render(this._moviesContainerComponent.getElement(), this._moviesListLoadingComponent.getElement(), RenderPosition.BEFOREEND);
   }
@@ -93,20 +93,20 @@ export default class PageController {
     remove(this._movieListExtraMostCommented);
     this._showedExtraMovieControllers = [];
 
-    const container = this._moviesContainerComponent.getElement();
+    const containerElement = this._moviesContainerComponent.getElement();
     const movies = this._moviesModel.getMovies();
 
     const extraTopRatedMovies = getTopRatedMovies(movies);
     const extraMostCommentedMovies = getMostCommentedMovies(movies);
 
     if (extraTopRatedMovies.length > 0) {
-      render(container, this._movieListExtraTopRated.getElement(), RenderPosition.BEFOREEND);
+      render(containerElement, this._movieListExtraTopRated.getElement(), RenderPosition.BEFOREEND);
 
       this._renderExtraMovies(this._movieListExtraTopRated, extraTopRatedMovies.slice(0, 2));
     }
 
     if (extraMostCommentedMovies.length > 0) {
-      render(container, this._movieListExtraMostCommented.getElement(), RenderPosition.BEFOREEND);
+      render(containerElement, this._movieListExtraMostCommented.getElement(), RenderPosition.BEFOREEND);
       this._renderExtraMovies(this._movieListExtraMostCommented, extraMostCommentedMovies.slice(0, 2));
     }
   }
@@ -129,8 +129,8 @@ export default class PageController {
     this._showingMoviesCount = SHOWING_FILMS_COUNT_ON_START;
   }
 
-  _renderExtraMovies(container, movies) {
-    const newExtraMovies = renderMovies(container.getElement(), movies, this._api, this._onDataChange, this._onViewChange, this._onCommentsChange);
+  _renderExtraMovies(containerElement, movies) {
+    const newExtraMovies = renderMovies(containerElement.getElement(), movies, this._api, this._onDataChange, this._onViewChange, this._onCommentsChange);
     this._showedExtraMovieControllers = this._showedExtraMovieControllers.concat(newExtraMovies);
   }
 
@@ -238,9 +238,10 @@ export default class PageController {
     const movies = this._moviesModel.getMovies();
 
     this._sortedMovies = movies;
-
     this._removeMovies();
-    this._renderMovies(this._sortedMovies.slice(0, SHOWING_FILMS_COUNT_ON_START));
+    if (this._sortedMovies.length > 0) {
+      this._renderMovies(this._sortedMovies.slice(0, SHOWING_FILMS_COUNT_ON_START));
+    }
     this._renderShowMoreButton();
   }
 

@@ -8,10 +8,11 @@ const MomentPeriod = {
   YEAR: `years`,
 };
 
+
 const isPeriod = (dateA, dateB, period) => {
   const a = moment(dateA);
   const b = moment(dateB);
-  return a.diff(b, period) === 0 && dateA.getDate() === dateB.getDate();
+  return a.diff(b, period) === 0;
 };
 
 const getMoviesForToday = (movies) => {
@@ -61,28 +62,29 @@ export const getDurationMovie = (movies) => {
 };
 
 export const getSortCountMovieGenres = (movies) => {
-  let ratingsGenre = [];
+  let ratingsGenres = [];
 
   movies.map((movie) => Array.from(movie.genres))
   .filter((genres) => genres.length > 0)
   .flat()
   .reduce((accumulator, genre) => {
-    const index = ratingsGenre.findIndex((it) => it.genre === genre);
+    const index = ratingsGenres.findIndex((it) => it.genre === genre);
 
     if (index === -1) {
-      ratingsGenre.push({genre, count: 1});
+      ratingsGenres.push({genre, count: 1});
     } else {
-      ratingsGenre[index].count += 1;
+      ratingsGenres[index].count += 1;
     }
   }, 0);
 
-  return ratingsGenre.sort((a, b) => b.count - a.count);
+  return ratingsGenres.sort((a, b) => b.count - a.count);
 };
 
 export const getTopGenreMovie = (movies) => {
-  if (movies.length > 0 && movies[0].genres.size > 0) {
-    return getSortCountMovieGenres(movies)[0].genres;
-  } else {
-    return `–`;
+  if (movies.length > 0) {
+    const ratingsGenres = getSortCountMovieGenres(movies);
+    return (ratingsGenres.length > 0) ? ratingsGenres[0].genre : `–`;
   }
+
+  return `–`;
 };

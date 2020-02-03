@@ -45,7 +45,7 @@ export const getMostCommentedMovies = (allMovies) => {
 };
 
 export const getSortDownReleaseDateMovies = (allMovies) => {
-  return allMovies.sort((a, b) => b.releaseDate - a.releaseDate);
+  return allMovies.slice().sort((a, b) => b.releaseDate - a.releaseDate);
 };
 
 export const parseDuration = (duration) => {
@@ -58,8 +58,8 @@ export const parseDuration = (duration) => {
   }
 };
 
-export const activateElement = (wrap, activeElement, activeClassName) => {
-  const currentActiveElement = wrap.querySelector(`.${activeClassName}`);
+export const activateElement = (container, activeElement, activeClassName) => {
+  const currentActiveElement = container.querySelector(`.${activeClassName}`);
   currentActiveElement.classList.remove(activeClassName);
   activeElement.classList.add(activeClassName);
 };

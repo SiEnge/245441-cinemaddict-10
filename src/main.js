@@ -39,21 +39,7 @@ const renderCountAllMoviesFooter = (countMovies) => {
   footerStatistics.querySelector(`p`).textContent = `${countMovies} movies inside`;
 };
 
-
-const api = new API(END_POINT, AUTHORIZATION);
-const store = new Store(window.localStorage);
-const apiWithProvider = new Provider(api, store);
-
-const moviesModel = new MoviesModel();
-const pageController = new PageController(mainElement, moviesModel, apiWithProvider);
-const menuComponent = new MenuComponent();
-const filterController = new FilterController(mainElement, moviesModel, menuComponent);
-const statisticsController = new StatisticsController(mainElement, moviesModel);
-
-filterController.render();
-pageController.renderLoading();
-
-menuComponent.setStatisticsClickHandler((mode) => {
+const togglePageMode = (mode) => {
   switch (mode) {
     case PageMode.STAT:
       pageController.hide();
@@ -64,7 +50,22 @@ menuComponent.setStatisticsClickHandler((mode) => {
       statisticsController.hide();
       break;
   }
-});
+};
+
+const api = new API(END_POINT, AUTHORIZATION);
+const store = new Store(window.localStorage);
+const apiWithProvider = new Provider(api, store);
+
+const moviesModel = new MoviesModel();
+const pageController = new PageController(mainElement, moviesModel, apiWithProvider);
+const menuComponent = new MenuComponent();
+const filterController = new FilterController(mainElement, moviesModel, menuComponent, togglePageMode);
+const statisticsController = new StatisticsController(mainElement, moviesModel);
+
+filterController.render();
+pageController.renderLoading();
+
+menuComponent.setStatisticsClickHandler(togglePageMode);
 
 renderCountAllMoviesFooter(0);
 

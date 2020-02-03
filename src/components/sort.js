@@ -40,7 +40,6 @@ export default class Sort extends AbstractComponent {
   setSortTypeChangeHandler(handler) {
     this.getElement().addEventListener(`click`, (evt) => {
       evt.preventDefault();
-
       const target = evt.target;
 
       if (target.tagName !== `A`) {

@@ -14,8 +14,8 @@ const Mode = {
 const bodyElement = document.querySelector(`body`);
 
 export default class MovieController {
-  constructor(container, api, onDataChange, onViewChange, onCommentsChange) {
-    this._container = container.querySelector(`.films-list__container`);
+  constructor(containerElement, api, onDataChange, onViewChange, onCommentsChange) {
+    this._containerElement = containerElement.querySelector(`.films-list__container`);
     this._api = api;
 
     this._onDataChange = onDataChange;
@@ -67,7 +67,7 @@ export default class MovieController {
         this._updatePopup(movie);
       }
     } else {
-      render(this._container, this._movieComponent.getElement(), RenderPosition.BEFOREEND);
+      render(this._containerElement, this._movieComponent.getElement(), RenderPosition.BEFOREEND);
     }
   }
 

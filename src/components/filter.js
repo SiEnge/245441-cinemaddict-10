@@ -53,17 +53,4 @@ export default class Filter extends AbstractComponent {
       handler(filterName);
     });
   }
-
-  setStatisticsClickHandler(handler) {
-    this.getElement().querySelector(`.main-navigation__item--additional`)
-    .addEventListener(`click`, (evt) => {
-      evt.preventDefault();
-
-      if (evt.target.classList.contains(ACTIVE_NAVIGATION_CLASS)) {
-        return;
-      }
-
-      handler();
-    });
-  }
 }
