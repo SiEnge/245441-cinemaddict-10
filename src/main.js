@@ -18,7 +18,6 @@ const mainElement = document.querySelector(`.main`);
 const headerElement = document.querySelector(`.header`);
 const footerElement = document.querySelector(`.footer`);
 
-
 window.addEventListener(`load`, () => {
   navigator.serviceWorker.register(`/sw.js`);
 });
